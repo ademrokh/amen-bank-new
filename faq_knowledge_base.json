@@ -1,0 +1,254 @@
+{
+  "faqs": [
+    {
+      "id": 1,
+      "category": "particuliers",
+      "question_fr": "Qu'est-ce qu'un compte de dépôt chez Amen Bank?",
+      "answer_fr": "Un compte de dépôt est un compte courant qui vous permet de gérer votre argent au quotidien. Vous pouvez effectuer des dépôts, des retraits, des virements et des paiements. Amen Bank propose plusieurs types de comptes adaptés à vos besoins.",
+      "question_ar": "ما هو حساب الإيداع في بنك آمن؟",
+      "answer_ar": "حساب الإيداع هو حساب جاري يسمح لك بإدارة أموالك يوميًا. يمكنك إجراء الودائع والسحب والتحويلات والدفع. يقدم بنك آمن عدة أنواع من الحسابات المناسبة لاحتياجاتك.",
+      "question_en": "What is a deposit account at Amen Bank?",
+      "answer_en": "A deposit account is a current account that allows you to manage your money on a daily basis. You can make deposits, withdrawals, transfers and payments. Amen Bank offers several types of accounts suited to your needs."
+    },
+    {
+      "id": 2,
+      "category": "particuliers",
+      "question_fr": "Quels sont les types de cartes bancaires disponibles?",
+      "answer_fr": "Amen Bank propose plusieurs types de cartes: Visa Classique, Visa Gold (premium), et Visa Platinum (ultra-premium). Chaque carte offre des avantages différents selon votre profil de consommateur.",
+      "question_ar": "ما هي أنواع البطاقات البنكية المتاحة؟",
+      "answer_ar": "يوفر بنك آمن عدة أنواع من البطاقات: Visa Classique و Visa Gold (بريميوم) و Visa Platinum (فائقة البريميوم). تقدم كل بطاقة مزايا مختلفة حسب ملف تعريفك كمستهلك.",
+      "question_en": "What types of bank cards are available?",
+      "answer_en": "Amen Bank offers several types of cards: Classic Visa, Gold Visa (premium), and Platinum Visa (ultra-premium). Each card offers different benefits depending on your consumer profile."
+    },
+    {
+      "id": 3,
+      "category": "particuliers",
+      "question_fr": "Quels sont les produits d'épargne proposés?",
+      "answer_fr": "Amen Bank propose des comptes d'épargne, des placements à terme fixe, et des SICAV (fonds mutuels) tels que ALLIANCE SICAV, SICAV AMEN, AMEN PREMIERE, et TUNISIE SICAV. Ces produits offrent des rendements compétitifs.",
+      "question_ar": "ما هي منتجات الادخار المقدمة؟",
+      "answer_ar": "يقدم بنك آمن حسابات توفير وودائع محددة الأجل وصناديق استثمار (SICAV) مثل ALLIANCE SICAV و SICAV AMEN و AMEN PREMIERE و TUNISIE SICAV. تقدم هذه المنتجات عوائد تنافسية.",
+      "question_en": "What savings products are offered?",
+      "answer_en": "Amen Bank offers savings accounts, fixed-term deposits, and mutual funds (SICAV) such as ALLIANCE SICAV, SICAV AMEN, AMEN PREMIERE, and TUNISIE SICAV. These products offer competitive returns."
+    },
+    {
+      "id": 4,
+      "category": "particuliers",
+      "question_fr": "Quels types de crédits sont disponibles?",
+      "answer_fr": "Amen Bank propose des crédits immobiliers, des crédits automobiles, et des crédits à la consommation. Chaque type de crédit a des conditions spécifiques adaptées à l'utilisation prévue.",
+      "question_ar": "ما أنواع القروض المتاحة؟",
+      "answer_ar": "يقدم بنك آمن قروضًا عقارية وقروضًا للسيارات وقروضًا استهلاكية. لكل نوع من القروض شروط محددة تناسب الاستخدام المقصود.",
+      "question_en": "What types of loans are available?",
+      "answer_en": "Amen Bank offers home loans, car loans, and consumer loans. Each type of loan has specific conditions suited to the intended use."
+    },
+    {
+      "id": 5,
+      "category": "particuliers",
+      "question_fr": "C'est quoi Amen First Bank?",
+      "answer_fr": "Amen First Bank est une plateforme bancaire 100% en ligne et mobile. Elle permet de gérer votre compte, effectuer des virements, payer vos factures et accéder à vos services bancaires 24/7 sans avoir à vous déplacer.",
+      "question_ar": "ما هو بنك آمن فيرست؟",
+      "answer_ar": "بنك آمن فيرست هو منصة بنكية بنسبة 100% عبر الإنترنت والهاتف المحمول. يسمح لك بإدارة حسابك وإجراء التحويلات ودفع فواتيرك والوصول إلى خدماتك البنكية 24/7 دون الاضطرار للذهاب إلى البنك.",
+      "question_en": "What is Amen First Bank?",
+      "answer_en": "Amen First Bank is a 100% online and mobile banking platform. It allows you to manage your account, make transfers, pay your bills and access your banking services 24/7 without having to leave home."
+    },
+    {
+      "id": 6,
+      "category": "particuliers",
+      "question_fr": "Qu'est-ce qu'une assurance famille chez Amen Bank?",
+      "answer_fr": "L'assurance famille offre une protection pour votre famille en cas de décès ou d'invalidité du souscripteur. Elle garantit une couverture financière pour vos proches.",
+      "question_ar": "ما هي تأمين الأسرة في بنك آمن؟",
+      "answer_ar": "يوفر تأمين الأسرة حماية لعائلتك في حالة وفاة المشترك أو عجزه. يضمن تغطية مالية لأحبائك.",
+      "question_en": "What is family insurance at Amen Bank?",
+      "answer_en": "Family insurance provides protection for your family in case of death or disability of the policyholder. It guarantees financial coverage for your loved ones."
+    },
+    {
+      "id": 7,
+      "category": "particuliers",
+      "question_fr": "Comment louer un coffre-fort?",
+      "answer_fr": "Vous pouvez louer un coffre-fort auprès de nos agences Amen Bank pour stocker vos documents importants, bijoux ou objets de valeur en toute sécurité.",
+      "question_ar": "كيف يمكنني تأجير خزنة آمنة؟",
+      "answer_ar": "يمكنك تأجير خزنة آمنة من فروع بنك آمن لتخزين مستنداتك المهمة والمجوهرات أو الأشياء الثمينة بأمان.",
+      "question_en": "How do I rent a safe deposit box?",
+      "answer_en": "You can rent a safe deposit box from our Amen Bank branches to store your important documents, jewelry or valuables securely."
+    },
+    {
+      "id": 8,
+      "category": "entreprises",
+      "question_fr": "Quel est le compte courant pour les entreprises?",
+      "answer_fr": "Le compte courant professionnel permet aux entreprises de gérer leurs opérations financières quotidiennes. Il inclut des services comme les virements, les prélèvements, et la facturation.",
+      "question_ar": "ما هو الحساب الجاري للشركات؟",
+      "answer_ar": "يسمح الحساب الجاري المهني للشركات بإدارة عملياتها المالية اليومية. ويشمل خدمات مثل التحويلات والخصم والفواتير.",
+      "question_en": "What is the business current account?",
+      "answer_en": "The business current account allows companies to manage their daily financial operations. It includes services such as transfers, debits, and invoicing."
+    },
+    {
+      "id": 9,
+      "category": "entreprises",
+      "question_fr": "Quels sont les financements court et moyen terme?",
+      "answer_fr": "Amen Bank propose des crédits à court terme (moins d'1 an) pour les besoins immédiats de trésorerie, et des crédits à moyen terme (1-5 ans) pour les projets d'investissement.",
+      "question_ar": "ما هي التمويلات قصيرة ومتوسطة الأجل؟",
+      "answer_ar": "يقدم بنك آمن قروضًا قصيرة الأجل (أقل من سنة) لاحتياجات السيولة الفورية، وقروضًا متوسطة الأجل (1-5 سنوات) لمشاريع الاستثمار.",
+      "question_en": "What are short and medium-term financing options?",
+      "answer_en": "Amen Bank offers short-term credits (less than 1 year) for immediate liquidity needs, and medium-term credits (1-5 years) for investment projects."
+    },
+    {
+      "id": 10,
+      "category": "entreprises",
+      "question_fr": "Comment effectuer un virement de salaires?",
+      "answer_fr": "Vous pouvez utiliser le service de virement de salaires d'Amen Bank pour verser automatiquement les salaires de vos employés. Contactez votre gestionnaire de compte pour les détails.",
+      "question_ar": "كيف يمكنني إجراء تحويل الرواتب؟",
+      "answer_ar": "يمكنك استخدام خدمة تحويل الرواتب في بنك آمن لتحويل الرواتب تلقائيًا لموظفيك. اتصل بمدير حسابك للحصول على التفاصيل.",
+      "question_en": "How do I make a salary transfer?",
+      "answer_en": "You can use Amen Bank's salary transfer service to automatically pay your employees' salaries. Contact your account manager for details."
+    },
+    {
+      "id": 11,
+      "category": "entreprises",
+      "question_fr": "Qu'est-ce qu'Amen FX?",
+      "answer_fr": "Amen FX est un service de change proposé par Amen Bank pour les entreprises. Il permet d'effectuer des opérations de change et de gérer les risques de taux de change.",
+      "question_ar": "ما هو Amen FX؟",
+      "answer_ar": "Amen FX هي خدمة صرف عملات يقدمها بنك آمن للشركات. يسمح بإجراء عمليات الصرف وإدارة مخاطر أسعار الصرف.",
+      "question_en": "What is Amen FX?",
+      "answer_en": "Amen FX is a foreign exchange service offered by Amen Bank for businesses. It allows you to conduct currency exchange operations and manage exchange rate risks."
+    },
+    {
+      "id": 12,
+      "category": "entreprises",
+      "question_fr": "Qu'est-ce que la Trading Room d'Amen Bank?",
+      "answer_fr": "La Trading Room est un service destiné aux clients corporates pour les opérations de trading et d'investissement en instruments financiers avancés.",
+      "question_ar": "ما هي غرفة التداول في بنك آمن؟",
+      "answer_ar": "غرفة التداول هي خدمة موجهة لعملاء الشركات لعمليات التداول والاستثمار في الأدوات المالية المتقدمة.",
+      "question_en": "What is Amen Bank's Trading Room?",
+      "answer_en": "The Trading Room is a service for corporate clients for trading and investment operations in advanced financial instruments."
+    },
+    {
+      "id": 13,
+      "category": "digital",
+      "question_fr": "Comment accéder à Amen Net?",
+      "answer_fr": "Amen Net est le portail de banque en ligne d'Amen Bank. Vous pouvez y accéder via www.amenbank.tn avec vos identifiants bancaires. C'est disponible 24/7.",
+      "question_ar": "كيف يمكنني الوصول إلى Amen Net؟",
+      "answer_ar": "Amen Net هو بوابة الخدمات المصرفية عبر الإنترنت لبنك آمن. يمكنك الوصول إليها عبر www.amenbank.tn باستخدام بيانات الدخول البنكية الخاصة بك. متاح 24/7.",
+      "question_en": "How do I access Amen Net?",
+      "answer_en": "Amen Net is Amen Bank's online banking portal. You can access it via www.amenbank.tn with your banking credentials. It's available 24/7."
+    },
+    {
+      "id": 14,
+      "category": "digital",
+      "question_fr": "Qu'est-ce que les espaces d'auto-service?",
+      "answer_fr": "Les espaces d'auto-service chez Amen Bank permettent d'effectuer certaines opérations sans l'aide d'un conseiller. Vous pouvez y faire des dépôts, des retraits, ou consulter votre solde.",
+      "question_ar": "ما هي مساحات الخدمة الذاتية؟",
+      "answer_ar": "تسمح مساحات الخدمة الذاتية في بنك آمن بإجراء بعض العمليات دون مساعدة من مستشار. يمكنك إيداع أموالك والسحب أو التحقق من رصيدك.",
+      "question_en": "What are self-service spaces?",
+      "answer_en": "Self-service spaces at Amen Bank allow you to perform certain operations without the help of an advisor. You can make deposits, withdrawals, or check your balance."
+    },
+    {
+      "id": 15,
+      "category": "digital",
+      "question_fr": "Amen First Bank fonctionne 24/7?",
+      "answer_fr": "Oui, Amen First Bank est disponible 24/7. Vous pouvez accéder à vos services bancaires à tout moment via l'application mobile ou le web.",
+      "question_ar": "هل بنك آمن فيرست يعمل 24/7؟",
+      "answer_ar": "نعم، بنك آمن فيرست متاح 24/7. يمكنك الوصول إلى خدماتك البنكية في أي وقت عبر تطبيق الهاتف المحمول أو الويب.",
+      "question_en": "Does Amen First Bank operate 24/7?",
+      "answer_en": "Yes, Amen First Bank is available 24/7. You can access your banking services at any time via the mobile app or web."
+    },
+    {
+      "id": 16,
+      "category": "reseau",
+      "question_fr": "Combien d'agences Amen Bank a-t-elle?",
+      "answer_fr": "Amen Bank dispose de 164 agences réparties sur 14 directions régionales à travers la Tunisie, vous permettant d'accéder facilement à nos services.",
+      "question_ar": "كم عدد فروع بنك آمن؟",
+      "answer_ar": "يمتلك بنك آمن 164 فرعًا موزعة على 14 إدارة إقليمية في جميع أنحاء تونس، مما يسمح لك بالوصول بسهولة إلى خدماتنا.",
+      "question_en": "How many branches does Amen Bank have?",
+      "answer_en": "Amen Bank has 164 branches distributed across 14 regional divisions throughout Tunisia, allowing you to easily access our services."
+    },
+    {
+      "id": 17,
+      "category": "reseau",
+      "question_fr": "Où se situe le siège social d'Amen Bank?",
+      "answer_fr": "Le siège social d'Amen Bank est situé à l'Av. Mohamed V, 1002 Tunis. Vous pouvez nous contacter par téléphone au 71 833 517 ou 71 148 000.",
+      "question_ar": "أين يقع المقر الرئيسي لبنك آمن؟",
+      "answer_ar": "يقع المقر الرئيسي لبنك آمن في الطريق السريع محمد الخامس، 1002 تونس. يمكنك الاتصال بنا على 71 833 517 أو 71 148 000.",
+      "question_en": "Where is Amen Bank's headquarters?",
+      "answer_en": "Amen Bank's headquarters is located at Av. Mohamed V, 1002 Tunis. You can reach us by phone at 71 833 517 or 71 148 000."
+    },
+    {
+      "id": 18,
+      "category": "reseau",
+      "question_fr": "Comment trouver une agence près de chez moi?",
+      "answer_fr": "Vous pouvez consulter notre localisateur d'agences sur www.amenbank.tn pour trouver l'agence la plus proche. Filtrez par région ou ville pour obtenir les horaires d'ouverture et les services disponibles.",
+      "question_ar": "كيف أجد فرعًا بالقرب مني؟",
+      "answer_ar": "يمكنك استشارة محدد الفروع الخاص بنا على www.amenbank.tn للعثور على أقرب فرع. قم بالتصفية حسب المنطقة أو المدينة للحصول على ساعات العمل والخدمات المتاحة.",
+      "question_en": "How do I find a branch near me?",
+      "answer_en": "You can consult our branch locator on www.amenbank.tn to find the nearest branch. Filter by region or city to get opening hours and available services."
+    },
+    {
+      "id": 19,
+      "category": "contact",
+      "question_fr": "Comment puis-je contacter Amen Bank?",
+      "answer_fr": "Vous pouvez nous contacter via: Email: amenbank@amenbank.com.tn | Téléphone: 71 833 517 ou 71 148 000 | Adresse: Av. Mohamed V, 1002 Tunis | Site: www.amenbank.tn",
+      "question_ar": "كيف يمكنني التواصل مع بنك آمن؟",
+      "answer_ar": "يمكنك التواصل معنا عبر: البريد الإلكتروني: amenbank@amenbank.com.tn | الهاتف: 71 833 517 أو 71 148 000 | العنوان: الطريق السريع محمد الخامس، 1002 تونس | الموقع: www.amenbank.tn",
+      "question_en": "How can I contact Amen Bank?",
+      "answer_en": "You can reach us via: Email: amenbank@amenbank.com.tn | Phone: 71 833 517 or 71 148 000 | Address: Av. Mohamed V, 1002 Tunis | Website: www.amenbank.tn"
+    },
+    {
+      "id": 20,
+      "category": "contact",
+      "question_fr": "Quels sont les horaires d'ouverture?",
+      "answer_fr": "Les horaires standard sont de 8h00 à 17h00 du lundi au vendredi, et de 9h00 à 12h00 le samedi. Certaines agences peuvent avoir des horaires différents. Consultez le site pour les horaires spécifiques.",
+      "question_ar": "ما هي ساعات العمل؟",
+      "answer_ar": "الساعات القياسية من الساعة 8:00 صباحًا إلى الساعة 5:00 مساءً من الاثنين إلى الجمعة، ومن الساعة 9:00 صباحًا إلى الظهيرة يوم السبت. قد يكون لبعض الفروع ساعات مختلفة. استشر الموقع للحصول على ساعات محددة.",
+      "question_en": "What are the opening hours?",
+      "answer_en": "Standard hours are 8:00 AM to 5:00 PM Monday to Friday, and 9:00 AM to 12:00 PM on Saturday. Some branches may have different hours. Check the website for specific times."
+    },
+    {
+      "id": 21,
+      "category": "particuliers",
+      "question_fr": "Quels sont les frais de compte?",
+      "answer_fr": "Les frais de compte varient selon le type de compte choisi. Ils incluent la tenue de compte, les virements, et les services additionnels. Consultez nos tarifs détaillés sur le site ou en agence.",
+      "question_ar": "ما هي رسوم الحساب؟",
+      "answer_ar": "تختلف رسوم الحساب حسب نوع الحساب المختار. وتشمل إدارة الحساب والتحويلات والخدمات الإضافية. استشر أسعارنا التفصيلية على الموقع أو في الفرع.",
+      "question_en": "What are the account fees?",
+      "answer_en": "Account fees vary depending on the type of account chosen. They include account maintenance, transfers, and additional services. Check our detailed rates on the website or in branch."
+    },
+    {
+      "id": 22,
+      "category": "particuliers",
+      "question_fr": "Comment ouvrir un compte?",
+      "answer_fr": "Pour ouvrir un compte chez Amen Bank, visitez une agence avec une pièce d'identité valide et un justificatif d'adresse. Notre conseiller vous guidera à travers le processus.",
+      "question_ar": "كيف أفتح حسابًا؟",
+      "answer_ar": "لفتح حساب في بنك آمن، قم بزيارة فرع مع بطاقة هوية صحيحة وإثبات عنوان. سيساعدك مستشارنا خلال العملية.",
+      "question_en": "How do I open an account?",
+      "answer_en": "To open an account with Amen Bank, visit a branch with a valid ID and proof of address. Our advisor will guide you through the process."
+    },
+    {
+      "id": 23,
+      "category": "entreprises",
+      "question_fr": "Quel est le taux intérêt des crédits professionnels?",
+      "answer_fr": "Les taux d'intérêt varient selon la durée du crédit et votre profil. Contactez notre département commercial pour obtenir une offre personnalisée.",
+      "question_ar": "ما هو سعر الفائدة على القروض المهنية؟",
+      "answer_ar": "تختلف أسعار الفائدة حسب مدة القرض وملفك الشخصي. اتصل بقسم المبيعات لدينا للحصول على عرض مخصص.",
+      "question_en": "What is the interest rate for professional loans?",
+      "answer_en": "Interest rates vary depending on the loan period and your profile. Contact our sales department for a personalized offer."
+    },
+    {
+      "id": 24,
+      "category": "digital",
+      "question_fr": "Comment sécuriser mon compte en ligne?",
+      "answer_fr": "Utilisez un mot de passe fort, activez l'authentification à deux facteurs, et ne partagez jamais vos identifiants. Amen Bank utilise le chiffrement SSL pour protéger vos données.",
+      "question_ar": "كيف أحمي حسابي عبر الإنترنت؟",
+      "answer_ar": "استخدم كلمة مرور قوية وفعّل المصادقة الثنائية ولا تشارك بيانات الدخول الخاصة بك. يستخدم بنك آمن تشفير SSL لحماية بياناتك.",
+      "question_en": "How do I secure my online account?",
+      "answer_en": "Use a strong password, enable two-factor authentication, and never share your credentials. Amen Bank uses SSL encryption to protect your data."
+    },
+    {
+      "id": 25,
+      "category": "particuliers",
+      "question_fr": "Puis-je faire un crédit immobilier?",
+      "answer_fr": "Oui, Amen Bank propose des crédits immobiliers avec des taux compétitifs. Vous pouvez financer l'achat ou la construction d'un bien immobilier. Contactez nos conseillers pour les détails.",
+      "question_ar": "هل يمكنني الحصول على قرض عقاري؟",
+      "answer_ar": "نعم، يقدم بنك آمن قروضًا عقارية بأسعار تنافسية. يمكنك تمويل شراء أو بناء عقار. اتصل بمستشارينا للتفاصيل.",
+      "question_en": "Can I get a home loan?",
+      "answer_en": "Yes, Amen Bank offers home loans at competitive rates. You can finance the purchase or construction of a property. Contact our advisors for details."
+    }
+  ]
+}
