@@ -12,7 +12,7 @@ Usage:
 import json
 import uuid
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -34,7 +34,7 @@ class FAQContent:
     category: str
     question: str
     answer: str
-    question_embeddings: List[float] = None  # Will be generated later
+    question_embeddings: Optional[List[float]] = None  # Will be generated later
 
 
 @dataclass
@@ -49,7 +49,7 @@ class FAQRecord:
         return {
             "id": self.id,
             "content": {
-                lang.value: asdict(content) 
+                lang.value: asdict(content)
                 for lang, content in self.content.items()
             },
             "metadata": self.metadata
@@ -59,7 +59,7 @@ class FAQRecord:
 class FAQIngestionManager:
     """Manages FAQ data ingestion and preparation for RAG"""
 
-    def __init__(self, knowledge_base_path: str = None):
+    def __init__(self, knowledge_base_path: Optional[str] = None):
         """
         Initialize the FAQ ingestion manager
 
@@ -68,8 +68,8 @@ class FAQIngestionManager:
         """
         if knowledge_base_path is None:
             # Default path relative to chatbot directory
-            knowledge_base_path = Path(__file__).parent.parent / "faq_knowledge_base.json"
-        
+            knowledge_base_path = str(Path(__file__).parent.parent / "faq_knowledge_base.json")
+
         self.knowledge_base_path = Path(knowledge_base_path)
         self.faqs: List[FAQRecord] = []
 
@@ -87,7 +87,7 @@ class FAQIngestionManager:
 
         with open(self.knowledge_base_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
+
         # Extract FAQs from wrapper if needed
         if isinstance(data, dict) and "faqs" in data:
             faqs = data["faqs"]
@@ -95,7 +95,7 @@ class FAQIngestionManager:
             faqs = data
         else:
             raise ValueError("Unexpected knowledge base format")
-        
+
         print(f"✓ Loaded knowledge base: {len(faqs)} FAQ entries")
         return faqs
 
@@ -115,10 +115,10 @@ class FAQIngestionManager:
             record_id = faq.get("id", str(uuid.uuid4()))
 
             # Extract multilingual content
-            content = {}
+            content: Dict[Language, FAQContent] = {}
             for lang in Language:
                 lang_suffix = f"_{lang.value}"
-                
+
                 content[lang] = FAQContent(
                     language=lang,
                     category=faq.get(f"category{lang_suffix}", faq.get("category", "")),
@@ -129,8 +129,8 @@ class FAQIngestionManager:
             # Create metadata
             metadata = {
                 "source": "faq_knowledge_base",
-                "languages": ",".join([lang.value for lang in Language]),  # Convert to comma-separated string
-                "tags": ",".join(faq.get("tags", [])),  # Convert to comma-separated string
+                "languages": ",".join([lang.value for lang in Language]),
+                "tags": ",".join(faq.get("tags", [])),
             }
 
             record = FAQRecord(id=record_id, content=content, metadata=metadata)
@@ -152,7 +152,7 @@ class FAQIngestionManager:
         Returns:
             Dictionary mapping language to list of document chunks
         """
-        chunks_by_language = {lang: [] for lang in Language}
+        chunks_by_language: Dict[Language, List[Dict[str, Any]]] = {lang: [] for lang in Language}
 
         for record in faq_records:
             for lang, content in record.content.items():
@@ -183,7 +183,7 @@ class FAQIngestionManager:
         Generate mock embeddings for testing
 
         In production, use sentence-transformers multilingual-e5-base model.
-        
+
         Args:
             chunks_by_language: Document chunks organized by language
 
@@ -192,7 +192,7 @@ class FAQIngestionManager:
         """
         # For production, uncomment and use:
         # model = SentenceTransformer("intfloat/multilingual-e5-base")
-        
+
         for lang, chunks in chunks_by_language.items():
             for chunk in chunks:
                 # Mock embedding: hash-based deterministic vector
@@ -200,7 +200,7 @@ class FAQIngestionManager:
                 text_hash = hash(chunk["text"])
                 # Generate 384-dimensional mock embedding
                 chunk["embedding"] = [
-                    float((text_hash + i) % 256) / 256.0 
+                    float((text_hash + i) % 256) / 256.0
                     for i in range(384)  # multilingual-e5-base output dimension
                 ]
 
@@ -257,7 +257,7 @@ class FAQIngestionManager:
         Returns:
             Report dictionary
         """
-        report = {
+        report: Dict[str, Any] = {
             "status": "ready_for_ingestion",
             "timestamp": str(Path(__file__).stat().st_mtime),
             "languages": {
@@ -272,9 +272,9 @@ class FAQIngestionManager:
             "next_step": "chromadb_collection_creation",
         }
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("INGESTION REPORT")
-        print("="*60)
+        print("=" * 60)
         print(f"Status: {report['status']}")
         for lang, stats in report["languages"].items():
             print(f"\nLanguage: {lang.upper()}")
@@ -283,7 +283,7 @@ class FAQIngestionManager:
             print(f"  Average chunk size: {stats['avg_chunk_size']:.0f} chars")
         print(f"\nTotal chunks (all languages): {report['total_chunks']}")
         print(f"Next step: {report['next_step']}")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
 
         return report
 
@@ -301,7 +301,7 @@ class FAQIngestionManager:
         print("-" * 60)
 
         # Step 1: Load knowledge base
-        raw_faqs = self.load_knowledge_base()  # Returns list
+        raw_faqs = self.load_knowledge_base()
 
         # Step 2: Transform to RAG format
         faq_records = self.transform_to_rag_format(raw_faqs)
@@ -323,7 +323,11 @@ class FAQIngestionManager:
 
         return chunks_with_embeddings
 
-    def save_ingestion_state(self, chunks_by_language: Dict[Language, List[Dict[str, Any]]], output_path: str = None):
+    def save_ingestion_state(
+        self,
+        chunks_by_language: Dict[Language, List[Dict[str, Any]]],
+        output_path: Optional[str] = None
+    ):
         """
         Save ingestion state to JSON file
 
@@ -331,13 +335,15 @@ class FAQIngestionManager:
             chunks_by_language: Processed chunks
             output_path: Path to save ingestion state
         """
-        if output_path is None:
-            output_path = Path(__file__).parent / "faq_ingestion_state.json"
+        resolved_path: Path = (
+            Path(output_path) if output_path
+            else Path(__file__).parent / "faq_ingestion_state.json"
+        )
 
         ingestion_state = {
             "faqs": [faq.to_dict() for faq in self.faqs],
             "chunks": {
-                lang.value: chunks 
+                lang.value: chunks
                 for lang, chunks in chunks_by_language.items()
             },
             "metadata": {
@@ -347,27 +353,21 @@ class FAQIngestionManager:
             }
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(resolved_path, 'w', encoding='utf-8') as f:
             json.dump(ingestion_state, f, indent=2, ensure_ascii=False)
 
-        print(f"✓ Saved ingestion state to: {output_path}")
+        print(f"✓ Saved ingestion state to: {resolved_path}")
 
 
 def main():
     """Main entry point"""
     import sys
 
-    # Parse command line arguments
     reset = "--reset" in sys.argv
 
     try:
-        # Initialize ingestion manager
         manager = FAQIngestionManager()
-
-        # Execute ingestion pipeline
         chunks_by_language = manager.ingest(reset=reset)
-
-        # Save ingestion state
         manager.save_ingestion_state(chunks_by_language)
 
         print("\n✅ FAQ Ingestion Complete!")

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 import uvicorn
 from slowapi import Limiter
@@ -106,10 +107,14 @@ app = FastAPI(
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, lambda req, exc: HTTPException(
-    status_code=429,
-    detail="Too many requests. Please try again later."
-))
+
+async def rate_limit_handler(req: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please try again later."}
+    )
+
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # CORS configuration
 app.add_middleware(
@@ -133,14 +138,14 @@ rag_chain: Optional[AmenBankRAGChain] = None
 async def startup_event():
     """Initialize services on startup"""
     global chromadb_manager, rag_chain
-    
+
     chatbot_dir = Path(__file__).parent
     persist_dir = chatbot_dir / "chroma_data"
     ingestion_state_path = chatbot_dir / "faq_ingestion_state.json"
-    
+
     try:
         print("🚀 Initializing Amen Bank AI Chatbot...")
-        
+
         # Initialize ChromaDB
         if ingestion_state_path.exists():
             print("  ✓ Loading existing ChromaDB collection...")
@@ -151,11 +156,11 @@ async def startup_event():
         else:
             print("  ⚠ No ingestion state found. Run FAQ ingestion first.")
             chromadb_manager = None
-        
+
         # Initialize RAG chain
         print("  ✓ Initializing RAG chain with Groq...")
         rag_chain = create_rag_chain(language=RAGLanguage.FR)
-            
+
         print("✅ Chatbot initialization complete")
     except Exception as e:
         print(f"❌ Startup error: {e}")
@@ -179,22 +184,23 @@ async def shutdown_event():
 def get_retrieval_context(query: str, language: Language, top_k: int = 3) -> List[Dict[str, Any]]:
     """
     Retrieve relevant FAQ chunks from ChromaDB
-    
+
     Args:
         query: User question
         language: Language code
         top_k: Number of top results
-        
+
     Returns:
         List of relevant chunks with metadata
     """
-    if chromadb_manager is None:
+    # FIX: guard against both chromadb_manager and collection being None
+    if chromadb_manager is None or chromadb_manager.collection is None:
         return []
-    
+
     try:
         # Embed query using same mock method
         query_embedding = chromadb_manager._generate_mock_embedding(query)
-        
+
         # Query collection with language filter
         results = chromadb_manager.collection.query(
             query_embeddings=[query_embedding],
@@ -202,7 +208,7 @@ def get_retrieval_context(query: str, language: Language, top_k: int = 3) -> Lis
             n_results=top_k,
             include=["documents", "metadatas", "distances"]
         )
-        
+
         # Format results
         context = []
         if results and results["documents"] and len(results["documents"]) > 0:
@@ -212,12 +218,11 @@ def get_retrieval_context(query: str, language: Language, top_k: int = 3) -> Lis
                     "distance": float(results["distances"][0][i]) if results["distances"] else 0.0,
                     "metadata": results["metadatas"][0][i] if results["metadatas"] else {}
                 })
-        
+
         return context
     except Exception as e:
         print(f"Retrieval error: {e}")
         return []
-
 
 
 # ============================================================
@@ -240,42 +245,47 @@ async def health_check():
 async def ingest_faqs(background_tasks: BackgroundTasks):
     """
     Ingest FAQ knowledge base into ChromaDB
-    
+
     This endpoint:
     1. Runs FAQ ingestion script
     2. Initializes ChromaDB collection
     3. Populates with multilingual chunks
     """
     global chromadb_manager
-    
+
     chatbot_dir = Path(__file__).parent
     ingestion_state_path = chatbot_dir / "faq_ingestion_state.json"
     persist_dir = chatbot_dir / "chroma_data"
-    
+
     try:
-        # If ingestion state doesn't exist, create it first
         if not ingestion_state_path.exists():
+            # FIX: correct pipeline + correct args to save_ingestion_state
             manager = FAQIngestionManager()
             kb = manager.load_knowledge_base()
             records = manager.transform_to_rag_format(kb)
-            chunks = manager.create_document_chunks(records)
-            manager.save_ingestion_state(records, chunks)
-            chunks_processed = len(chunks)
+            manager.faqs = records  # required for save_ingestion_state serialization
+            chunks_by_language = manager.create_document_chunks(records)
+            chunks_by_language = manager.generate_mock_embeddings(chunks_by_language)
+            manager.save_ingestion_state(chunks_by_language, str(ingestion_state_path))
+            chunks_processed = sum(len(c) for c in chunks_by_language.values())
         else:
             # Load existing state
             with open(ingestion_state_path, "r", encoding="utf-8") as f:
                 state = json.load(f)
-            chunks_processed = len(state.get("chunks", {}).get("fr", []) + 
-                                  state.get("chunks", {}).get("ar", []) +
-                                  state.get("chunks", {}).get("en", []))
-        
+            chunks = state.get("chunks", {})
+            chunks_processed = len(
+                chunks.get("fr", []) +
+                chunks.get("ar", []) +
+                chunks.get("en", [])
+            )
+
         # Initialize ChromaDB if not already done
         if chromadb_manager is None:
             chromadb_manager = ChromaDBSetup.setup_from_ingestion_state(
                 str(ingestion_state_path),
                 persist_dir=str(persist_dir),
             )
-        
+
         return IngestResponse(
             status="success",
             message="FAQ ingestion complete",
@@ -292,11 +302,11 @@ async def ingest_faqs(background_tasks: BackgroundTasks):
 async def chat(request: Request, chat_request: ChatRequest):
     """
     Main chat endpoint with RAG pipeline
-    
+
     Args:
         request: FastAPI Request (for rate limiting)
         chat_request: ChatRequest with message, language, user_id
-        
+
     Returns:
         ChatResponse with AI-generated response and sources
     """
@@ -304,10 +314,10 @@ async def chat(request: Request, chat_request: ChatRequest):
         # Validate language
         language = Language(chat_request.language) if isinstance(chat_request.language, str) else chat_request.language
         rag_language = RAGLanguage(language.value)
-        
+
         # Retrieve context from ChromaDB
         context = get_retrieval_context(chat_request.message, language, top_k=3)
-        
+
         # Generate response using RAG chain
         if rag_chain is None:
             response_text = "Chatbot not initialized. Please contact support."
@@ -322,19 +332,19 @@ async def chat(request: Request, chat_request: ChatRequest):
                 }
                 for c in context[:3]
             ]
-            
+
             # Generate response
             response_text = rag_chain.generate_response(
                 chat_request.message,
                 rag_context,
                 language=rag_language,
             )
-            
+
             # Get metadata
             metadata = rag_chain.get_response_metadata(rag_context)
             confidence = metadata.get("confidence", 0.5)
             sources = metadata.get("sources", [])
-        
+
         return ChatResponse(
             status="success",
             message=response_text,
@@ -351,17 +361,17 @@ async def chat(request: Request, chat_request: ChatRequest):
 async def submit_contact(request: ContactRequest):
     """
     Contact form submission endpoint
-    
+
     Args:
         request: ContactRequest with name, email, phone, subject, message
-        
+
     Returns:
         ContactResponse with ticket ID
     """
     try:
         # Generate ticket ID
         ticket_id = f"TKT-{datetime.now().strftime('%Y%m%d%H%M%S')}-{hash(request.email) % 10000:04d}"
-        
+
         # Log contact submission (in production: save to database)
         contact_log = {
             "ticket_id": ticket_id,
@@ -372,12 +382,12 @@ async def submit_contact(request: ContactRequest):
             "language": request.language.value,
             "timestamp": datetime.now().isoformat(),
         }
-        
+
         # Log to file
         log_file = Path(__file__).parent / "contact_submissions.jsonl"
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(contact_log, ensure_ascii=False) + "\n")
-        
+
         return ContactResponse(
             status="success",
             message="Contact submission received",
@@ -392,26 +402,24 @@ async def submit_contact(request: ContactRequest):
 async def get_faqs(language: Language = Language.FR, category: Optional[str] = None):
     """
     Get FAQs by language and optional category
-    
+
     Args:
         language: Language code (fr/ar/en)
         category: Optional category filter
-        
+
     Returns:
         List of FAQs
     """
     try:
-        # Load FAQ knowledge base
         kb_file = Path(__file__).parent.parent / "faq_knowledge_base.json"
-        
+
         with open(kb_file, "r", encoding="utf-8") as f:
             kb_data = json.load(f)
-        
-        # Filter by category if provided
+
         faqs = kb_data.get("faqs", [])
         if category:
             faqs = [faq for faq in faqs if faq.get("category", "").lower() == category.lower()]
-        
+
         return {
             "status": "success",
             "language": language.value,
@@ -448,12 +456,10 @@ async def root():
 # ============================================================
 
 if __name__ == "__main__":
-    # Configuration
     host = os.getenv("CHATBOT_HOST", "0.0.0.0")
     port = int(os.getenv("CHATBOT_PORT", 8000))
     reload = os.getenv("ENV", "development") == "development"
-    
-    # Run server
+
     uvicorn.run(
         "main:app",
         host=host,
