@@ -1,9 +1,12 @@
-![Amen Bank Logo](https://b2b.tn/files/2020/12/amen-bank.jpg)
-# Amen Bank AI Digital Solution - Technical README
+# Amen Bank Website- Europeanized and Smart AI Solution
 
 **Version**: 1.0  
 **Last Updated**: June 2026  
 **Status**: Production Ready (Post-UAT)
+
+<p align="center">
+  <img src="https://pbs.twimg.com/profile_images/842261819330842624/PrmnR9ug_400x400.jpg" alt="Amen Bank" />
+</p>
 
 ---
 
@@ -18,8 +21,9 @@
 7. [Running Tests](#running-tests)
 8. [Project Structure](#project-structure)
 9. [API Reference](#api-reference)
-10. [Troubleshooting](#troubleshooting)
-11. [Contributing](#contributing)
+10. [Deployment](#deployment)
+11. [Troubleshooting](#troubleshooting)
+12. [Contributing](#contributing)
 
 ---
 
@@ -53,7 +57,7 @@
 | Testing | Playwright | 1.40.0 |
 | Icons | Lucide React | 1.18.0 |
 
-**Status**: Development/Local only
+**Deployment**: Vercel (recommended) or Node.js server
 
 ### Backend
 | Component | Technology | Version |
@@ -69,7 +73,7 @@
 | Rate Limiting | SlowAPI | 0.1.10 |
 | CORS | FastAPI CORS | Built-in |
 
-**Status**: Development/Local only
+**Deployment**: Docker + Python 3.14+
 
 ---
 
@@ -555,7 +559,72 @@ curl -X POST http://localhost:8000/ingest
 
 ---
 
+## Deployment
 
+### Frontend Deployment (Vercel)
+
+```bash
+cd frontend
+
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy to Vercel
+vercel
+
+# Set environment variables in Vercel dashboard
+# (Optional for this project)
+```
+
+**Production URL**: Will be provided by Vercel
+
+### Backend Deployment (Docker + Python)
+
+#### Option 1: Docker
+
+```dockerfile
+# Dockerfile
+FROM python:3.14-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+**Build & Run**:
+```bash
+docker build -t amen-bank-backend .
+docker run -p 8000:8000 -e GROQ_API_KEY="your-key" amen-bank-backend
+```
+
+#### Option 2: Traditional Server
+
+```bash
+# Install Python 3.14+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+export GROQ_API_KEY="your-key"
+export DATABASE_URL="postgresql://..."  # If using external DB
+
+# Run with Gunicorn (production)
+pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:8000 main:app
+```
+
+---
 
 ## Troubleshooting
 
