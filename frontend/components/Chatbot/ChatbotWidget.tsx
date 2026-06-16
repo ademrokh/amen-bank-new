@@ -121,7 +121,7 @@ export default function ChatbotWidget() {
             'comment': 'Amen Bank propose des services bancaires modernes et sécurisés.',
             'compte': 'Vous pouvez ouvrir un compte Amen Bank en ligne ou en visitant une agence.',
             'taux': 'Les taux d\'intérêt varient selon le type de compte et les conditions actuelles.',
-            'default': 'Merci pour votre question! Pour plus d\'informations, consultez notre page FAQ ou contactez nos conseillers au +216 71 833 517.',
+            'default': 'Je ne comprends pas votre demande, veuillez le reformuler ou bien contactez nos conseillers au +216 71 833 517 pour plus d\'informations.',
           },
           ar: {
             'حساب': 'يمكنك فتح حساب بأمين بنك عبر الإنترنت أو بزيارة أحد فروعنا.',
@@ -182,7 +182,7 @@ export default function ChatbotWidget() {
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-40 w-14 h-14 bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-full shadow-2xl hover:shadow-blue-900/50 hover:scale-110 transition-all duration-300 flex items-center justify-center group`}
+        className={`fixed bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-40 w-14 h-14 bg-linear-to-r from-blue-900 to-blue-800 text-white rounded-full shadow-2xl hover:shadow-blue-900/50 hover:scale-110 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 flex items-center justify-center group`}
         aria-label={isOpen ? 'Close chat' : 'Open chat'}
         aria-expanded={isOpen}
         aria-controls="chat-drawer"
@@ -201,7 +201,7 @@ export default function ChatbotWidget() {
       {isOpen && (
         <div
           id="chat-drawer"
-          className={`fixed bottom-24 ${isRTL ? 'left-6' : 'right-6'} z-40 w-96 h-[600px] max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideInUp`}
+          className={`fixed bottom-24 ${isRTL ? 'left-6' : 'right-6'} z-40 w-96 h-150 max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-slideInUp`}
           style={{
             direction: isRTL ? 'rtl' : 'ltr',
           }}
@@ -209,7 +209,7 @@ export default function ChatbotWidget() {
           aria-labelledby="chat-title"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-6 flex items-center justify-between">
+          <div className="bg-linear-to-r from-blue-900 to-blue-800 text-white p-6 flex items-center justify-between">
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <MessageCircle className="w-5 h-5" aria-hidden="true" />
@@ -236,14 +236,14 @@ export default function ChatbotWidget() {
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-slate-50 to-white" role="log" aria-label="Chat messages" aria-live="polite" aria-atomic="false">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-linear-to-b from-slate-50 to-white" role="log" aria-label="Chat messages" aria-live="polite" aria-atomic="false">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.role === 'user' ? (isRTL ? 'flex-row' : 'flex-row-reverse') : ''} gap-3`}
               >
                 {message.role === 'bot' && (
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  <div className="w-8 h-8 bg-linear-to-r from-blue-900 to-blue-800 text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">
                     AB
                   </div>
                 )}
@@ -267,7 +267,7 @@ export default function ChatbotWidget() {
 
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                <div className="w-8 h-8 bg-linear-to-r from-blue-900 to-blue-800 text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">
                   AB
                 </div>
                 <div className="bg-slate-200 text-slate-900 px-4 py-3 rounded-lg rounded-bl-none max-w-xs">
@@ -281,7 +281,7 @@ export default function ChatbotWidget() {
 
             {error && (
               <div className="mx-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-red-800">{error}</p>
                   <button
@@ -315,7 +315,7 @@ export default function ChatbotWidget() {
               <button
                 onClick={handleSendMessage}
                 disabled={!input.trim() || isLoading}
-                className={`px-4 py-2 bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`px-4 py-2 bg-linear-to-r from-blue-900 to-blue-800 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
                   isRTL ? 'flex-row-reverse' : ''
                 }`}
               >

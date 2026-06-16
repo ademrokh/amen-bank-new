@@ -170,7 +170,7 @@ export default function Products() {
     : 'Complete banking solutions tailored to your profile and goals';
 
   return (
-    <section className={`py-24 bg-gradient-to-b from-slate-50 to-white ${isRTL ? 'dir-rtl' : ''}`}>
+    <section className={`py-24 bg-linear-to-b from-slate-50 to-white ${isRTL ? 'dir-rtl' : ''}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -190,12 +190,12 @@ export default function Products() {
                 className={`group relative bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col h-full ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 {/* Background Accent */}
-                <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} w-32 h-32 bg-gradient-to-br ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full blur-3xl -m-16`}></div>
+                <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} w-32 h-32 bg-linear-to-br ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full blur-3xl -m-16`}></div>
 
                 {/* Content */}
                 <div className="relative z-10 p-8 flex flex-col h-full">
                   {/* Icon */}
-                  <div className={`inline-flex w-16 h-16 rounded-xl bg-gradient-to-br ${product.color} items-center justify-center text-slate-900 mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'ml-auto' : ''}`}>
+                  <div className={`inline-flex w-16 h-16 rounded-xl bg-linear-to-br ${product.color} items-center justify-center text-slate-900 mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'ml-auto' : ''}`}>
                     {product.icon}
                   </div>
 
@@ -203,13 +203,13 @@ export default function Products() {
                   <h3 className="text-2xl font-bold text-slate-900 mb-3">{content.title}</h3>
 
                   {/* Description */}
-                  <p className="text-slate-600 mb-6 leading-relaxed flex-grow">{content.description}</p>
+                  <p className="text-slate-600 mb-6 leading-relaxed grow">{content.description}</p>
 
                   {/* Features */}
                   <div className={`space-y-2 mb-8 ${isRTL ? 'text-right' : ''}`}>
                     {content.features.map((feature, idx) => (
                       <div key={idx} className={`flex items-center gap-3 text-slate-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <span className="w-2 h-2 rounded-full bg-blue-900 flex-shrink-0"></span>
+                        <span className="w-2 h-2 rounded-full bg-blue-900 shrink-0"></span>
                         <span className="text-sm font-medium">{feature}</span>
                       </div>
                     ))}
@@ -218,7 +218,7 @@ export default function Products() {
                   {/* CTA Button */}
                   <Link
                     href={`/${currentLang}/${product.link}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg group/btn w-full justify-center"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg group/btn w-full justify-center"
                   >
                     {content.cta}
                     <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />

@@ -101,7 +101,7 @@ export default function Footer() {
   const content = footerContent[currentLang];
 
   return (
-    <footer className={`bg-gradient-to-b from-slate-50 to-slate-100 text-slate-700 ${isRTL ? 'dir-rtl' : ''}`}>
+    <footer className={`bg-linear-to-b from-slate-50 to-slate-100 text-slate-700 ${isRTL ? 'dir-rtl' : ''}`}>
       {/* Top Section with Newsletter */}
       <div className="border-b border-slate-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -128,7 +128,7 @@ export default function Footer() {
                 placeholder={currentLang === 'fr' ? 'Votre email' : currentLang === 'ar' ? 'بريدك الإلكتروني' : 'Your email'}
                 className="flex-1 px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 transition-all"
               />
-              <button className="px-6 py-3 bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-300 whitespace-nowrap shadow-md hover:shadow-lg">
+              <button className="px-6 py-3 bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-300 whitespace-nowrap shadow-md hover:shadow-lg">
                 {currentLang === 'fr' ? 'S\'abonner' : currentLang === 'ar' ? 'اشتراك' : 'Subscribe'}
               </button>
             </div>
@@ -142,7 +142,7 @@ export default function Footer() {
           {/* Column 1: Amen Bank Info */}
           <div className={isRTL ? 'lg:col-start-5' : ''}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
+              <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
                 A
               </div>
               <div>
@@ -161,19 +161,19 @@ export default function Footer() {
             {/* Contact Info */}
             <div className="space-y-4 text-sm">
               <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Mail className="w-5 h-5 flex-shrink-0 text-blue-700" />
+                <Mail className="w-5 h-5 shrink-0 text-blue-700" />
                 <a href="mailto:amenbank@amenbank.com.tn" className="text-slate-700 hover:text-blue-700 transition-colors font-medium">
                   {content.email}
                 </a>
               </div>
               <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Phone className="w-5 h-5 flex-shrink-0 text-blue-700" />
+                <Phone className="w-5 h-5 shrink-0 text-blue-700" />
                 <a href="tel:+21671833517" className="text-slate-700 hover:text-blue-700 transition-colors font-medium">
                   {content.phone}
                 </a>
               </div>
               <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-700" />
+                <MapPin className="w-5 h-5 shrink-0 mt-0.5 text-blue-700" />
                 <p className="text-slate-700">{content.address}</p>
               </div>
             </div>
