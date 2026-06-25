@@ -1,13 +1,14 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, Clock, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
 export default function Contact() {
-  const pathname = usePathname();
+  const { lang: currentLang, isRTL } = useLang();
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,17 +18,6 @@ export default function Contact() {
     subject: '',
     message: '',
   });
-
-  // Extract current language
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
-
-  const isRTL = currentLang === 'ar';
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -41,7 +31,7 @@ export default function Contact() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'}/contact`, {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, language: currentLang }),
@@ -53,7 +43,6 @@ export default function Contact() {
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
     } catch {
-      // Fallback: still show success for demo purposes
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setTimeout(() => setSubmitted(false), 5000);
@@ -80,7 +69,7 @@ export default function Contact() {
       success: 'Message envoyé avec succès !',
       successMsg: 'Merci pour votre message. Nous vous répondrons dans les 24 heures.',
       location: 'Localisation',
-      workingHours: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+      workingHours: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
       subjects: ['Général', 'Support Client', 'Demande de Crédit', 'Plainte', 'Autre'],
       faqTitle: 'Questions Fréquemment Posées',
       faqDesc: 'Consultez notre section FAQ pour trouver des réponses à vos questions',
@@ -111,7 +100,7 @@ export default function Contact() {
     },
     en: {
       pageTitle: 'Contact Us',
-      pageDescription: "Have a question? Our team is here to listen 24/7",
+      pageDescription: 'Have a question? Our team is here to listen 24/7',
       contactInfo: 'Contact Information',
       email: 'Email',
       phone: 'Phone',
@@ -136,58 +125,59 @@ export default function Contact() {
 
   const lang = content[currentLang];
 
-  const inputClass = `w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 transition-all outline-none ${isRTL ? 'text-right' : ''}`;
-
   return (
-    <section
-      className="py-20 bg-linear-to-b from-white to-slate-50"
-      dir={isRTL ? 'rtl' : 'ltr'}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            {lang.pageTitle}
-          </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">{lang.pageDescription}</p>
+    <section className="bg-surface py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container">
+        {/* ── Header ── */}
+        <div className="section-header mb-16">
+          <h1>{lang.pageTitle}</h1>
+          <p>{lang.pageDescription}</p>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          {/* Contact Information */}
+        {/* ── Main Grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+          {/* Left — Contact Info */}
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-8">{lang.contactInfo}</h2>
+            <h2 className="text-h2 text-ink mb-8">{lang.contactInfo}</h2>
 
-            <div className="space-y-6">
-              {/* Email */}
-              <div className={`flex items-start gap-4 p-6 rounded-xl bg-blue-50 border border-blue-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Mail className="w-8 h-8 text-blue-900 shrink-0" />
+            <div className="space-y-4">
+              {/* Email — blue tint */}
+              <div
+                className={`flex items-start gap-4 p-5 rounded-lg bg-blue-50 border border-blue-100 ${
+                  isRTL ? 'flex-row-reverse text-right' : ''
+                }`}
+              >
+                <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-2">{lang.email}</h3>
+                  <h3 className="text-small font-semibold text-ink mb-1">{lang.email}</h3>
                   <a
                     href="mailto:amenbank@amenbank.com.tn"
-                    className="text-blue-900 hover:text-blue-700 font-medium transition-colors"
+                    className="text-small text-blue-800 hover:text-blue-600 font-medium transition-colors"
                   >
                     amenbank@amenbank.com.tn
                   </a>
                 </div>
               </div>
 
-              {/* Phone */}
-              <div className={`flex items-start gap-4 p-6 rounded-xl bg-cyan-50 border border-cyan-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Phone className="w-8 h-8 text-cyan-700 shrink-0" />
+              {/* Phone — cyan tint */}
+              <div
+                className={`flex items-start gap-4 p-5 rounded-lg bg-cyan-50 border border-cyan-100 ${
+                  isRTL ? 'flex-row-reverse text-right' : ''
+                }`}
+              >
+                <Phone className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-2">{lang.phone}</h3>
-                  <div className="space-y-1">
+                  <h3 className="text-small font-semibold text-ink mb-1">{lang.phone}</h3>
+                  <div className="space-y-0.5">
                     <a
                       href="tel:+21671833517"
-                      className="block text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
+                      className="block text-small text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
                     >
                       +216 71 833 517
                     </a>
                     <a
                       href="tel:+21671148000"
-                      className="block text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
+                      className="block text-small text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
                     >
                       +216 71 148 000
                     </a>
@@ -195,57 +185,72 @@ export default function Contact() {
                 </div>
               </div>
 
-              {/* Address */}
-              <div className={`flex items-start gap-4 p-6 rounded-xl bg-purple-50 border border-purple-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <MapPin className="w-8 h-8 text-purple-900 shrink-0" />
+              {/* Address — purple tint */}
+              <div
+                className={`flex items-start gap-4 p-5 rounded-lg bg-purple-50 border border-purple-100 ${
+                  isRTL ? 'flex-row-reverse text-right' : ''
+                }`}
+              >
+                <MapPin className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-2">{lang.address}</h3>
-                  <p className="text-slate-700">Avenue Mohamed V, 1002 Tunis, Tunisia</p>
+                  <h3 className="text-small font-semibold text-ink mb-1">{lang.address}</h3>
+                  <p className="text-small text-ink-secondary">
+                    Avenue Mohamed V, 1002 Tunis, Tunisia
+                  </p>
                 </div>
               </div>
 
-              {/* Hours */}
-              <div className={`flex items-start gap-4 p-6 rounded-xl bg-green-50 border border-green-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Clock className="w-8 h-8 text-green-700 shrink-0" />
+              {/* Hours — green tint */}
+              <div
+                className={`flex items-start gap-4 p-5 rounded-lg bg-primary-50 border border-primary-100 ${
+                  isRTL ? 'flex-row-reverse text-right' : ''
+                }`}
+              >
+                <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-2">{lang.hours}</h3>
-                  <p className="text-slate-700">{lang.workingHours}</p>
+                  <h3 className="text-small font-semibold text-ink mb-1">{lang.hours}</h3>
+                  <p className="text-small text-ink-secondary">{lang.workingHours}</p>
                 </div>
               </div>
             </div>
 
             {/* Map Placeholder */}
             <div className="mt-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-4">{lang.location}</h3>
-              <div className="bg-linear-to-br from-slate-200 to-slate-300 rounded-xl h-64 flex items-center justify-center border border-slate-300">
+              <h3 className="text-h4 text-ink mb-4">{lang.location}</h3>
+              <div className="bg-surface-alt border border-border rounded-lg h-64 flex items-center justify-center">
                 <div className="text-center">
-                  <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                  <p className="text-slate-600 font-medium">Leaflet Map</p>
+                  <MapPin className="w-8 h-8 text-ink-muted mx-auto mb-2" />
+                  <p className="text-small text-ink-muted">Leaflet Map</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Contact Form */}
+          {/* Right — Form */}
           <div>
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-lg">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">{lang.formTitle}</h2>
-              <p className="text-slate-600 mb-8">{lang.formDesc}</p>
+            <div className="card">
+              <h2 className="text-h2 text-ink mb-2">{lang.formTitle}</h2>
+              <p className="text-ink-secondary mb-8 leading-relaxed">{lang.formDesc}</p>
 
+              {/* Success Alert */}
               {submitted && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                  <CheckCircle className="w-6 h-6 text-green-700 shrink-0" />
+                <div
+                  className={`flex items-start gap-3 p-4 mb-6 rounded-lg bg-primary-50 border border-primary-100 ${
+                    isRTL ? 'flex-row-reverse text-right' : ''
+                  }`}
+                >
+                  <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-green-900">{lang.success}</p>
-                    <p className="text-sm text-green-700">{lang.successMsg}</p>
+                    <p className="text-small font-semibold text-ink">{lang.success}</p>
+                    <p className="text-small text-ink-secondary mt-0.5">{lang.successMsg}</p>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-small font-semibold text-ink mb-2">
                     {lang.name}
                   </label>
                   <input
@@ -254,14 +259,14 @@ export default function Contact() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className={inputClass}
+                    className="input-field"
                     placeholder={lang.name}
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-small font-semibold text-ink mb-2">
                     {lang.email}
                   </label>
                   <input
@@ -270,14 +275,14 @@ export default function Contact() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className={inputClass}
+                    className="input-field"
                     placeholder="your@email.com"
                   />
                 </div>
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-small font-semibold text-ink mb-2">
                     {lang.phone}
                   </label>
                   <input
@@ -285,14 +290,14 @@ export default function Contact() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className={inputClass}
+                    className="input-field"
                     placeholder="+216 XX XXX XXX"
                   />
                 </div>
 
                 {/* Subject */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-small font-semibold text-ink mb-2">
                     {lang.subject}
                   </label>
                   <select
@@ -300,7 +305,7 @@ export default function Contact() {
                     value={formData.subject}
                     onChange={handleInputChange}
                     required
-                    className={inputClass}
+                    className="input-field"
                   >
                     <option value="">{lang.subject}</option>
                     {lang.subjects.map((subject) => (
@@ -313,7 +318,7 @@ export default function Contact() {
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-small font-semibold text-ink mb-2">
                     {lang.message}
                   </label>
                   <textarea
@@ -322,16 +327,16 @@ export default function Contact() {
                     onChange={handleInputChange}
                     required
                     rows={5}
-                    className={`${inputClass} resize-none`}
+                    className="input-field resize-none"
                     placeholder={lang.message}
                   />
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit — primary solid green, full width */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full px-6 py-3 bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  className="btn btn-primary btn-full"
                 >
                   {isLoading ? (
                     <>
@@ -350,16 +355,23 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* FAQ Section */}
-        <div className="bg-linear-to-r from-blue-50 to-cyan-50 rounded-2xl border border-blue-200 p-8 text-center">
-          <h3 className="text-2xl font-bold text-slate-900 mb-4">{lang.faqTitle}</h3>
-          <p className="text-slate-600 mb-6">{lang.faqDesc}</p>
-          <a
+        {/* ── FAQ CTA ── */}
+        <div
+          className={`bg-secondary-50 border border-secondary-100 rounded-lg p-10 text-center ${
+            isRTL ? 'text-right' : ''
+          }`}
+        >
+          <h3 className="text-h3 text-ink mb-3">{lang.faqTitle}</h3>
+          <p className="text-ink-secondary mb-6 max-w-lg mx-auto leading-relaxed">
+            {lang.faqDesc}
+          </p>
+          <Link
             href={`/${currentLang}/faq`}
-            className="inline-flex items-center gap-2 px-8 py-3 bg-white border-2 border-blue-900 text-blue-900 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+            className={`btn btn-outline inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             {lang.faqLink}
-          </a>
+            <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+          </Link>
         </div>
       </div>
     </section>

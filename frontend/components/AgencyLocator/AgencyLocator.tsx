@@ -1,8 +1,13 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { MapPin, Phone, Clock, Search } from 'lucide-react';
+import { useLang } from '@/hooks/useLang';
+
+/* ════════════════════════════════════════════
+   Types & Data
+   ════════════════════════════════════════════ */
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -26,7 +31,6 @@ interface Branch {
   longitude: number;
 }
 
-// Static data outside component — no re-creation on every render
 const branches: Branch[] = [
   {
     id: 1,
@@ -41,7 +45,7 @@ const branches: Branch[] = [
     address_ar: 'جادة محمد الخامس، 1002 تونس',
     address_en: 'Avenue Mohamed V, 1002 Tunis',
     phone: '71 833 517',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 36.8065,
@@ -55,12 +59,12 @@ const branches: Branch[] = [
     city_fr: 'La Marsa',
     city_ar: 'المرسى',
     city_en: 'La Marsa',
-    region: 'Ben Arous',
+    region: 'Tunis',
     address_fr: 'Avenue Bourguiba, La Marsa',
     address_ar: 'جادة بورقيبة، المرسى',
     address_en: 'Avenue Bourguiba, La Marsa',
     phone: '71 748 000',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 36.8626,
@@ -79,7 +83,7 @@ const branches: Branch[] = [
     address_ar: 'شارع علي بلهوان، صفاقس',
     address_en: 'Rue Ali Belhouane, Sfax',
     phone: '74 298 555',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 34.7406,
@@ -98,7 +102,7 @@ const branches: Branch[] = [
     address_ar: 'جادة بورقيبة، سوسة',
     address_en: 'Avenue Bourguiba, Sousse',
     phone: '73 225 300',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 35.8356,
@@ -117,7 +121,7 @@ const branches: Branch[] = [
     address_ar: 'جادة النصر، قفصة',
     address_en: 'Avenue de la Victoire, Gafsa',
     phone: '76 224 455',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 34.4267,
@@ -136,7 +140,7 @@ const branches: Branch[] = [
     address_ar: 'شارع الباي، القيروان',
     address_en: 'Rue du Bey, Kairouan',
     phone: '77 224 677',
-    hours_fr: 'Lun-Ven: 8:00-17:00 | Sam: 9:00-12:00',
+    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
     hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
     hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
     latitude: 35.6713,
@@ -144,206 +148,319 @@ const branches: Branch[] = [
   },
 ];
 
+/* ════════════════════════════════════════════
+   Helpers
+   ════════════════════════════════════════════ */
+
 function getBranchContent(branch: Branch, lang: Language) {
   return {
-    name:    lang === 'fr' ? branch.name_fr    : lang === 'ar' ? branch.name_ar    : branch.name_en,
-    city:    lang === 'fr' ? branch.city_fr    : lang === 'ar' ? branch.city_ar    : branch.city_en,
+    name: lang === 'fr' ? branch.name_fr : lang === 'ar' ? branch.name_ar : branch.name_en,
+    city: lang === 'fr' ? branch.city_fr : lang === 'ar' ? branch.city_ar : branch.city_en,
     address: lang === 'fr' ? branch.address_fr : lang === 'ar' ? branch.address_ar : branch.address_en,
-    hours:   lang === 'fr' ? branch.hours_fr   : lang === 'ar' ? branch.hours_ar   : branch.hours_en,
+    hours: lang === 'fr' ? branch.hours_fr : lang === 'ar' ? branch.hours_ar : branch.hours_en,
   };
 }
 
+/* ════════════════════════════════════════════
+   Map — all Leaflet code inside dynamic()
+   to prevent SSR crashes. Marker/Popup
+   inline styles MUST stay — they're raw HTML
+   strings passed to Leaflet's API, not
+   React-rendered elements.
+   ════════════════════════════════════════════ */
+
+const TUNISIA_CENTER: [number, number] = [35.2, 9.6];
+const DEFAULT_ZOOM = 7;
+const BRANCH_ZOOM = 14;
+
+interface MapInnerProps {
+  branches: Branch[];
+  selectedBranch: Branch | null;
+  onSelectBranch: (branch: Branch) => void;
+  lang: Language;
+}
+
+const MapView = dynamic<MapInnerProps>(
+  () =>
+    Promise.all([import('react-leaflet'), import('leaflet')]).then(
+      ([
+        { MapContainer, TileLayer, Marker, Popup, useMap },
+        L,
+      ]) => {
+        const markerDefault = L.divIcon({
+          className: '',
+          html: '<div style="width:14px;height:14px;border-radius:50%;background:#64748b;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.18)"></div>',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+          popupAnchor: [0, -10],
+        });
+
+        const markerSelected = L.divIcon({
+          className: '',
+          html: '<div style="width:18px;height:18px;border-radius:50%;background:#006B3C;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.22)"></div>',
+          iconSize: [18, 18],
+          iconAnchor: [9, 9],
+          popupAnchor: [0, -12],
+        });
+
+        function FlyController({ branch }: { branch: Branch | null }) {
+          const map = useMap();
+          useEffect(() => {
+            if (branch) {
+              map.flyTo([branch.latitude, branch.longitude], BRANCH_ZOOM, {
+                duration: 0.8,
+              });
+            }
+          }, [branch, map]);
+          return null;
+        }
+
+        function MapInner({
+          branches,
+          selectedBranch,
+          onSelectBranch,
+          lang,
+        }: MapInnerProps) {
+          return (
+            <MapContainer
+              center={TUNISIA_CENTER}
+              zoom={DEFAULT_ZOOM}
+              scrollWheelZoom={true}
+              className="w-full h-full rounded-lg"
+              style={{ minHeight: '380px' }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              <FlyController branch={selectedBranch} />
+
+              {branches.map((branch) => {
+                const c = getBranchContent(branch, lang);
+                const isSelected = selectedBranch?.id === branch.id;
+                return (
+                  <Marker
+                    key={branch.id}
+                    position={[branch.latitude, branch.longitude]}
+                    icon={isSelected ? markerSelected : markerDefault}
+                    eventHandlers={{
+                      click: () => onSelectBranch(branch),
+                    }}
+                  >
+                    <Popup>
+                      <span style={{ fontWeight: 600, fontSize: '0.8125rem', color: '#0f172a', lineHeight: 1.4 }}>
+                        {c.name}
+                      </span>
+                      <br />
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        {c.city}
+                      </span>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+            </MapContainer>
+          );
+        }
+
+        return MapInner;
+      }
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-95 bg-surface-alt border border-border rounded-lg flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-small text-ink-muted">Loading map…</p>
+        </div>
+      </div>
+    ),
+  }
+);
+
+/* ════════════════════════════════════════════
+   Main Component
+   ════════════════════════════════════════════ */
+
 export default function AgencyLocator() {
-  const pathname = usePathname();
+  const { lang: currentLang, isRTL } = useLang();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
 
-  // Extract current language
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
-
-  const isRTL = currentLang === 'ar';
-
-  // Filter branches — React Compiler handles memoization
   const filteredBranches = branches.filter((branch) => {
-    const searchLower = searchQuery.toLowerCase();
-    const content = getBranchContent(branch, currentLang);
+    const q = searchQuery.toLowerCase();
+    const c = getBranchContent(branch, currentLang);
     return (
-      content.name.toLowerCase().includes(searchLower) ||
-      content.city.toLowerCase().includes(searchLower) ||
-      content.address.toLowerCase().includes(searchLower) ||
-      branch.region.toLowerCase().includes(searchLower)
+      c.name.toLowerCase().includes(q) ||
+      c.city.toLowerCase().includes(q) ||
+      c.address.toLowerCase().includes(q) ||
+      branch.region.toLowerCase().includes(q)
     );
   });
 
   const ui = {
     fr: {
       sectionTitle: "Réseau d'Agences",
-      sectionDescription: 'Trouvez l\'agence Amen Bank la plus proche de vous',
-      searchPlaceholder: 'Rechercher par ville ou région...',
-      mapLabel: 'Carte Interactive',
-      mapSub: 'Leaflet.js intégration',
-      selectPrompt: 'Sélectionnez une agence pour voir les détails',
+      sectionDescription: "Trouvez l'agence Amen Bank la plus proche de vous",
+      searchPlaceholder: 'Rechercher par ville ou région…',
+      selectPrompt: 'Sélectionnez une agence sur la carte pour voir les détails',
       address: 'Adresse',
       phone: 'Téléphone',
       hours: 'Horaires',
       infoBox: 'Amen Bank dispose de 164 agences réparties dans 14 régions tunisiennes',
       infoSub: 'Visitez-nous pour une consultation gratuite avec nos experts',
       branchCount: (n: number) => `${n} agence${n !== 1 ? 's' : ''} trouvée${n !== 1 ? 's' : ''}`,
+      noResults: 'Aucune agence trouvée.',
     },
     ar: {
       sectionTitle: 'شبكة الفروع',
       sectionDescription: 'جد فرع أمين بنك الأقرب إليك',
-      searchPlaceholder: 'ابحث حسب المدينة أو المنطقة...',
-      mapLabel: 'خريطة تفاعلية',
-      mapSub: 'تكامل Leaflet.js',
-      selectPrompt: 'حدد فرعا لعرض التفاصيل',
+      searchPlaceholder: 'ابحث حسب المدينة أو المنطقة…',
+      selectPrompt: 'حدد فرعا على الخريطة لعرض التفاصيل',
       address: 'العنوان',
       phone: 'الهاتف',
       hours: 'الساعات',
       infoBox: 'يوجد لدى أمين بنك 164 فرعا موزعة على 14 منطقة تونسية',
       infoSub: 'قم بزيارتنا للحصول على استشارة مجانية من خبرائنا',
       branchCount: (n: number) => `${n} فرع موجود`,
+      noResults: 'لم يتم العثور على أي فرع.',
     },
     en: {
       sectionTitle: 'Branch Network',
       sectionDescription: 'Find the nearest Amen Bank branch to you',
-      searchPlaceholder: 'Search by city or region...',
-      mapLabel: 'Interactive Map',
-      mapSub: 'Leaflet.js integration',
-      selectPrompt: 'Select a branch to view details',
+      searchPlaceholder: 'Search by city or region…',
+      selectPrompt: 'Select a branch on the map to view details',
       address: 'Address',
       phone: 'Phone',
       hours: 'Hours',
       infoBox: 'Amen Bank has 164 branches distributed across 14 Tunisian regions',
       infoSub: 'Visit us for a free consultation with our experts',
       branchCount: (n: number) => `${n} branch${n !== 1 ? 'es' : ''} found`,
+      noResults: 'No branches found.',
     },
   }[currentLang];
 
   return (
-    <section
-      className="py-20 bg-linear-to-b from-white to-slate-50"
-      dir={isRTL ? 'rtl' : 'ltr'}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">{ui.sectionTitle}</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">{ui.sectionDescription}</p>
+    <section className="bg-surface-alt py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container">
+
+        {/* ── Header ── */}
+        <div className="section-header mb-16">
+          <h1>{ui.sectionTitle}</h1>
+          <p>{ui.sectionDescription}</p>
         </div>
 
-        {/* Search Bar */}
+        {/* ── Search ── */}
         <div className="max-w-2xl mx-auto mb-12">
           <div className="relative">
-            <Search
-              className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} w-6 h-6 text-slate-400 pointer-events-none`}
-            />
             <input
               type="text"
               placeholder={ui.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full px-6 py-4 ${isRTL ? 'pr-6 pl-14' : 'pl-6 pr-14'} bg-white border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 transition-all outline-none`}
+              className={`input-field ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
             />
+            <div className={`absolute top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}>
+              <Search className="w-5 h-5" />
+            </div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Map Placeholder */}
-          <div className="lg:col-span-2 lg:row-span-2">
-            <div className="bg-linear-to-br from-slate-200 to-slate-300 rounded-2xl h-96 lg:h-full min-h-96 flex items-center justify-center border border-slate-300 shadow-lg overflow-hidden">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">{ui.mapLabel}</p>
-                <p className="text-sm text-slate-500 mt-2">{ui.mapSub}</p>
-              </div>
+        {/* ── Map + Info Panel ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+
+          {/* Map — no inline style, uses Tailwind min-h */}
+          <div className="lg:col-span-2">
+            <div className="bg-surface-alt border border-border rounded-lg overflow-hidden min-h-95">
+              <MapView
+                branches={filteredBranches}
+                selectedBranch={selectedBranch}
+                onSelectBranch={setSelectedBranch}
+                lang={currentLang}
+              />
             </div>
           </div>
 
-          {/* Branch Info Panel */}
+          {/* Info Panel */}
           <div className="lg:col-span-1">
             {selectedBranch ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-lg sticky top-24">
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">
+              <div className="card sticky top-24 border-primary!">
+                <h3 className="text-h4 text-ink mb-5">
                   {getBranchContent(selectedBranch, currentLang).name}
                 </h3>
 
-                <div className={`flex items-start gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <MapPin className="w-5 h-5 text-blue-900 shrink-0 mt-1" />
+                <div className={`flex items-start gap-3 mb-5 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                  <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm text-slate-600 font-semibold">{ui.address}</p>
-                    <p className="text-slate-900">{getBranchContent(selectedBranch, currentLang).address}</p>
+                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.address}</p>
+                    <p className="text-small text-ink">{getBranchContent(selectedBranch, currentLang).address}</p>
                   </div>
                 </div>
 
-                <div className={`flex items-start gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <Phone className="w-5 h-5 text-blue-900 shrink-0 mt-1" />
+                <div className={`flex items-start gap-3 mb-5 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                  <Phone className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm text-slate-600 font-semibold">{ui.phone}</p>
-                    <a
-                      href={`tel:${selectedBranch.phone}`}
-                      className="text-blue-900 hover:text-blue-700 font-medium transition-colors"
-                    >
+                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.phone}</p>
+                    <a href={`tel:${selectedBranch.phone}`} className="text-small font-medium text-secondary hover:text-secondary-dark transition-colors">
                       {selectedBranch.phone}
                     </a>
                   </div>
                 </div>
 
-                <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <Clock className="w-5 h-5 text-blue-900 shrink-0 mt-1" />
+                <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                  <Clock className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm text-slate-600 font-semibold mb-2">{ui.hours}</p>
-                    <p className="text-sm text-slate-700">{getBranchContent(selectedBranch, currentLang).hours}</p>
+                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.hours}</p>
+                    <p className="text-small text-ink-secondary">{getBranchContent(selectedBranch, currentLang).hours}</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-blue-50 rounded-2xl border border-blue-200 p-6 text-center">
-                <p className="text-slate-600">{ui.selectPrompt}</p>
+              <div className="bg-secondary-50 border border-border rounded-lg p-8 text-center sticky top-24">
+                <MapPin className="w-8 h-8 text-ink-muted mx-auto mb-3" />
+                <p className="text-small text-ink-secondary leading-relaxed">{ui.selectPrompt}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Branches List */}
-        <div className="mt-8">
-          <h3 className="text-2xl font-bold text-slate-900 mb-6">
-            {ui.branchCount(filteredBranches.length)}
-          </h3>
+        {/* ── Branch List ── */}
+        <div className="mb-16">
+          <h3 className="text-h3 text-ink mb-6">{ui.branchCount(filteredBranches.length)}</h3>
 
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isRTL ? 'text-right' : ''}`}>
-            {filteredBranches.map((branch) => {
-              const content = getBranchContent(branch, currentLang);
-              return (
-                <button
-                  key={branch.id}
-                  onClick={() => setSelectedBranch(branch)}
-                  className={`p-4 rounded-xl border-2 transition-all duration-300 ${isRTL ? 'text-right' : 'text-left'} ${
-                    selectedBranch?.id === branch.id
-                      ? 'border-blue-900 bg-blue-50 shadow-lg'
-                      : 'border-slate-200 bg-white hover:border-blue-500 hover:shadow-md'
-                  }`}
-                >
-                  <h4 className="font-bold text-slate-900 mb-1">{content.name}</h4>
-                  <p className="text-sm text-slate-600 mb-2">{content.city}</p>
-                  <p className="text-xs text-slate-500 line-clamp-2">{content.address}</p>
-                </button>
-              );
-            })}
-          </div>
+          {filteredBranches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredBranches.map((branch) => {
+                const c = getBranchContent(branch, currentLang);
+                const isSelected = selectedBranch?.id === branch.id;
+                return (
+                  <button
+                    key={branch.id}
+                    onClick={() => setSelectedBranch(branch)}
+                    className={`text-left p-5 rounded-lg border transition-colors cursor-pointer ${
+                      isSelected ? 'border-primary bg-primary-50' : 'border-border bg-surface hover:border-primary'
+                    } ${isRTL ? 'text-right' : ''}`}
+                  >
+                    <h4 className={`font-semibold text-sm mb-1 ${isSelected ? 'text-primary' : 'text-ink'}`}>{c.name}</h4>
+                    <p className="text-small text-ink-secondary mb-1.5">{c.city}</p>
+                    <p className="text-xs text-ink-muted leading-relaxed">{c.address}</p>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-16 text-center">
+              <p className="text-ink-muted">{ui.noResults}</p>
+            </div>
+          )}
         </div>
 
-        {/* Info Box */}
-        <div className="mt-12 bg-linear-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 p-8 text-center">
-          <p className="text-slate-700 mb-3">{ui.infoBox}</p>
-          <p className="text-sm text-slate-600">{ui.infoSub}</p>
+        {/* ── Info Box ── */}
+        <div className="bg-secondary-50 border border-border rounded-lg p-10 text-center">
+          <p className="text-ink-secondary mb-2">{ui.infoBox}</p>
+          <p className="text-small text-ink-muted">{ui.infoSub}</p>
         </div>
       </div>
     </section>

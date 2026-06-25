@@ -2,45 +2,49 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Globe, ChevronDown } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
 export default function Header() {
-  const pathname = usePathname();
+  const { lang: currentLang, isRTL } = useLang();
   const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
-  // Extract current language from pathname
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
-
-  const isRTL = currentLang === 'ar';
-
-  const languages = [
-    { code: 'fr' as Language, label: 'Français', flag: '🇫🇷' },
-    { code: 'ar' as Language, label: 'العربية', flag: '🇹🇳' },
-    { code: 'en' as Language, label: 'English', flag: '🇬🇧' },
+  const languages: { code: Language; label: string; flag: string }[] = [
+    { code: 'fr', label: 'Français', flag: '🇫🇷' },
+    { code: 'ar', label: 'العربية', flag: '🇹🇳' },
+    { code: 'en', label: 'English', flag: '🇬🇧' },
   ];
 
   const switchLanguage = (lang: Language) => {
-    const newPath = pathname.replace(`/${currentLang}/`, `/${lang}/`);
-    router.push(newPath);
+    const [pathOnly, query = ''] = pathname.split('?');
+    const localePattern = /^\/(fr|en|ar)(\/|$)/;
+    let newPath = pathOnly;
+
+    if (localePattern.test(newPath)) {
+      newPath = newPath.replace(localePattern, `/${lang}$2`);
+    } else if (newPath === '/') {
+      newPath = `/${lang}`;
+    } else {
+      newPath = `/${lang}${newPath}`;
+    }
+
+    router.push(`${newPath}${query ? `?${query}` : ''}`);
   };
 
   const navLinks = [
-    { label: currentLang === 'fr' ? 'Accueil'    : currentLang === 'ar' ? 'الرئيسية'       : 'Home',     href: `/${currentLang}/` },
-    { label: currentLang === 'fr' ? 'Particuliers': currentLang === 'ar' ? 'للأفراد'        : 'Retail',   href: `/${currentLang}/particuliers` },
-    { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات'        : 'Business', href: `/${currentLang}/entreprises` },
-    { label: currentLang === 'fr' ? 'Agences'     : currentLang === 'ar' ? 'الفروع'         : 'Branches', href: `/${currentLang}/reseau-agences` },
-    { label: currentLang === 'fr' ? 'FAQ'         : currentLang === 'ar' ? 'الأسئلة الشائعة': 'FAQ',      href: `/${currentLang}/faq` },
+    { label: currentLang === 'fr' ? 'Accueil' : currentLang === 'ar' ? 'الرئيسية' : 'Home', href: `/${currentLang}/` },
+    { label: currentLang === 'fr' ? 'Devenir client' : currentLang === 'ar' ? 'انضم إلينا' : 'Become a client', href: `/${currentLang}/devenir-client` },
+    { label: currentLang === 'fr' ? 'Particuliers' : currentLang === 'ar' ? 'للأفراد' : 'Retail', href: `/${currentLang}/particuliers` },
+    { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات' : 'Business', href: `/${currentLang}/entreprises` },
+    { label: currentLang === 'fr' ? 'Actualités' : currentLang === 'ar' ? 'الأخبار' : 'News', href: `/${currentLang}/actualites` },
+    { label: currentLang === 'fr' ? 'Notre Identité' : currentLang === 'ar' ? 'هويتنا' : 'About Us', href: `/${currentLang}/notre-identite` },
+    { label: currentLang === 'fr' ? 'Agences' : currentLang === 'ar' ? 'الفروع' : 'Branches', href: `/${currentLang}/agencies` },
   ];
 
   const ctaLabel =
@@ -48,101 +52,136 @@ export default function Header() {
     currentLang === 'ar' ? 'فتح حساب' :
     'Open Account';
 
+  const logoSubtitle =
+    currentLang === 'fr' ? 'Depuis 1980' :
+    currentLang === 'ar' ? 'منذ 1980' :
+    'Since 1980';
+
+  const normalizePath = (path: string) => path.replace(/\/+$/, '') || '/';
+
+  const isLinkActive = (href: string) => {
+    const currentPath = normalizePath(pathname);
+    const targetPath = normalizePath(href);
+    return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
+  };
+
   return (
     <header
-      className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-100 transition-all duration-300"
+      className="sticky top-0 z-50 bg-surface border-b border-border"
       dir={isRTL ? 'rtl' : 'ltr'}
       role="banner"
     >
       <nav
-        className={`container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}
+        className={`container flex items-center justify-between h-16 ${isRTL ? 'flex-row-reverse' : ''}`}
         aria-label="Main navigation"
       >
-        {/* Logo */}
-        <Link href={`/${currentLang}/`} className="flex items-center gap-3 shrink-0 group">
-          <div className="w-12 h-12 bg-linear-to-br from-blue-900 to-blue-700 rounded-lg flex items-center justify-center font-bold text-white text-lg shadow-lg group-hover:shadow-xl transition-shadow">
+        {/* ── Logo: wordmark only, no icon block ── */}
+        <Link
+          href={`/${currentLang}/`}
+          className={`flex items-center gap-2.5 no-underline ${isRTL ? 'flex-row-reverse' : ''}`}
+        >
+          <span className="text-2xl font-bold text-primary leading-none select-none">
             A
-          </div>
-          <div className="hidden sm:block">
-            <p className="font-bold text-lg text-gray-900">Amen Bank</p>
-            <p className="text-xs text-gray-500">Since 1980</p>
+          </span>
+          <div className={`flex flex-col leading-tight ${isRTL ? 'items-end' : ''}`}>
+            <span className="text-base font-bold tracking-tight text-ink">
+              Amen Bank
+            </span>
+            <span className="text-[0.625rem] text-ink-muted tracking-wide uppercase">
+              {logoSubtitle}
+            </span>
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* ── Desktop Navigation ── */}
         <div
-          className={`hidden lg:flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`hidden lg:flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}
           role="menubar"
         >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="relative px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-900 transition-colors group"
+              className={`nav-link ${isLinkActive(link.href) ? 'text-ink font-semibold' : ''}`}
               role="menuitem"
+              aria-current={isLinkActive(link.href) ? 'page' : undefined}
             >
               {link.label}
-              <span
-                className="absolute bottom-0 left-3 right-3 h-0.5 bg-linear-to-r from-blue-900 to-cyan-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"
-                aria-hidden="true"
-              />
             </Link>
           ))}
         </div>
 
-        {/* Right Section: Language + CTA + Mobile toggle */}
-        <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Language Selector */}
+        {/* ── Right Section: Language + CTA + Mobile toggle ── */}
+        <div className={`flex items-center gap-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Language Selector — text-only, no box */}
           <div className="relative">
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 font-medium text-sm"
+              className="flex items-center gap-1.5 text-small font-medium text-ink-secondary hover:text-ink bg-transparent border-none cursor-pointer p-0 transition-colors"
               aria-label={`Select language, current: ${currentLang}`}
               aria-expanded={isLangDropdownOpen}
               aria-haspopup="menu"
             >
-              <Globe className="w-5 h-5" aria-hidden="true" />
               <span className="uppercase">{currentLang}</span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
                 aria-hidden="true"
               />
             </button>
 
             {isLangDropdownOpen && (
-              <div
-                className={`absolute top-full mt-2 bg-white rounded-lg shadow-xl overflow-hidden min-w-40 border border-gray-100 ${isRTL ? 'right-0' : 'left-0'}`}
-                role="menu"
-              >
-                {languages.map((lang, idx) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      switchLanguage(lang.code);
-                      setIsLangDropdownOpen(false);
-                    }}
-                    className={`w-full px-4 py-3 hover:bg-blue-50 transition-colors flex items-center gap-3 font-medium text-sm
-                      ${currentLang === lang.code ? 'bg-blue-50 text-blue-900' : 'text-gray-700'}
-                      ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}
-                      ${idx !== languages.length - 1 ? 'border-b border-gray-100' : ''}`}
-                    role="menuitem"
-                    aria-current={currentLang === lang.code ? 'true' : 'false'}
-                  >
-                    <span className="text-lg" aria-hidden="true">{lang.flag}</span>
-                    <span>{lang.label}</span>
-                    {currentLang === lang.code && (
-                      <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-blue-900`} aria-hidden="true">✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <>
+                {/* Backdrop to close on outside click */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsLangDropdownOpen(false)}
+                  aria-hidden="true"
+                />
+                <div
+                  className={`absolute top-full mt-2 z-50 bg-surface border border-border rounded-lg py-1 min-w-40 shadow-dropdown ${isRTL ? 'right-0' : 'left-0'}`}
+                  role="menu"
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        switchLanguage(lang.code);
+                        setIsLangDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-small bg-transparent border-none cursor-pointer transition-colors hover:bg-surface-alt ${
+                        isRTL
+                          ? 'text-right flex-row-reverse'
+                          : 'text-left'
+                      } ${
+                        currentLang === lang.code
+                          ? 'text-ink font-semibold'
+                          : 'text-ink-secondary'
+                      }`}
+                      role="menuitem"
+                    >
+                      <span className="text-base leading-none" aria-hidden="true">
+                        {lang.flag}
+                      </span>
+                      <span>{lang.label}</span>
+                      {currentLang === lang.code && (
+                        <span
+                          className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-primary text-sm`}
+                          aria-hidden="true"
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
-          {/* CTA Button — Desktop */}
+          {/* CTA Button — Desktop: solid dark, tight radius */}
           <Link
             href={`/${currentLang}/devenir-client`}
-            className="hidden md:block px-4 py-2 bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 text-sm"
+            className="btn btn-dark hidden lg:inline-flex"
           >
             {ctaLabel}
           </Link>
@@ -150,42 +189,56 @@ export default function Header() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+            className="lg:hidden flex items-center justify-center w-10 h-10 text-ink border-none bg-transparent cursor-pointer"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Navigation Menu */}
+      {/* ── Mobile Navigation Menu ── */}
       {isMenuOpen && (
         <div
-          className="lg:hidden bg-linear-to-b from-white to-gray-50 border-t border-gray-100"
+          className="lg:hidden border-t border-border bg-surface animate-fadeIn"
           id="mobile-menu"
           role="navigation"
           aria-label="Mobile navigation"
         >
-          <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col gap-2">
+          <div className="container py-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-3 hover:bg-blue-50 rounded-lg transition-colors text-gray-700 font-medium text-sm border-transparent hover:border-blue-900
-                  ${isRTL ? 'border-r-4 border-l-0 text-right' : 'border-l-4'}`}
+                className={`block py-3 px-4 text-small no-underline transition-colors border-b border-border last:border-b-0 ${
+                  isRTL ? 'text-right' : 'text-left'
+                } ${
+                  isLinkActive(link.href)
+                    ? `text-primary font-semibold ${
+                        isRTL
+                          ? 'border-r-2 border-r-primary pr-3'
+                          : 'border-l-2 border-l-primary pl-3'
+                      }`
+                    : 'text-ink-secondary hover:text-ink'
+                }`}
                 onClick={() => setIsMenuOpen(false)}
+                aria-current={isLinkActive(link.href) ? 'page' : undefined}
               >
                 {link.label}
               </Link>
             ))}
 
             {/* Mobile CTA */}
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-4 px-4 pb-2">
               <Link
                 href={`/${currentLang}/devenir-client`}
-                className="block w-full text-center bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition-all duration-300 shadow-md"
+                className="btn btn-primary btn-full"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {ctaLabel}

@@ -1,35 +1,70 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, TrendingUp, Zap, Shield, Building2, Cpu } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, TrendingUp, Zap, Shield, Building2, Cpu, Loader, Smartphone } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
 export default function Hero() {
-  const pathname = usePathname();
-  const [exchangeRates] = useState({ EUR: 3.45, USD: 3.12, CAD: 2.28 });
-  const [sicavValues] = useState({ balanced: 156.89, growth: 203.45, conservative: 142.12 });
+  const { lang: currentLang, isRTL } = useLang();
+  const [exchangeRates, setExchangeRates] = useState({ EUR: 3.39, USD: 3.17, CAD: 2.38 });
+  const [sicavValues, setSicavValues] = useState<Record<string, number>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/sicav');
+        if (!response.ok) throw new Error('Failed');
+        const data = await response.json();
+        if (data.exchangeRates?.rates) setExchangeRates(data.exchangeRates.rates);
+        if (data.sicavFunds && Array.isArray(data.sicavFunds)) {
+          const fundMap: Record<string, number> = {};
+          data.sicavFunds.forEach((fund: { id: string; value?: number }) => {
+            if (fund.value) fundMap[fund.id] = fund.value;
+          });
+          setSicavValues(fundMap);
+        }
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const isRTL = currentLang === 'ar';
-
-  const heroContent = {
+  const heroContent: Record<Language, {
+    headline: string;
+    subheadline: string;
+    exchangeRateLabel: string;
+    sicavLabel: string;
+    trustTitle: string;
+    trustDesc: string;
+    trustItems: { icon: React.ElementType; title: string; desc: string }[];
+    certificationsTitle: string;
+    cta1: string;
+    cta2: string;
+    ctaBottom: string;
+    ctaBottomDesc: string;
+    rateUpdate: string;
+    vni: string;
+    stats: { value: string; label: string }[];
+    amenPay: { badge: string; title: string; desc: string; cta: string; platforms: string };
+  }> = {
     fr: {
       headline: 'Votre Partenaire Financier de Confiance',
       subheadline: 'Solutions bancaires innovantes pour particuliers et entreprises depuis 1980',
       exchangeRateLabel: 'Taux de change en TND',
       sicavLabel: "Fonds d'investissement",
       trustTitle: 'Pourquoi nous faire confiance ?',
-      trustDesc: 'Nous nous engageons à fournir des services financiers excellence avec transparence et intégrité',
+      trustDesc: 'Nous nous engageons à fournir des services financiers d\'excellence avec transparence et intégrité',
+      certificationsTitle: 'Certifications & Standards',
       trustItems: [
         { icon: Building2, title: "40+ ans d'expérience", desc: 'Leader du secteur bancaire tunisien' },
         { icon: Shield, title: 'Sécurité garantie', desc: 'Certifications internationales et conformité stricte' },
@@ -46,11 +81,13 @@ export default function Hero() {
         { value: '500K+', label: 'Clients' },
         { value: '98%', label: 'Satisfaction' },
       ],
-      funds: [
-        { key: 'balanced', name: 'Équilibré' },
-        { key: 'growth', name: 'Croissance' },
-        { key: 'conservative', name: 'Conservateur' },
-      ],
+      amenPay: {
+        badge: 'Nouveau',
+        title: 'Payez avec AmenPay',
+        platforms: 'Disponible sur iOS et Android',
+        desc: "Payez en toute simplicité avec AmenPay, l'application de mobile payment d'Amen Bank.",
+        cta: 'Découvrir AmenPay',
+      },
     },
     ar: {
       headline: 'شريكك المالي الموثوق',
@@ -59,6 +96,7 @@ export default function Hero() {
       sicavLabel: 'صناديق الاستثمار',
       trustTitle: 'لماذا تثق بنا؟',
       trustDesc: 'نلتزم بتقديم خدمات مالية ممتازة بشفافية واستقامة',
+      certificationsTitle: 'الشهادات والمعايير',
       trustItems: [
         { icon: Building2, title: 'أكثر من 40 سنة من الخبرة', desc: 'رائد القطاع المصرفي التونسي' },
         { icon: Shield, title: 'أمان مضمون', desc: 'شهادات دولية والامتثال الصارم' },
@@ -75,11 +113,13 @@ export default function Hero() {
         { value: '500K+', label: 'عملاء' },
         { value: '98%', label: 'الرضا' },
       ],
-      funds: [
-        { key: 'balanced', name: 'متوازن' },
-        { key: 'growth', name: 'النمو' },
-        { key: 'conservative', name: 'محافظ' },
-      ],
+      amenPay: {
+        badge: 'جديد',
+        title: 'ادفع مع AmenPay',
+        platforms: 'متاح على iOS و Android',
+        desc: 'ادفع بكل سهولة مع AmenPay، تطبيق الدفع المحمول من أمين بنك.',
+        cta: 'اكتشف AmenPay',
+      },
     },
     en: {
       headline: 'Your Trusted Financial Partner',
@@ -88,6 +128,7 @@ export default function Hero() {
       sicavLabel: 'Investment Funds',
       trustTitle: 'Why Trust Us?',
       trustDesc: 'We are committed to providing excellent financial services with transparency and integrity',
+      certificationsTitle: 'Certifications & Standards',
       trustItems: [
         { icon: Building2, title: '40+ Years of Experience', desc: 'Leader in Tunisian banking sector' },
         { icon: Shield, title: 'Guaranteed Security', desc: 'International certifications and strict compliance' },
@@ -104,180 +145,315 @@ export default function Hero() {
         { value: '500K+', label: 'Clients' },
         { value: '98%', label: 'Satisfaction' },
       ],
-      funds: [
-        { key: 'balanced', name: 'Balanced' },
-        { key: 'growth', name: 'Growth' },
-        { key: 'conservative', name: 'Conservative' },
-      ],
+      amenPay: {
+        badge: 'New',
+        title: 'Pay with AmenPay',
+        platforms: 'Available on iOS and Android',
+        desc: "Pay effortlessly with AmenPay, Amen Bank's mobile payment app.",
+        cta: 'Discover AmenPay',
+      },
     },
   };
 
   const content = heroContent[currentLang];
-  const fundValues: Record<string, number> = {
-    balanced: sicavValues.balanced,
-    growth: sicavValues.growth,
-    conservative: sicavValues.conservative,
+  const errorMsg =
+    currentLang === 'ar'
+      ? '⚠ البيانات غير متاحة'
+      : currentLang === 'en'
+        ? '⚠ Data unavailable'
+        : '⚠ Données indisponibles';
+
+  const getFundDisplayName = (fundId: string): string => {
+    const nameMap: Record<string, Record<Language, string>> = {
+      'sicav-diversif': { fr: 'Diversification', ar: 'التنويع', en: 'Diversification' },
+      'sicav-actions': { fr: 'Actions Monde', ar: 'الأسهم العالمية', en: 'Global Equities' },
+      'sicav-obligations': { fr: 'Obligations', ar: 'السندات', en: 'Bonds' },
+    };
+    return nameMap[fundId]?.[currentLang] ?? fundId.replace('sicav-', '').replace(/-/g, ' ');
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* Background */}
-      <div className="absolute inset-0 bg-linear-to-br from-slate-50 via-emerald-50/40 to-slate-50">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-300/20 rounded-full blur-3xl -mr-48 -mt-48" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-200/20 rounded-full blur-3xl -ml-32 -mb-32" />
-      </div>
-
-      <div className="relative z-10 pt-20 pb-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* ── Hero ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-
-            {/* Text */}
+      {/* ════════════════════════════════════════════
+          HERO — #0f172a flat, no gradient, no blobs
+          ════════════════════════════════════════════ */}
+      <section className="bg-slate-900 relative">
+        <div className="container py-32 md:py-40">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left — Headline + Sub + CTA + Stats */}
             <div className="space-y-8">
-              <div className="space-y-4">
-                <span className="inline-block text-xs font-bold tracking-widest uppercase text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
-                  Amen Bank · Since 1980
-                </span>
-                <h1 className="text-5xl md:text-6xl font-bold text-slate-900 leading-tight">
-                  {content.headline}
-                </h1>
-                <p className="text-xl text-slate-600 leading-relaxed max-w-lg">
-                  {content.subheadline}
-                </p>
-              </div>
+              {/* Label: plain uppercase, no pill */}
+              <span className="section-label text-white/50!">
+                Amen Bank · {currentLang === 'fr' ? 'Depuis 1980' : currentLang === 'ar' ? 'منذ 1980' : 'Since 1980'}
+              </span>
 
-              {/* Stats */}
-              <div className={`flex gap-8 py-6 border-y border-slate-200 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-                {content.stats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col">
-                    <span className="text-3xl font-bold text-emerald-700">{stat.value}</span>
-                    <span className="text-sm text-slate-500">{stat.label}</span>
+              <h1 className="text-[2.5rem] sm:text-display text-white leading-[1.1] tracking-tight">
+                {content.headline}
+              </h1>
+
+              <p className="text-lg text-ink-muted leading-relaxed max-w-lg">
+                {content.subheadline}
+              </p>
+
+              {/* Stats bar — 3 cols, white/10 vertical dividers */}
+              <div className={`grid grid-cols-3 py-8 border-y border-white/10 ${isRTL ? 'text-right' : ''}`}>
+                {content.stats.map((stat, i) => (
+                  <div
+                    key={stat.label}
+                    className={`stats-divider ${isRTL ? 'pl-6' : 'pr-6'} ${i === 0 ? (isRTL ? 'pr-6' : 'pl-6') : ''}`}
+                  >
+                    <div className="text-3xl font-bold text-white">{stat.value}</div>
+                    <div className="text-small text-ink-muted mt-1">{stat.label}</div>
                   </div>
                 ))}
               </div>
 
-              {/* CTAs */}
-              <div className={`flex gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {/* CTAs — primary green + outline-white */}
+              <div className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <Link
                   href={`/${currentLang}/devenir-client`}
-                  className="px-8 py-4 bg-linear-to-r from-emerald-700 to-green-600 hover:from-emerald-600 hover:to-green-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2 group"
+                  className="btn btn-primary btn-lg"
                 >
                   {content.cta1}
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <Link
                   href={`/${currentLang}/particuliers`}
-                  className="px-8 py-4 bg-white border-2 border-emerald-700 text-emerald-700 hover:bg-emerald-50 font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 group"
+                  className="btn btn-outline-white btn-lg"
                 >
                   {content.cta2}
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
 
-            {/* Visual panel */}
-            <div className="relative h-96">
-              <div className="absolute inset-0 bg-linear-to-br from-emerald-900/8 to-green-400/8 rounded-2xl border border-emerald-200 shadow-2xl flex items-center justify-center overflow-hidden">
-                {/* Decorative rings */}
-                <div className="absolute w-72 h-72 rounded-full border border-emerald-200/40" />
-                <div className="absolute w-52 h-52 rounded-full border border-emerald-300/30" />
-                <div className="text-center relative z-10">
-                  <TrendingUp className="w-20 h-20 text-emerald-600/40 mx-auto mb-4" />
-                  <p className="text-slate-400 font-medium text-sm tracking-wide uppercase">Banking Growth</p>
+            {/* Right — Glass panels */}
+            <div className="space-y-5">
+              {/* Certifications panel — glass effect */}
+              <div className="glass-panel">
+                <h3 className="text-h4 text-white mb-5">{content.certificationsTitle}</h3>
+                <div className="space-y-4">
+                  {[
+                    { label: 'ISO', title: 'ISO 27001', sub: 'Information Security' },
+                    { label: 'ISO', title: 'ISO 20000', sub: 'IT Service Management' },
+                    { label: '✓', title: 'PCI DSS', sub: 'Payment Card Security' },
+                  ].map((cert) => (
+                    <div
+                      key={cert.title}
+                      className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    >
+                      <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xs font-bold text-primary bg-primary-50 border border-border">
+                        {cert.label}
+                      </div>
+                      <div className={isRTL ? 'text-right' : ''}>
+                        <p className="font-semibold text-white text-sm">{cert.title}</p>
+                        <p className="text-xs text-ink-muted">{cert.sub}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              {/* Award panel — glass + accent left-border */}
+              <div className="glass-panel border-l-2! border-l-accent!">
+                <p className="text-small font-medium text-accent mb-1">🏆 Award Winning</p>
+                <p className="text-h4 text-white">
+                  {currentLang === 'fr'
+                    ? 'Élu Service Client de l\'Année 2024'
+                    : currentLang === 'ar'
+                      ? 'تم انتخاب خدمة العملاء لعام 2024'
+                      : 'Elected Customer Service of the Year 2024'}
+                </p>
+                <p className="text-small text-ink-muted mt-1">
+                  {currentLang === 'fr'
+                    ? 'Pour la 3ème année consécutive'
+                    : currentLang === 'ar'
+                      ? 'للسنة الثالثة على التوالي'
+                      : 'For the 3rd consecutive year'}
+                </p>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* ── Rates & SICAV ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+      {/* ════════════════════════════════════════════
+          AMENPAY STRIP — #0f172a, full-bleed, no radius
+          ════════════════════════════════════════════ */}
+      <section className="bg-slate-900">
+        <div className="container py-8">
+          <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center border border-white/10 bg-white/6">
+                <Smartphone className="w-6 h-6 text-white" />
+              </div>
+              <div className={isRTL ? 'text-right' : ''}>
+                {/* Badge: plain uppercase text, no pill */}
+                <span className="section-label text-white/50! mb-0.5! block!">
+                  {content.amenPay.badge}
+                </span>
+                <p className="font-bold text-white">{content.amenPay.title}</p>
+                <p className="text-small text-ink-muted">{content.amenPay.platforms}</p>
+              </div>
+            </div>
+            <Link
+              href={`/${currentLang}/particuliers#amenpay`}
+              className="btn btn-secondary shrink-0"
+            >
+              {content.amenPay.cta}
+              <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          RATES & SICAV — #f8fafc section, white cards
+          ════════════════════════════════════════════ */}
+      <section className="bg-surface-alt py-24">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
 
             {/* Exchange Rates */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="card">
               <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <TrendingUp className="w-6 h-6 text-emerald-700" />
-                <h3 className="text-2xl font-bold text-slate-900">{content.exchangeRateLabel}</h3>
+                <div className="feature-icon">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <h3 className="text-h4 text-ink">{content.exchangeRateLabel}</h3>
               </div>
-              <div className="space-y-3">
-                {Object.entries(exchangeRates).map(([currency, rate]) => (
-                  <div
-                    key={currency}
-                    className={`flex items-center justify-between p-4 bg-linear-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 rounded-lg transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-                  >
-                    <span className="font-semibold text-slate-700">{currency}/TND</span>
-                    <span className="text-2xl font-bold text-emerald-700">{rate.toFixed(2)}</span>
+              <div className="space-y-2">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8 gap-2 text-ink-muted">
+                    <Loader className="w-4 h-4 animate-spin" />
+                    <span className="text-small">
+                      {currentLang === 'fr' ? 'Chargement...' : currentLang === 'ar' ? 'جار التحميل...' : 'Loading...'}
+                    </span>
                   </div>
-                ))}
+                ) : error ? (
+                  <p className="text-small text-error py-4 text-center">{errorMsg}</p>
+                ) : (
+                  Object.entries(exchangeRates).map(([currency, rate]) => (
+                    <div
+                      key={currency}
+                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-alt hover:bg-primary-50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                    >
+                      <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <span className="currency-tag">{currency}</span>
+                        <span className="text-small font-medium text-ink-secondary">
+                          1 {currency}
+                        </span>
+                      </div>
+                      <span className="text-lg font-bold text-ink">
+                        {(rate as number).toFixed(3)} TND
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-              <p className="text-xs text-slate-400 mt-4">{content.rateUpdate}</p>
+              <p className="text-xs text-ink-muted mt-4 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+                {content.rateUpdate}
+              </p>
             </div>
 
             {/* SICAV */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="card">
               <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Zap className="w-6 h-6 text-emerald-700" />
-                <h3 className="text-2xl font-bold text-slate-900">{content.sicavLabel}</h3>
+                <div className="feature-icon">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <h3 className="text-h4 text-ink">{content.sicavLabel}</h3>
               </div>
-              <div className="space-y-3">
-                {content.funds.map((fund) => (
-                  <div
-                    key={fund.key}
-                    className={`flex items-center justify-between p-4 bg-linear-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 rounded-lg transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-                  >
-                    <span className="font-semibold text-slate-700">{fund.name}</span>
-                    <span className="text-2xl font-bold text-emerald-700">
-                      {fundValues[fund.key].toFixed(2)} TND
+              <div className="space-y-2">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8 gap-2 text-ink-muted">
+                    <Loader className="w-4 h-4 animate-spin" />
+                    <span className="text-small">
+                      {currentLang === 'fr' ? 'Chargement...' : currentLang === 'ar' ? 'جار التحميل...' : 'Loading...'}
                     </span>
                   </div>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400 mt-4">{content.vni}</p>
-            </div>
-          </div>
-
-          {/* ── Trust ── */}
-          <div className="mb-12">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.trustTitle}</h2>
-              <p className="text-lg text-slate-600 max-w-2xl mx-auto">{content.trustDesc}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {content.trustItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.title}
-                    className="bg-white rounded-xl border border-slate-200 p-8 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center group"
-                  >
-                    <div className="w-16 h-16 bg-emerald-100 group-hover:bg-emerald-200 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-colors">
-                      <Icon className="w-8 h-8 text-emerald-700" />
+                ) : error ? (
+                  <p className="text-small text-error py-4 text-center">{errorMsg}</p>
+                ) : Object.keys(sicavValues).length > 0 ? (
+                  Object.entries(sicavValues).map(([fundId, value]) => (
+                    <div
+                      key={fundId}
+                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-alt hover:bg-secondary-50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                    >
+                      <span className="text-small font-medium text-ink-secondary">
+                        {getFundDisplayName(fundId)}
+                      </span>
+                      <span className="text-lg font-bold text-ink">
+                        {(value as number).toFixed(3)} TND
+                      </span>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                    <p className="text-slate-500">{item.desc}</p>
-                  </div>
-                );
-              })}
+                  ))
+                ) : (
+                  <p className="text-small text-ink-muted py-4 text-center">—</p>
+                )}
+              </div>
+              <p className="text-xs text-ink-muted mt-4">{content.vni}</p>
             </div>
           </div>
-
-          {/* ── Bottom CTA ── */}
-          <div className="bg-linear-to-r from-emerald-900 via-emerald-800 to-green-700 rounded-2xl p-12 text-center text-white shadow-2xl mb-8">
-            <h3 className="text-3xl font-bold mb-4">{content.ctaBottom}</h3>
-            <p className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto">{content.ctaBottomDesc}</p>
-            <Link
-              href={`/${currentLang}/devenir-client`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-emerald-900 font-bold rounded-lg hover:bg-emerald-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
-            >
-              {content.cta1}
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
-
         </div>
-      </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          TRUST — white section, centered cards, stripe top
+          ════════════════════════════════════════════ */}
+      <section className="bg-surface py-24">
+        <div className="container">
+          <div className="text-center mb-16">
+            <span className="section-label">
+              {currentLang === 'ar'
+                ? 'ثقتك أولويتنا'
+                : currentLang === 'en'
+                  ? 'Why Choose Us'
+                  : 'Pourquoi nous'}
+            </span>
+            <h2 className="text-h1 text-ink mt-2">{content.trustTitle}</h2>
+            <p className="text-lg text-ink-secondary max-w-2xl mx-auto mt-4 leading-relaxed">
+              {content.trustDesc}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+            {content.trustItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="card card-stripe-green text-center">
+                  <div className="feature-icon mx-auto">
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-h4 text-ink mt-5 mb-2">{item.title}</h3>
+                  <p className="text-small text-ink-secondary leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          BOTTOM CTA — #0f172a flat, white button
+          ════════════════════════════════════════════ */}
+      <section className="bg-slate-900 py-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-h1 text-white">{content.ctaBottom}</h2>
+          <p className="text-lg text-ink-muted mt-4 mb-10 leading-relaxed">
+            {content.ctaBottomDesc}
+          </p>
+          <Link
+            href={`/${currentLang}/devenir-client`}
+            className="btn btn-white btn-lg"
+          >
+            {content.cta1}
+            <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

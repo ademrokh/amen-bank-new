@@ -1,8 +1,8 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { ChevronDown, Search, MessageCircle } from 'lucide-react';
+import { ChevronDown, MessageCircle } from 'lucide-react';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -25,7 +25,7 @@ const faqItems: FAQItem[] = [
     category_fr: 'Particuliers',
     category_ar: 'للأفراد',
     category_en: 'Retail',
-    question_fr: "Comment ouvrir un compte Amen Bank ?",
+    question_fr: 'Comment ouvrir un compte Amen Bank ?',
     question_ar: 'كيف أفتح حساب بأمين بنك؟',
     question_en: 'How do I open an Amen Bank account?',
     answer_fr: "L'ouverture d'un compte Amen Bank est simple et rapide. Vous pouvez le faire en ligne via notre plateforme Amen First Bank ou en visitant l'une de nos 164 agences. Vous aurez besoin d'une pièce d'identité valide et d'une adresse de contact.",
@@ -76,7 +76,7 @@ const faqItems: FAQItem[] = [
     question_fr: 'Comment mes données sont-elles protégées ?',
     question_ar: 'كيف تتم حماية بياناتي؟',
     question_en: 'How are my data protected?',
-    answer_fr: 'Vos données sont protégées par les normes de sécurité les plus strictes. Nous utilisons le chiffrement SSL, l\'authentification multifactorielle et conformons aux standards PCI DSS pour garantir la sécurité de vos transactions.',
+    answer_fr: "Vos données sont protégées par les normes de sécurité les plus strictes. Nous utilisons le chiffrement SSL, l'authentification multifactorielle et conformons aux standards PCI DSS pour garantir la sécurité de vos transactions.",
     answer_ar: 'يتم حماية بيانات باستخدام معايير الأمان الأكثر صرامة. نستخدم تشفير SSL والمصادقة متعددة العوامل ونمتثل لمعايير PCI DSS لضمان أمان معاملاتك.',
     answer_en: 'Your data is protected by the strictest security standards. We use SSL encryption, multi-factor authentication, and comply with PCI DSS standards to ensure transaction security.',
   },
@@ -96,59 +96,74 @@ const faqItems: FAQItem[] = [
 
 function getFAQContent(item: FAQItem, lang: Language) {
   return {
-    category: lang === 'fr' ? item.category_fr : lang === 'ar' ? item.category_ar : item.category_en,
-    question: lang === 'fr' ? item.question_fr : lang === 'ar' ? item.question_ar : item.question_en,
-    answer:   lang === 'fr' ? item.answer_fr   : lang === 'ar' ? item.answer_ar   : item.answer_en,
+    category:
+      lang === 'fr'
+        ? item.category_fr
+        : lang === 'ar'
+          ? item.category_ar
+          : item.category_en,
+    question:
+      lang === 'fr'
+        ? item.question_fr
+        : lang === 'ar'
+          ? item.question_ar
+          : item.question_en,
+    answer:
+      lang === 'fr'
+        ? item.answer_fr
+        : lang === 'ar'
+          ? item.answer_ar
+          : item.answer_en,
   };
 }
 
 export default function FAQ() {
-  const pathname = usePathname();
+  const { lang: currentLang, isRTL } = useLang();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  // Extract current language
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
-
-  const isRTL = currentLang === 'ar';
-
-  // Get unique categories
+  /* Unique categories in display order */
   const categories = Array.from(
     new Set(faqItems.map((item) => getFAQContent(item, currentLang).category))
   );
 
-  // Filter FAQs based on search and category
+  /* Filter by search + category */
   const filteredFAQs = faqItems.filter((item) => {
-    const content = getFAQContent(item, currentLang);
+    const c = getFAQContent(item, currentLang);
     const matchesSearch =
-      content.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      content.answer.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !activeCategory || content.category === activeCategory;
+      c.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !activeCategory || c.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
   const toggleExpand = (id: string) => {
     setExpandedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
+  };
+
+  /**
+   * Opens the chatbot widget in maximized/overview mode.
+   * The ChatbotWidget (file #11) listens for this custom event
+   * and sets itself to open + maximized state.
+   */
+  const openChatbot = () => {
+    window.dispatchEvent(new CustomEvent('open-chatbot'));
   };
 
   const ui = {
     fr: {
       pageTitle: 'Questions Fréquemment Posées',
-      pageDescription: 'Trouvez les réponses à vos questions sur nos services bancaires',
+      pageDescription:
+        'Trouvez les réponses à vos questions sur nos services bancaires',
       searchPlaceholder: 'Rechercher une question...',
       all: 'Tous',
       nothingFound: 'Aucune question trouvée. Essayez une autre recherche.',
       chatbotCTA: 'Vous ne trouvez pas la réponse ?',
-      chatbotDesc: 'Contactez notre chatbot IA pour une assistance immédiate 24h/24',
+      chatbotDesc:
+        'Contactez notre chatbot IA pour une assistance immédiate 24h/24',
       launchChatbot: 'Lancer le Chatbot',
     },
     ar: {
@@ -158,57 +173,73 @@ export default function FAQ() {
       all: 'الكل',
       nothingFound: 'لم يتم العثور على أي سؤال. جرب بحثا آخر.',
       chatbotCTA: 'لا تجد الجواب؟',
-      chatbotDesc: 'اتصل بروبوتنا الحواري بالذكاء الاصطناعي للحصول على مساعدة فورية 24/7',
+      chatbotDesc:
+        'اتصل بروبوتنا الحواري بالذكاء الاصطناعي للحصول على مساعدة فورية 24/7',
       launchChatbot: 'إطلاق روبوت الحوار',
     },
     en: {
       pageTitle: 'Frequently Asked Questions',
-      pageDescription: 'Find answers to your questions about our banking services',
+      pageDescription:
+        'Find answers to your questions about our banking services',
       searchPlaceholder: 'Search a question...',
       all: 'All',
       nothingFound: 'No questions found. Try another search.',
       chatbotCTA: "Can't find the answer?",
-      chatbotDesc: 'Contact our AI chatbot for immediate 24/7 assistance',
+      chatbotDesc:
+        'Contact our AI chatbot for immediate 24/7 assistance',
       launchChatbot: 'Launch Chatbot',
     },
   }[currentLang];
 
   return (
-    <section
-      className="py-20 bg-linear-to-b from-white to-slate-50"
-      dir={isRTL ? 'rtl' : 'ltr'}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">{ui.pageTitle}</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">{ui.pageDescription}</p>
+    <section className="bg-surface py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container">
+        {/* ── Header: Label → Headline → Sub ── */}
+        <div className="section-header">
+          <h1>{ui.pageTitle}</h1>
+          <p>{ui.pageDescription}</p>
         </div>
 
-        {/* Search Bar */}
-        <div className="max-w-2xl mx-auto mb-12">
+        {/* ── Search ── */}
+        <div className="max-w-2xl mx-auto mb-8">
           <div className="relative">
-            <Search
-              className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} w-6 h-6 text-slate-400 pointer-events-none`}
-            />
             <input
               type="text"
               placeholder={ui.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full px-6 py-4 ${isRTL ? 'pr-6 pl-14' : 'pl-6 pr-14'} bg-white border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-900/20 transition-all outline-none`}
+              className={`input-field ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
             />
+            <div
+              className={`absolute top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none ${
+                isRTL ? 'right-4' : 'left-4'
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-3 mb-12 justify-center">
+        {/* ── Category Filters ── */}
+        <div className={`flex flex-wrap gap-2 justify-center mb-12`}>
           <button
             onClick={() => setActiveCategory(null)}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
+            className={`px-4 py-2 text-small font-medium rounded-lg border transition-colors ${
               activeCategory === null
-                ? 'bg-blue-900 text-white shadow-lg'
-                : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-900'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-transparent text-ink-secondary border-border hover:border-slate-300'
             }`}
           >
             {ui.all}
@@ -217,10 +248,10 @@ export default function FAQ() {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-6 py-2 rounded-full font-medium transition-all ${
+              className={`px-4 py-2 text-small font-medium rounded-lg border transition-colors ${
                 activeCategory === category
-                  ? 'bg-blue-900 text-white shadow-lg'
-                  : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-blue-900'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-transparent text-ink-secondary border-border hover:border-slate-300'
               }`}
             >
               {category}
@@ -228,41 +259,49 @@ export default function FAQ() {
           ))}
         </div>
 
-        {/* FAQ Accordion */}
-        <div className="max-w-3xl mx-auto mb-12">
+        {/* ── Accordion ── */}
+        <div className="max-w-3xl mx-auto">
           {filteredFAQs.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredFAQs.map((item) => {
-                const content = getFAQContent(item, currentLang);
-                const isExpanded = expandedItems.includes(item.id);
+                const c = getFAQContent(item, currentLang);
+                const isOpen = expandedItems.includes(item.id);
                 return (
                   <div
                     key={item.id}
-                    className="bg-white rounded-xl border border-slate-200 shadow-md hover:shadow-lg transition-all overflow-hidden"
+                    className={`faq-item ${isOpen ? 'faq-item-open' : ''}`}
                   >
                     <button
                       onClick={() => toggleExpand(item.id)}
-                      className={`w-full px-6 py-5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors ${isRTL ? 'flex-row-reverse text-right' : ''}`}
-                      aria-expanded={isExpanded}
+                      className={`w-full flex items-start gap-4 p-5 bg-transparent border-none cursor-pointer text-left transition-colors ${
+                        isRTL ? 'text-right flex-row-reverse' : ''
+                      }`}
+                      aria-expanded={isOpen}
                       aria-controls={`faq-answer-${item.id}`}
                     >
-                      <div className="grow">
-                        <span className="text-xs font-semibold text-blue-900 uppercase tracking-wide">
-                          {content.category}
+                      <div className="flex-1 min-w-0">
+                        {/* Category: uppercase 0.6875rem, secondary color */}
+                        <span className="section-label section-label-secondary mb-1! block!">
+                          {c.category}
                         </span>
-                        <h3 className="text-lg font-bold text-slate-900 mt-1">{content.question}</h3>
+                        <h3 className="text-base font-semibold text-ink leading-snug">
+                          {c.question}
+                        </h3>
                       </div>
+                      {/* Chevron: right-aligned, rotates 180deg on open */}
                       <ChevronDown
-                        className={`w-6 h-6 text-slate-600 shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''} ${isRTL ? 'mr-4' : 'ml-4'}`}
+                        className={`faq-chevron w-5 h-5 text-ink-muted shrink-0 mt-1 ${
+                          isOpen ? 'faq-chevron-open' : ''
+                        }`}
                       />
                     </button>
-                    {isExpanded && (
+                    {isOpen && (
                       <div
                         id={`faq-answer-${item.id}`}
                         role="region"
-                        className="px-6 py-4 bg-linear-to-b from-slate-50 to-white border-t border-slate-200"
+                        className="faq-answer text-small text-ink-secondary leading-relaxed"
                       >
-                        <p className="text-slate-700 leading-relaxed">{content.answer}</p>
+                        {c.answer}
                       </div>
                     )}
                   </div>
@@ -270,25 +309,32 @@ export default function FAQ() {
               })}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-              <p className="text-slate-600 text-lg">{ui.nothingFound}</p>
+            <div className="py-16 text-center">
+              <p className="text-ink-muted">{ui.nothingFound}</p>
             </div>
           )}
         </div>
 
-        {/* Chatbot CTA */}
-        <div className="bg-linear-to-r from-blue-900 via-blue-800 to-cyan-800 rounded-2xl p-12 text-center text-white shadow-2xl">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-8 h-8" />
+        {/* ── Chatbot CTA — flat #0f172a, opens chatbot maximized ── */}
+        <div className="max-w-3xl mx-auto mt-16">
+          <div className="bg-slate-900 rounded-lg p-10 sm:p-12 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-white/6 border border-white/10 flex items-center justify-center">
+                <MessageCircle className="w-7 h-7 text-white" />
+              </div>
             </div>
+            <h3 className="text-h2 text-white mb-3">{ui.chatbotCTA}</h3>
+            <p className="text-ink-muted mb-8 max-w-xl mx-auto leading-relaxed">
+              {ui.chatbotDesc}
+            </p>
+            <button
+              onClick={openChatbot}
+              className="btn btn-white btn-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              {ui.launchChatbot}
+            </button>
           </div>
-          <h3 className="text-3xl font-bold mb-4">{ui.chatbotCTA}</h3>
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">{ui.chatbotDesc}</p>
-          <button className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-900 font-bold rounded-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-            <MessageCircle className="w-5 h-5" />
-            {ui.launchChatbot}
-          </button>
         </div>
       </div>
     </section>

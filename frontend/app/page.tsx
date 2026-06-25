@@ -1,10 +1,5 @@
-import { Hero, Products } from '@/components/Homepage';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-white">
-      <Hero />
-      <Products />
-    </div>
-  );
+export default function RootPage() {
+  redirect('/fr');
 }

@@ -1,252 +1,258 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowRight, CreditCard, Wallet, Zap, TrendingUp, Smartphone, Wrench } from 'lucide-react';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
-interface Product {
-  id: string;
-  icon: React.ReactNode;
-  title_fr: string;
-  title_ar: string;
-  title_en: string;
-  description_fr: string;
-  description_ar: string;
-  description_en: string;
-  features_fr: string[];
-  features_ar: string[];
-  features_en: string[];
-  cta_fr: string;
-  cta_ar: string;
-  cta_en: string;
-  link: string;
-  color: string;
-}
+/* 2px top-border accent per card — blue / green / gold */
+const STRIPE_CLASSES = [
+  'card-stripe-blue',
+  'card-stripe-blue',
+  'card-stripe-green',
+  'card-stripe-accent',
+  'card-stripe-blue',
+  'card-stripe-green',
+];
+
+const products = [
+  {
+    id: 'comptes',
+    icon: Wallet,
+    link: 'particuliers',
+    fr: {
+      title: 'Comptes',
+      desc: 'Comptes courants et épargne adaptés à vos besoins, avec accès mobile 24/7',
+      features: ['Ouverture instantanée', 'Frais réduits', 'Gestion mobile simple'],
+      cta: 'Ouvrir un compte',
+    },
+    ar: {
+      title: 'الحسابات',
+      desc: 'حسابات جارية وادخار مخصصة لاحتياجاتك مع إمكانية الوصول 24/7',
+      features: ['فتح فوري', 'رسوم منخفضة', 'إدارة جوال سهلة'],
+      cta: 'فتح حساب',
+    },
+    en: {
+      title: 'Accounts',
+      desc: 'Current and savings accounts tailored to your needs, with 24/7 mobile access',
+      features: ['Instant opening', 'Low fees', 'Easy mobile management'],
+      cta: 'Open Account',
+    },
+  },
+  {
+    id: 'cartes',
+    icon: CreditCard,
+    link: 'particuliers',
+    fr: {
+      title: 'Cartes Bancaires',
+      desc: 'Cartes de débit et crédit avec protection maximale et avantages exclusifs',
+      features: ['Paiement sans contact', 'Cashback automatique', 'Assurance voyage'],
+      cta: 'Découvrir les cartes',
+    },
+    ar: {
+      title: 'البطاقات البنكية',
+      desc: 'بطاقات الخصم والائتمان مع الحماية القصوى والامتيازات الحصرية',
+      features: ['الدفع بدون تلامس', 'استرجاع نقدي تلقائي', 'تأمين السفر'],
+      cta: 'اكتشف البطاقات',
+    },
+    en: {
+      title: 'Bank Cards',
+      desc: 'Debit and credit cards with maximum protection and exclusive benefits',
+      features: ['Contactless payment', 'Auto cashback', 'Travel insurance'],
+      cta: 'Explore Cards',
+    },
+  },
+  {
+    id: 'epargne',
+    icon: TrendingUp,
+    link: 'particuliers',
+    fr: {
+      title: 'Épargne & Investissement',
+      desc: 'Placements sécurisés avec rendement attractif et conseil expert',
+      features: ['SICAV diversifiées', 'Fiscalité avantageuse', 'Suivi en temps réel'],
+      cta: 'Investir maintenant',
+    },
+    ar: {
+      title: 'الادخار والاستثمار',
+      desc: 'استثمارات آمنة بعائد جذاب وتشاور خبير',
+      features: ['صناديق متنوعة', 'ضرائب مواتية', 'متابعة فورية'],
+      cta: 'استثمر الآن',
+    },
+    en: {
+      title: 'Savings & Investment',
+      desc: 'Secure investments with attractive returns and expert advice',
+      features: ['Diversified funds', 'Tax benefits', 'Real-time tracking'],
+      cta: 'Invest Now',
+    },
+  },
+  {
+    id: 'credits',
+    icon: Zap,
+    link: 'particuliers',
+    fr: {
+      title: 'Crédits & Prêts',
+      desc: 'Financements rapides et flexibles pour tous vos projets personnels',
+      features: ['Taux compétitifs', 'Accord rapide', 'Sans garantie spéciale'],
+      cta: 'Demander un crédit',
+    },
+    ar: {
+      title: 'القروض والتمويل',
+      desc: 'تمويل سريع ومرن لجميع مشاريعك الشخصية',
+      features: ['أسعار فائدة تنافسية', 'موافقة سريعة', 'بدون ضمانات خاصة'],
+      cta: 'اطلب قرضا',
+    },
+    en: {
+      title: 'Credits & Loans',
+      desc: 'Fast and flexible financing for all your personal projects',
+      features: ['Competitive rates', 'Quick approval', 'No special collateral'],
+      cta: 'Request Loan',
+    },
+  },
+  {
+    id: 'amen-first',
+    icon: Smartphone,
+    link: 'amen-first-bank',
+    fr: {
+      title: 'Amen First Bank',
+      desc: 'Banque 100% digitale avec tous les services au bout de vos doigts',
+      features: ['Interface intuitive', 'Transferts instantanés', 'Support 24/7'],
+      cta: 'Activer Amen First',
+    },
+    ar: {
+      title: 'أمين فيرست بانك',
+      desc: 'بنك رقمي 100% مع جميع الخدمات في متناول يدك',
+      features: ['واجهة بديهية', 'تحويلات فورية', 'دعم 24/7'],
+      cta: 'فعّل أمين فيرست',
+    },
+    en: {
+      title: 'Amen First Bank',
+      desc: '100% digital banking with all services at your fingertips',
+      features: ['Intuitive interface', 'Instant transfers', '24/7 support'],
+      cta: 'Activate Now',
+    },
+  },
+  {
+    id: 'services',
+    icon: Wrench,
+    link: 'particuliers',
+    fr: {
+      title: 'Services Additionnels',
+      desc: "Assurances, virements, mandats et bien d'autres services bancaires",
+      features: ['Assurance complète', 'Envois sécurisés', 'Frais transparents'],
+      cta: 'Voir tous les services',
+    },
+    ar: {
+      title: 'الخدمات الإضافية',
+      desc: 'التأمين والتحويلات والحوالات والعديد من الخدمات المصرفية الأخرى',
+      features: ['تأمين شامل', 'إرسال آمن', 'رسوم شفافة'],
+      cta: 'عرض جميع الخدمات',
+    },
+    en: {
+      title: 'Additional Services',
+      desc: 'Insurance, transfers, money orders and many more banking services',
+      features: ['Complete insurance', 'Secure shipments', 'Transparent fees'],
+      cta: 'View All Services',
+    },
+  },
+];
 
 export default function Products() {
-  const pathname = usePathname();
+  const { lang, isRTL } = useLang();
+  const l = lang as Language;
 
-  // Extract current language
-  let currentLang: Language = 'fr';
-  if (pathname) {
-    const langFromPath = pathname.split('/')[1];
-    if (langFromPath === 'fr' || langFromPath === 'ar' || langFromPath === 'en') {
-      currentLang = langFromPath as Language;
-    }
-  }
-
-  const isRTL = currentLang === 'ar';
-
-  const products: Product[] = [
-    {
-      id: 'comptes',
-      icon: <Wallet className="w-12 h-12" />,
-      title_fr: 'Comptes',
-      title_ar: 'الحسابات',
-      title_en: 'Accounts',
-      description_fr: 'Comptes courants et épargne adaptés à vos besoins, avec accès mobile 24/7',
-      description_ar: 'حسابات جارية وادخار مخصصة لاحتياجاتك، مع إمكانية الوصول عبر الهاتف المحمول 24/7',
-      description_en: 'Current and savings accounts tailored to your needs, with 24/7 mobile access',
-      features_fr: ['Ouverture instantanée', 'Frais réduits', 'Gestion mobile simple'],
-      features_ar: ['فتح فوري', 'رسوم منخفضة', 'إدارة جوال سهلة'],
-      features_en: ['Instant opening', 'Low fees', 'Easy mobile management'],
-      cta_fr: 'Ouvrir un compte',
-      cta_ar: 'فتح حساب',
-      cta_en: 'Open Account',
-      link: 'particuliers',
-      color: 'from-blue-50 to-blue-100',
-    },
-    {
-      id: 'cartes',
-      icon: <CreditCard className="w-12 h-12" />,
-      title_fr: 'Cartes Bancaires',
-      title_ar: 'البطاقات البنكية',
-      title_en: 'Bank Cards',
-      description_fr: 'Cartes de débit et crédit avec protection maximale et avantages exclusifs',
-      description_ar: 'بطاقات الخصم والائتمان مع الحماية القصوى والامتيازات الحصرية',
-      description_en: 'Debit and credit cards with maximum protection and exclusive benefits',
-      features_fr: ['Paiement sans contact', 'Cashback automatique', 'Assurance voyage'],
-      features_ar: ['الدفع بدون تلامس', 'استرجاع نقدي تلقائي', 'تأمين السفر'],
-      features_en: ['Contactless payment', 'Auto cashback', 'Travel insurance'],
-      cta_fr: 'Découvrir les cartes',
-      cta_ar: 'اكتشف البطاقات',
-      cta_en: 'Explore Cards',
-      link: 'particuliers',
-      color: 'from-purple-50 to-purple-100',
-    },
-    {
-      id: 'epargne',
-      icon: <TrendingUp className="w-12 h-12" />,
-      title_fr: 'Épargne & Investissement',
-      title_ar: 'الادخار والاستثمار',
-      title_en: 'Savings & Investment',
-      description_fr: 'Placements sécurisés avec rendement attractif et conseil expert',
-      description_ar: 'استثمارات آمنة برائد جذاب وتشاور خبير',
-      description_en: 'Secure investments with attractive returns and expert advice',
-      features_fr: ['SICAV diversifiées', 'Fiscalité avantageuse', 'Suivi en temps réel'],
-      features_ar: ['صناديق متنوعة', 'ضرائب مواتية', 'متابعة فورية'],
-      features_en: ['Diversified funds', 'Tax benefits', 'Real-time tracking'],
-      cta_fr: 'Investir maintenant',
-      cta_ar: 'استثمر الآن',
-      cta_en: 'Invest Now',
-      link: 'particuliers',
-      color: 'from-green-50 to-green-100',
-    },
-    {
-      id: 'credits',
-      icon: <Zap className="w-12 h-12" />,
-      title_fr: 'Crédits & Prêts',
-      title_ar: 'القروض والتمويل',
-      title_en: 'Credits & Loans',
-      description_fr: 'Financements rapides et flexibles pour tous vos projets personnels',
-      description_ar: 'تمويل سريع ومرن لجميع مشاريعك الشخصية',
-      description_en: 'Fast and flexible financing for all your personal projects',
-      features_fr: ['Taux compétitifs', 'Accord rapide', 'Sans garantie spéciale'],
-      features_ar: ['أسعار فائدة تنافسية', 'موافقة سريعة', 'بدون ضمانات خاصة'],
-      features_en: ['Competitive rates', 'Quick approval', 'No special collateral'],
-      cta_fr: 'Demander un crédit',
-      cta_ar: 'اطلب قرضا',
-      cta_en: 'Request Loan',
-      link: 'particuliers',
-      color: 'from-orange-50 to-orange-100',
-    },
-    {
-      id: 'amen-first',
-      icon: <Smartphone className="w-12 h-12" />,
-      title_fr: 'Amen First Bank',
-      title_ar: 'أمين فيرست بانك',
-      title_en: 'Amen First Bank',
-      description_fr: 'Banque 100% digitale avec tous les services au bout de vos doigts',
-      description_ar: 'بنك رقمي 100% مع جميع الخدمات في متناول يدك',
-      description_en: '100% digital banking with all services at your fingertips',
-      features_fr: ['Interface intuitive', 'Transferts instantanés', 'Support 24/7'],
-      features_ar: ['واجهة بديهية', 'تحويلات فورية', 'دعم 24/7'],
-      features_en: ['Intuitive interface', 'Instant transfers', '24/7 support'],
-      cta_fr: 'Activer Amen First',
-      cta_ar: 'فعّل أمين فيرست',
-      cta_en: 'Activate Now',
-      link: 'amen-first-bank',
-      color: 'from-cyan-50 to-cyan-100',
-    },
-    {
-      id: 'services',
-      icon: <Wrench className="w-12 h-12" />,
-      title_fr: 'Services Additionnels',
-      title_ar: 'الخدمات الإضافية',
-      title_en: 'Additional Services',
-      description_fr: 'Assurances, virements, mandats et bien d\'autres services bancaires',
-      description_ar: 'التأمين والتحويلات والحوالات والعديد من الخدمات المصرفية الأخرى',
-      description_en: 'Insurance, transfers, money orders and many more banking services',
-      features_fr: ['Assurance complète', 'Envois sécurisés', 'Frais transparents'],
-      features_ar: ['تأمين شامل', 'إرسال آمن', 'رسوم شفافة'],
-      features_en: ['Complete insurance', 'Secure shipments', 'Transparent fees'],
-      cta_fr: 'Voir tous les services',
-      cta_ar: 'عرض جميع الخدمات',
-      cta_en: 'View All Services',
-      link: 'particuliers',
-      color: 'from-pink-50 to-pink-100',
-    },
-  ];
-
-  const getProductContent = (product: Product) => ({
-    title: currentLang === 'fr' ? product.title_fr : currentLang === 'ar' ? product.title_ar : product.title_en,
-    description: currentLang === 'fr' ? product.description_fr : currentLang === 'ar' ? product.description_ar : product.description_en,
-    features: currentLang === 'fr' ? product.features_fr : currentLang === 'ar' ? product.features_ar : product.features_en,
-    cta: currentLang === 'fr' ? product.cta_fr : currentLang === 'ar' ? product.cta_ar : product.cta_en,
-  });
-
-  const sectionTitle = currentLang === 'fr'
-    ? 'Nos Produits & Services'
-    : currentLang === 'ar'
-    ? 'منتجاتنا والخدمات'
-    : 'Our Products & Services';
-
-  const sectionDescription = currentLang === 'fr'
-    ? 'Solutions bancaires complètes adaptées à votre profil et vos objectifs'
-    : currentLang === 'ar'
-    ? 'حلول مصرفية شاملة مناسبة لملفك الشخصي وأهدافك'
-    : 'Complete banking solutions tailored to your profile and goals';
+  const heading =
+    l === 'ar'
+      ? 'منتجاتنا والخدمات'
+      : l === 'en'
+        ? 'Our Products & Services'
+        : 'Nos Produits & Services';
+  const sub =
+    l === 'ar'
+      ? 'حلول مصرفية شاملة مناسبة لملفك الشخصي وأهدافك'
+      : l === 'en'
+        ? 'Complete banking solutions tailored to your profile and goals'
+        : 'Solutions bancaires complètes adaptées à votre profil et vos objectifs';
+  const badge =
+    l === 'ar' ? 'خدماتنا' : l === 'en' ? 'Our Services' : 'Nos Services';
+  const notFound =
+    l === 'ar'
+      ? 'لا تجد ما تبحث عنه؟'
+      : l === 'en'
+        ? "Can't find what you're looking for?"
+        : "Vous ne trouvez pas ce qu'il vous faut ?";
+  const contactLabel =
+    l === 'ar'
+      ? 'تواصل مع فريقنا'
+      : l === 'en'
+        ? 'Contact Our Team'
+        : 'Contactez notre équipe';
 
   return (
-    <section className={`py-24 bg-linear-to-b from-slate-50 to-white ${isRTL ? 'dir-rtl' : ''}`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="bg-surface-alt py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="container">
+        {/* ── Section Header: Label → Headline → Sub ── */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">{sectionTitle}</h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            {sectionDescription}
+          <span className="section-label">{badge}</span>
+          <h2 className="text-h2 text-ink mt-2">{heading}</h2>
+          <p className="text-lg text-ink-secondary max-w-2xl mx-auto mt-4 leading-relaxed">
+            {sub}
           </p>
         </div>
 
-        {/* Products Grid */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 ${isRTL ? 'text-right' : ''}`}>
-          {products.map((product) => {
-            const content = getProductContent(product);
+        {/* ── Products Grid: 3 / 2 / 1 ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+          {products.map((product, idx) => {
+            const c = product[l];
+            const Icon = product.icon;
             return (
               <div
                 key={product.id}
-                className={`group relative bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col h-full ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`card flex flex-col ${STRIPE_CLASSES[idx]}`}
               >
-                {/* Background Accent */}
-                <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} w-32 h-32 bg-linear-to-br ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full blur-3xl -m-16`}></div>
-
-                {/* Content */}
-                <div className="relative z-10 p-8 flex flex-col h-full">
-                  {/* Icon */}
-                  <div className={`inline-flex w-16 h-16 rounded-xl bg-linear-to-br ${product.color} items-center justify-center text-slate-900 mb-6 group-hover:scale-110 transition-transform duration-300 ${isRTL ? 'ml-auto' : ''}`}>
-                    {product.icon}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-slate-900 mb-3">{content.title}</h3>
-
-                  {/* Description */}
-                  <p className="text-slate-600 mb-6 leading-relaxed grow">{content.description}</p>
-
-                  {/* Features */}
-                  <div className={`space-y-2 mb-8 ${isRTL ? 'text-right' : ''}`}>
-                    {content.features.map((feature, idx) => (
-                      <div key={idx} className={`flex items-center gap-3 text-slate-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <span className="w-2 h-2 rounded-full bg-blue-900 shrink-0"></span>
-                        <span className="text-sm font-medium">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* CTA Button */}
-                  <Link
-                    href={`/${currentLang}/${product.link}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg group/btn w-full justify-center"
-                  >
-                    {content.cta}
-                    <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                  </Link>
+                <div className="feature-icon">
+                  <Icon className="w-6 h-6" />
                 </div>
+                <h3 className="text-h4 text-ink mt-5 mb-2">{c.title}</h3>
+                <p className="text-small text-ink-secondary leading-relaxed mb-6 flex-1">
+                  {c.desc}
+                </p>
 
-                {/* Border Accent on Hover */}
-                <div className="absolute inset-0 rounded-2xl border-2 border-blue-900/0 group-hover:border-blue-900/20 transition-colors pointer-events-none"></div>
+                {/* Feature list: 5px green dot, not an icon */}
+                <ul className="space-y-2.5 mb-8">
+                  {c.features.map((f) => (
+                    <li
+                      key={f}
+                      className={`flex items-center gap-2.5 text-small text-ink-secondary ${isRTL ? 'flex-row-reverse' : ''}`}
+                    >
+                      <span className="w-1.25 h-1.25 rounded-full bg-primary shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Full-width primary CTA */}
+                <Link
+                  href={`/${lang}/${product.link}`}
+                  className={`btn btn-primary btn-full justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  {c.cta}
+                  <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+                </Link>
               </div>
             );
           })}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-20 text-center">
-          <p className="text-lg text-slate-600 mb-6">
-            {currentLang === 'fr'
-              ? 'Vous ne trouvez pas ce qu\'il vous faut ?'
-              : currentLang === 'ar'
-              ? 'لا تجد ما تبحث عنه؟'
-              : 'Can\'t find what you\'re looking for?'}
-          </p>
+        {/* ── Fallback CTA ── */}
+        <div className="mt-16 text-center">
+          <p className="text-ink-secondary mb-5">{notFound}</p>
           <Link
-            href={`/${currentLang}/contact`}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-blue-900 text-blue-900 hover:bg-blue-50 font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg group"
+            href={`/${lang}/contact`}
+            className={`btn btn-outline inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
           >
-            {currentLang === 'fr' ? 'Contactez notre équipe' : currentLang === 'ar' ? 'تواصل مع فريقنا' : 'Contact Our Team'}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            {contactLabel}
+            <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
           </Link>
         </div>
       </div>
