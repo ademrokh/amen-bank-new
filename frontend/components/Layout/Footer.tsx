@@ -21,7 +21,7 @@ export default function Footer() {
       press: 'Presse',
       sustainability: 'Développement durable',
       support: 'Support',
-      faq: 'FAQ',
+      amenGpt: 'AmenGPT',
       contact: 'Contact',
       branches: 'Agences',
       email: 'amenbank@amenbank.com.tn',
@@ -47,7 +47,7 @@ export default function Footer() {
       press: 'الصحافة',
       sustainability: 'التنمية المستدامة',
       support: 'الدعم',
-      faq: 'الأسئلة الشائعة',
+      amenGpt: 'AmenGPT',
       contact: 'اتصل بنا',
       branches: 'الفروع',
       email: 'amenbank@amenbank.com.tn',
@@ -73,7 +73,7 @@ export default function Footer() {
       press: 'Press',
       sustainability: 'Sustainability',
       support: 'Support',
-      faq: 'FAQ',
+      amenGpt: 'AmenGPT',
       contact: 'Contact',
       branches: 'Branches',
       email: 'amenbank@amenbank.com.tn',
@@ -125,7 +125,11 @@ export default function Footer() {
             {/* Column 1: Brand */}
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="footer-brand-mark">A</div>
+                <img 
+                  src="/favicon.ico" 
+                  alt="Amen Bank Logo" 
+                  className="w-8 h-8 object-contain" 
+                />
                 <div>
                   <span className="footer-brand-name">Amen Bank</span>
                   <span className="footer-brand-est">
@@ -165,9 +169,9 @@ export default function Footer() {
               <h3 className="footer-col-title">{content.company}</h3>
               <div className="footer-col-links">
                 <Link href={`/${currentLang}/notre-identite`} className="footer-col-link">{content.about}</Link>
-                <Link href={`/${currentLang}/#careers`} className="footer-col-link">{content.careers}</Link>
-                <Link href={`/${currentLang}/#press`} className="footer-col-link">{content.press}</Link>
-                <Link href={`/${currentLang}/#sustainability`} className="footer-col-link">{content.sustainability}</Link>
+                <Link href={`/${currentLang}/careers`} className="footer-col-link">{content.careers}</Link>
+                <Link href={`/${currentLang}/actualites`} className="footer-col-link">{content.press}</Link>
+                <Link href={`/${currentLang}/sustainability`} className="footer-col-link">{content.sustainability}</Link>
               </div>
             </div>
 
@@ -175,7 +179,7 @@ export default function Footer() {
             <div>
               <h3 className="footer-col-title">{content.support}</h3>
               <div className="footer-col-links">
-                <Link href={`/${currentLang}/faq`} className="footer-col-link">{content.faq}</Link>
+                <Link href={`/${currentLang}/amengpt`} className="footer-col-link">{content.amenGpt}</Link>
                 <Link href={`/${currentLang}/contact`} className="footer-col-link">{content.contact}</Link>
                 <Link href={`/${currentLang}/agencies`} className="footer-col-link">{content.branches}</Link>
               </div>
@@ -185,16 +189,16 @@ export default function Footer() {
             <div>
               <h3 className="footer-col-title">{content.follow}</h3>
               <div className="footer-social">
-                <a href="https://facebook.com/amenbank" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Facebook">
+                <a href="https://www.facebook.com/AMENBANK.page.officielle" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Facebook">
                   <Share2 />
                 </a>
-                <a href="https://linkedin.com/company/amenbank" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="LinkedIn">
+                <a href="https://www.linkedin.com/company/amen-bank/" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="LinkedIn">
                   <MessageSquare />
                 </a>
-                <a href="https://twitter.com/amenbank" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Twitter">
+                <a href="https://www.instagram.com/amen_bank_officielle/" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Instagram">
                   <MessageCircle />
                 </a>
-                <a href="https://instagram.com/amenbank" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Instagram">
+                <a href="https://x.com/AMENBANKTN" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="X (Twitter)">
                   <Heart />
                 </a>
               </div>

@@ -1,2 +1,8 @@
 {"ticket_id": "TKT-20260615102655-1331", "name": "Test User", "email": "test@example.com", "phone": "+216123456789", "subject": "Account Opening Inquiry", "language": "fr", "timestamp": "2026-06-15T10:26:55.903182"}
 {"ticket_id": "TKT-20260615102914-0891", "name": "Test User", "email": "test@example.com", "phone": "+216123456789", "subject": "Account Opening Inquiry", "language": "fr", "timestamp": "2026-06-15T10:29:14.165648"}
+{"ticket_id": "TKT-20260701134045-7086", "name": "John Doe", "email": "john@example.com", "phone": "+216123456789", "subject": "Account Inquiry", "language": "fr", "timestamp": "2026-07-01T13:40:45.753381"}
+{"ticket_id": "TKT-20260701134045-2016", "name": "Jane Doe", "email": "jane@example.com", "phone": "+216987654321", "subject": "Loan Request", "language": "en", "timestamp": "2026-07-01T13:40:45.772808"}
+{"ticket_id": "TKT-20260701134045-0650", "name": "Test User", "email": "test@example.com", "phone": "+216555555555", "subject": "General Inquiry", "language": "fr", "timestamp": "2026-07-01T13:40:45.781192"}
+{"ticket_id": "TKT-20260701134146-8196", "name": "John Doe", "email": "john@example.com", "phone": "+216123456789", "subject": "Account Inquiry", "language": "fr", "timestamp": "2026-07-01T13:41:46.849127"}
+{"ticket_id": "TKT-20260701134146-9267", "name": "Jane Doe", "email": "jane@example.com", "phone": "+216987654321", "subject": "Loan Request", "language": "en", "timestamp": "2026-07-01T13:41:46.856949"}
+{"ticket_id": "TKT-20260701134146-9338", "name": "Test User", "email": "test@example.com", "phone": "+216555555555", "subject": "General Inquiry", "language": "fr", "timestamp": "2026-07-01T13:41:46.862168"}

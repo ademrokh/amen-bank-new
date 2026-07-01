@@ -10,11 +10,8 @@ import {
   Send,
   AlertCircle,
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useLang } from '@/hooks/useLang';
-
-/* ════════════════════════════════════════════
-   Types & Data
-   ════════════════════════════════════════════ */
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -26,18 +23,13 @@ interface Message {
 }
 
 const greetingMap: Record<Language, string> = {
-  fr: "Bonjour ! Je suis l'assistant bancaire d'Amen Bank. Comment puis-je vous aider ?",
-  ar: 'مرحبا! أنا مساعد الخدمات المصرفية في أمين بنك. كيف يمكنني مساعدتك؟',
-  en: "Hello! I'm Amen Bank's banking assistant. How can I help you?",
+  fr: "Bonjour ! Je suis l'assistant bancaire d'Amen Bank. Posez-moi vos questions sur Amen First Bank, vos comptes, cartes ou crédits.",
+  ar: 'أهلا! أنا المساعد تاع أمين بنك. اسألني على Amen First Bank، الكومبتات، الكارطات وإلا القروض.',
+  en: "Hello! I'm Amen Bank's banking assistant. Ask me anything about Amen First Bank, accounts, cards or loans.",
 };
 
 const getInitialMessages = (lang: Language): Message[] => [
-  {
-    id: '1',
-    role: 'bot',
-    content: greetingMap[lang],
-    timestamp: new Date(),
-  },
+  { id: '1', role: 'bot', content: greetingMap[lang], timestamp: new Date() },
 ];
 
 const uiMap: Record<
@@ -54,114 +46,140 @@ const uiMap: Record<
     closeAria: string;
     maximizeAria: string;
     minimizeAria: string;
+    suggestions: string;
   }
 > = {
-  fr: {
-    title: 'Assistant Bancaire',
-    status: 'En ligne',
-    placeholder: 'Tapez votre message…',
-    typing: "L'assistant tape…",
-    error: 'Impossible de se connecter au service. Veuillez réessayer.',
-    retry: 'Réessayer',
-    sendAria: 'Envoyer',
-    openAria: 'Ouvrir le chat',
-    closeAria: 'Fermer le chat',
-    maximizeAria: 'Agrandir',
-    minimizeAria: 'Réduire',
-  },
-  ar: {
-    title: 'المساعد المصرفي',
-    status: 'متصل',
-    placeholder: 'اكتب رسالتك…',
-    typing: 'المساعد يكتب…',
-    error: 'تعذر الاتصال بالخدمة. يرجى المحاولة مرة أخرى.',
-    retry: 'حاول مرة أخرى',
-    sendAria: 'إرسال',
-    openAria: 'فتح المحادثة',
-    closeAria: 'إغلاق المحادثة',
-    maximizeAria: 'تكبير',
-    minimizeAria: 'تصغير',
-  },
-  en: {
-    title: 'Banking Assistant',
-    status: 'Online',
-    placeholder: 'Type your message…',
-    typing: 'Assistant is typing…',
-    error: 'Unable to connect to the service. Please try again.',
-    retry: 'Try Again',
-    sendAria: 'Send',
-    openAria: 'Open chat',
-    closeAria: 'Close chat',
-    maximizeAria: 'Maximize',
-    minimizeAria: 'Minimize',
-  },
+  fr: { title: 'Assistant Bancaire', status: 'En ligne', placeholder: 'Tapez votre message…', typing: "L'assistant tape…", error: 'Impossible de se connecter au service. Veuillez réessayer.', retry: 'Réessayer', sendAria: 'Envoyer', openAria: 'Ouvrir le chat', closeAria: 'Fermer le chat', maximizeAria: 'Agrandir', minimizeAria: 'Réduire', suggestions: 'Questions fréquentes' },
+  ar: { title: 'المساعد البنكي', status: 'حاضر', placeholder: 'اكتب سؤالك…', typing: 'المساعد يكتب…', error: 'ما تقدرش تكمل. عاود المحاولة.', retry: 'عاود', sendAria: 'ابعث', openAria: 'حل المحادثة', closeAria: 'اغلق المحادثة', maximizeAria: 'كبّر', minimizeAria: 'صغّر', suggestions: 'أسئلة متداولة' },
+  en: { title: 'Banking Assistant', status: 'Online', placeholder: 'Type your message…', typing: 'Assistant is typing…', error: 'Unable to connect to the service. Please try again.', retry: 'Try Again', sendAria: 'Send', openAria: 'Open chat', closeAria: 'Close chat', maximizeAria: 'Maximize', minimizeAria: 'Minimize', suggestions: 'Common questions' },
 };
 
-const botResponses: Record<Language, Record<string, string>> = {
-  fr: {
-    compte:
-      "Vous pouvez ouvrir un compte Amen Bank en ligne via Amen First Bank ou en visitant l'une de nos 164 agences.",
-    carte:
-      'Amen Bank propose des cartes de débit et crédit avec paiement sans contact et cashback automatique.',
-    crédit:
-      "Nos crédits ont des taux compétitifs. Utilisez notre simulateur pour obtenir une estimation.",
-    taux:
-      "Les taux d'intérêt varient selon le type de produit et les conditions du marché.",
-    agence:
-      'Nous avons 164 agences dans 14 régions. Consultez notre localisateur pour trouver la plus proche.',
-    contact:
-      'Vous pouvez nous joindre au +216 71 833 517 ou par email à amenbank@amenbank.com.tn',
-    default:
-      "Je ne comprends pas votre demande. Veuillez la reformuler ou contactez nos conseillers au +216 71 833 517.",
-  },
-  ar: {
-    حساب:
-      'يمكنك فتح حساب بأمين بنك عبر الإنترنت عبر Amen First Bank أو بزيارة أحد فروعنا الـ 164.',
-    بطاقة:
-      'تقدم أمين بنك بطاقات خصم وائتمان مع دفع بدون تلامس واسترجاع نقدي تلقائي.',
-    قرض:
-      'لدينا قروض بأسعار تنافسية. استخدم محاكينا للحصول على تقدير.',
-    سعر:
-      'تختلف أسعار الفائدة حسب نوع المنتج وشروط السوق.',
-    فرع:
-      'لدينا 164 فرعا في 14 منطقة. استخدم محدد المواقع لإيجاد الأقرب.',
-    اتصل:
-      'يمكنك التواصل معنا على +216 71 833 517 أو عبر البريد الإلكتروني amenbank@amenbank.com.tn',
-    default:
-      'لا أفهم طلبك. يرجى إعادة صياغته أو الاتصال بمستشارينا على +216 71 833 517.',
-  },
-  en: {
-    account:
-      'You can open an Amen Bank account online via Amen First Bank or by visiting one of our 164 branches.',
-    card:
-      'Amen Bank offers debit and credit cards with contactless payment and auto cashback.',
-    loan:
-      'Our loans have competitive rates. Use our simulator to get an estimate.',
-    rate:
-      'Interest rates vary depending on the product type and market conditions.',
-    branch:
-      'We have 164 branches across 14 regions. Use our locator to find the nearest one.',
-    contact:
-      'You can reach us at +216 71 833 517 or by email at amenbank@amenbank.com.tn',
-    default:
-      "I don't understand your request. Please rephrase it or contact our advisors at +216 71 833 517.",
-  },
+const quickReplies: Record<Language, string[]> = {
+  fr: ['Qu\'est-ce qu\'Amen First Bank ?', 'Comment ouvrir un compte ?', 'Comment retirer de l\'argent ?', 'Crédit auto ou logement ?', 'Contacter le CRC'],
+  ar: ['آش هو Amen First Bank؟', 'كيفاش نفتح كومبت؟', 'كيفاش نسحب فلوس؟', 'كريدي سيارة وإلا سكن؟', 'كيفاش نكلم CRC؟'],
+  en: ['What is Amen First Bank?', 'How to open an account?', 'How to withdraw money?', 'Auto or housing loan?', 'Contact the CRC'],
 };
 
-/* ════════════════════════════════════════════
-   Component
-   ════════════════════════════════════════════ */
+const responsePairs: Record<Language, Array<[string, string]>> = {
+  fr: [
+    ['amen first', 'Absolument ! Avec Amen First Bank vous pouvez ouvrir un compte de dépôt ou un compte épargne.'],
+    ["qu'est-ce", 'Amen First Bank (AFB) est l\'agence en ligne d\'Amen Bank, disponible 7j/7 et 24h/24. Vous pouvez y ouvrir un compte dépôt ou épargne et bénéficier de tarifs réduits.'],
+    ['avantage', 'En tant que client Amen First Bank, vous bénéficiez :\n• Tarification avantageuse (moins de 50 % des tarifs en agence classique, pouvant aller jusqu\'à la gratuité totale).\n• Disponibilité de l\'agence AFB 7j/7 et 24h/24.'],
+    ['privilège', 'En tant que client Amen First Bank, vous bénéficiez :\n• Tarification avantageuse (moins de 50 % des tarifs en agence classique, pouvant aller jusqu\'à la gratuité totale).\n• Disponibilité de l\'agence AFB 7j/7 et 24h/24.'],
+    ['retirer', 'Vous pouvez retirer de l\'argent :\n• En utilisant votre carte dans les espaces libre-service ou tout DAB bancaire (compte dépôt), ou uniquement aux DAB Amen Bank (compte épargne).\n• En vous rendant dans n\'importe quelle agence Amen Bank.'],
+    ['retrait', 'Vous pouvez retirer de l\'argent :\n• En utilisant votre carte dans les espaces libre-service ou tout DAB bancaire (compte dépôt), ou uniquement aux DAB Amen Bank (compte épargne).\n• En vous rendant dans n\'importe quelle agence Amen Bank.'],
+    ['dab', 'Utilisez votre carte dans les espaces libre-service ou tout DAB bancaire (compte dépôt), ou uniquement aux DAB Amen Bank (compte épargne).'],
+    ['déposer', 'Vous pouvez déposer de l\'argent :\n• Dans n\'importe quelle agence du réseau Amen Bank.\n• Dans les espaces libre-service.'],
+    ['dépôt', 'Vous pouvez déposer de l\'argent :\n• Dans n\'importe quelle agence du réseau Amen Bank.\n• Dans les espaces libre-service.'],
+    ['chargé', 'Vous pouvez contacter votre chargé clientèle par téléphone, visioconférence (sur rendez-vous), email ou par courrier.'],
+    ['conseiller', 'Vous pouvez contacter votre conseiller par téléphone, visioconférence (sur rendez-vous), email ou par courrier.'],
+    ['ouvrir', 'Pour ouvrir un compte en ligne :\n• Connectez-vous sur www.amenfirstbank.com.tn\n• Remplissez le formulaire électronique.\n• Téléchargez vos pièces justificatives (convention, spécimen, fiche KYC).\n• Remplissez, signez et scannez les documents.\n• Joignez-les via le site et validez votre demande.'],
+    ['ouverture', 'Pour ouvrir un compte en ligne :\n• Connectez-vous sur www.amenfirstbank.com.tn\n• Remplissez le formulaire électronique.\n• Téléchargez vos pièces justificatives (convention, spécimen, fiche KYC).\n• Remplissez, signez et scannez les documents.\n• Joignez-les via le site et validez votre demande.'],
+    ['salaire', 'Oui, vous pouvez domicilier votre salaire sur le compte dépôt après son ouverture.'],
+    ['domicili', 'Oui, vous pouvez domicilier votre salaire sur le compte dépôt après son ouverture.'],
+    ['crédit auto', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Auto, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['automobile', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Auto, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['voiture', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Auto, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['logement', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Logement, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['immobilier', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Logement, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['maison', 'Oui, avec un compte dépôt AFB vous pouvez prétendre à un crédit Logement, sans plafond mais dans la limite de votre capacité de remboursement.'],
+    ['crc', 'Pour contacter le CRC :\n• Téléphone : 71 148 888\n• Email : crc@amenbank.com.tn'],
+    ['contact', 'Vous pouvez nous joindre au +216 71 833 517 ou par email à amenbank@amenbank.com.tn\nPour le CRC : 71 148 888 | crc@amenbank.com.tn'],
+    ['compte', 'Vous pouvez ouvrir un compte Amen Bank en ligne via Amen First Bank ou en visitant l\'une de nos 164 agences.'],
+    ['carte', 'Amen Bank propose des cartes de débit et crédit avec paiement sans contact et cashback automatique.'],
+    ['crédit', 'Nos crédits ont des taux compétitifs. Précisez le type (auto, logement…) pour plus de détails, ou utilisez notre simulateur en ligne.'],
+    ['taux', 'Les taux d\'intérêt varient selon le type de produit et les conditions du marché. Contactez-nous pour une simulation personnalisée.'],
+    ['agence', 'Nous avons 164 agences dans 14 régions. Consultez notre localisateur pour trouver la plus proche.'],
+    ['__default__', 'Je ne comprends pas votre demande. Veuillez la reformuler ou contactez-nous au +216 71 833 517.'],
+  ],
+  ar: [
+    ['amen first',  'إيه! مع Amen First Bank تنجم تفتح كومبت دپو وإلا كومبت توفير.'],
+    ['آش هو',       'Amen First Bank هي agence en ligne تاع أمين بنك، حاضرة 7/7 و24/24. تنجم تفتح فيها كومبت دپو وإلا كومبت توفير، بـprix أرخص بكثير من agence عادية.'],
+    ['شنيّة',       'Amen First Bank هي agence en ligne تاع أمين بنك، حاضرة 7/7 و24/24. تنجم تفتح فيها كومبت دپو وإلا كومبت توفير، بـprix أرخص بكثير من agence عادية.'],
+    ['فائدة',  'مع Amen First Bank تستافد من:\n• Prix avantageuse — أقل من 50% من tarifs تاع agence عادية، وتنجم توصل للخدمة بالصح بالمجان.\n• Agence AFB متوفرة 7 أيام/7 و24 ساعة/24.'],
+    ['ميزة',   'مع Amen First Bank تستافد من:\n• Prix avantageuse — أقل من 50% من tarifs تاع agence عادية، وتنجم توصل للخدمة بالصح بالمجان.\n• Agence AFB متوفرة 7 أيام/7 و24 ساعة/24.'],
+    ['فضل',    'مع Amen First Bank تستافد من:\n• Prix avantageuse — أقل من 50% من tarifs تاع agence عادية، وتنجم توصل للخدمة بالصح بالمجان.\n• Agence AFB متوفرة 7 أيام/7 و24 ساعة/24.'],
+    ['نسحب',  'تنجم تسحب فلوس:\n• بكارطتك في espaces libre-service وإلا في أي DAB bancaire (كومبت دپو)، غير في DAB تاع أمين بنك (كومبت توفير).\n• وإلا تمشي لأي أقانسي تاع أمين بنك.'],
+    ['سحب',   'تنجم تسحب فلوس:\n• بكارطتك في espaces libre-service وإلا في أي DAB bancaire (كومبت دپو)، غير في DAB تاع أمين بنك (كومبت توفير).\n• وإلا تمشي لأي أقانسي تاع أمين بنك.'],
+    ['دب',    'تنجم تستعمل كارطتك في espaces libre-service وإلا في أي DAB bancaire (كومبت دپو)، غير في DAB تاع أمين بنك (كومبت توفير).'],
+    ['نودّع', 'تنجم توّدع فلوس:\n• في أي أقانسي من réseau أمين بنك.\n• وإلا في espaces libre-service.'],
+    ['إيداع', 'تنجم توّدع فلوس:\n• في أي أقانسي من réseau أمين بنك.\n• وإلا في espaces libre-service.'],
+    ['مسؤول', 'تنجم تكلم chargé clientèle تاعك بالتيليفون، visioconférence (بـrendez-vous)، إيميل، وإلا بـcourrier.'],
+    ['موظف',  'تنجم تكلم chargé clientèle تاعك بالتيليفون، visioconférence (بـrendez-vous)، إيميل، وإلا بـcourrier.'],
+    ['فتح كومبت', 'باش تفتح كومبت أونلاين:\n• دخل على www.amenfirstbank.com.tn\n• ملّا le formulaire الإلكتروني.\n• حمّل pièces justificatives تاعك (convention، spécimen، fiche KYC).\n• عمّر، وقّع، وصوّر الوثائق.\n• علّقهم في الموقع وصادق على la demande.'],
+    ['نفتح',     'باش تفتح كومبت أونلاين:\n• دخل على www.amenfirstbank.com.tn\n• ملّا le formulaire الإلكتروني.\n• حمّل pièces justificatives تاعك (convention، spécimen، fiche KYC).\n• عمّر، وقّع، وصوّر الوثائق.\n• علّقهم في الموقع وصادق على la demande.'],
+    ['راتب', 'إيه، تنجم تسجّل راتب تاعك في كومبت دپو بعد ما يتفتح.'],
+    ['سيارة',  'إيه، مع كومبت دپو AFB تنجم تطلب crédit Auto، بلا plafond أمّا في حدود قدرة السداد تاعك.'],
+    ['أوتو',   'إيه، مع كومبت دپو AFB تنجم تطلب crédit Auto، بلا plafond أمّا في حدود قدرة السداد تاعك.'],
+    ['سكن',  'إيه، مع كومبت دپو AFB تنجم تطلب crédit Logement، بلا plafond أمّا في حدود قدرة السداد تاعك.'],
+    ['دار',  'إيه، مع كومبت دپو AFB تنجم تطلب crédit Logement، بلا plafond أمّا في حدود قدرة السداد تاعك.'],
+    ['crc',     'باش تكلم CRC:\n• تيليفون: 71 148 888\n• إيميل: crc@amenbank.com.tn'],
+    ['نكلمكم', 'تنجم تكلمنا على +216 71 833 517 وإلا على إيميل: amenbank@amenbank.com.tn\nللـ CRC: 71 148 888 | crc@amenbank.com.tn'],
+    ['اتصل',   'تنجم تكلمنا على +216 71 833 517 وإلا على إيميل: amenbank@amenbank.com.tn\nللـ CRC: 71 148 888 | crc@amenbank.com.tn'],
+    ['نكلم',   'تنجم تكلم chargé clientèle تاعك بالتيليفون، visioconférence (بـrendez-vous)، إيميل، وإلا بـcourrier.'],
+    ['حساب',   'تنجم تفتح كومبت في أمين بنك أونلاين مع Amen First Bank وإلا تجي لأي أقانسي من الـ 164.'],
+    ['كومبت',  'تنجم تفتح كومبت في أمين بنك أونلاين مع Amen First Bank وإلا تجي لأي أقانسي من الـ 164.'],
+    ['كارطة',  'أمين بنك تعطيك cartes débit وcrédit بـpaiement sans contact وcashback تلقائي.'],
+    ['كارطو',  'أمين بنك تعطيك cartes débit وcrédit بـpaiement sans contact وcashback تلقائي.'],
+    ['قرض',    'عندنا قروض بأسعار تنافسية. قولي نوع القرض (سيارة، سكن…) باش نعطيك أكثر تفاصيل.'],
+    ['كريدي',  'عندنا قروض بأسعار تنافسية. قولي نوع القرض (سيارة، سكن…) باش نعطيك أكثر تفاصيل.'],
+    ['أقانسي', 'عندنا 164 أقانسي في 14 منطقة. استعمل le localisateur باش تلقى الأقرب منك.'],
+    ['فرع',    'عندنا 164 أقانسي في 14 منطقة. استعمل le localisateur باش تلقى الأقرب منك.'],
+    ['__default__', 'ما فهمتش باش تقصد. عاود صياغة السؤال وإلا كلمنا على +216 71 833 517.'],
+  ],
+  en: [
+    ['amen first', 'Absolutely! With Amen First Bank you can open either a deposit account or a savings account.'],
+    ['what is', 'Amen First Bank (AFB) is Amen Bank\'s fully online branch, available 7 days a week 24/7. You can open a deposit or savings account and enjoy reduced fees.'],
+    ['advantage', 'As an Amen First Bank client you benefit from:\n• Advantageous pricing (less than 50% of standard branch fees, potentially completely free).\n• Access to the AFB branch 7 days/7 and 24h/24.'],
+    ['benefit', 'As an Amen First Bank client you benefit from:\n• Advantageous pricing (less than 50% of standard branch fees, potentially completely free).\n• Access to the AFB branch 7 days/7 and 24h/24.'],
+    ['perk', 'As an Amen First Bank client you benefit from:\n• Advantageous pricing (less than 50% of standard branch fees, potentially completely free).\n• Access to the AFB branch 7 days/7 and 24h/24.'],
+    ['withdraw', 'You can withdraw money:\n• Using your card at self-service spaces or any bank ATM (deposit account), or only at Amen Bank ATMs (savings account).\n• By visiting any Amen Bank branch.'],
+    ['atm', 'You can withdraw money:\n• Using your card at self-service spaces or any bank ATM (deposit account), or only at Amen Bank ATMs (savings account).\n• By visiting any Amen Bank branch.'],
+    ['deposit money', 'You can deposit money:\n• At any branch of the Amen Bank network.\n• At self-service spaces.'],
+    ['put money', 'You can deposit money:\n• At any branch of the Amen Bank network.\n• At self-service spaces.'],
+    ['account manager', 'You can contact your account manager by phone, video conference (by appointment), email, or mail.'],
+    ['manager', 'You can contact your account manager by phone, video conference (by appointment), email, or mail.'],
+    ['advisor', 'You can contact your advisor by phone, video conference (by appointment), email, or mail.'],
+    ['open', 'To open an account online:\n• Visit www.amenfirstbank.com.tn\n• Fill in the electronic form.\n• Upload your supporting documents (agreement, specimen, KYC form).\n• Fill, sign and scan the documents.\n• Attach them via the site and validate your request.'],
+    ['register', 'To open an account online:\n• Visit www.amenfirstbank.com.tn\n• Fill in the electronic form.\n• Upload your supporting documents (agreement, specimen, KYC form).\n• Fill, sign and scan the documents.\n• Attach them via the site and validate your request.'],
+    ['salary', 'Yes, you can have your salary deposited to the deposit account after it is opened.'],
+    ['paycheck', 'Yes, you can have your salary deposited to the deposit account after it is opened.'],
+    ['auto loan', 'Yes, with an AFB deposit account you can apply for an Auto loan, with no ceiling but within your repayment capacity.'],
+    ['car loan', 'Yes, with an AFB deposit account you can apply for an Auto loan, with no ceiling but within your repayment capacity.'],
+    ['vehicle', 'Yes, with an AFB deposit account you can apply for an Auto loan, with no ceiling but within your repayment capacity.'],
+    ['housing', 'Yes, with an AFB deposit account you can apply for a Housing loan, with no ceiling but within your repayment capacity.'],
+    ['mortgage', 'Yes, with an AFB deposit account you can apply for a Housing loan, with no ceiling but within your repayment capacity.'],
+    ['home loan', 'Yes, with an AFB deposit account you can apply for a Housing loan, with no ceiling but within your repayment capacity.'],
+    ['crc', 'To contact the CRC:\n• Phone: 71 148 888\n• Email: crc@amenbank.com.tn'],
+    ['contact', 'You can reach us at +216 71 833 517 or by email at amenbank@amenbank.com.tn\nFor the CRC: 71 148 888 | crc@amenbank.com.tn'],
+    ['account', 'You can open an Amen Bank account online via Amen First Bank or by visiting one of our 164 branches.'],
+    ['card', 'Amen Bank offers debit and credit cards with contactless payment and auto cashback.'],
+    ['loan', 'Our loans have competitive rates. Specify the type (auto, housing…) for more details, or use our online simulator.'],
+    ['rate', 'Interest rates vary depending on the product type and market conditions. Contact us for a personalised simulation.'],
+    ['branch', 'We have 164 branches across 14 regions. Use our locator to find the nearest one.'],
+    ['__default__', "I don't understand your request. Please rephrase it or contact our advisors at +216 71 833 517."],
+  ],
+};
+
+function getBotResponse(input: string, lang: Language): string {
+  const lower = input.toLowerCase();
+  const pairs = responsePairs[lang];
+  const found = pairs.find(([key]) => key !== '__default__' && lower.includes(key));
+  if (found) return found[1];
+  return pairs.find(([key]) => key === '__default__')![1];
+}
 
 export default function ChatbotWidget() {
   const { lang: currentLang, isRTL } = useLang();
+  const pathname = usePathname();
+  
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(() =>
-    getInitialMessages(currentLang)
-  );
+  const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(currentLang));
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -169,7 +187,6 @@ export default function ChatbotWidget() {
 
   const ui = uiMap[currentLang];
 
-  /* ── Listen for open-chatbot event (from FAQ, etc.) ── */
   useEffect(() => {
     const handler = () => {
       setIsOpen(true);
@@ -179,12 +196,10 @@ export default function ChatbotWidget() {
     return () => window.removeEventListener('open-chatbot', handler);
   }, []);
 
-  /* ── Auto-scroll to bottom ── */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  /* ── Focus input when opened ── */
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => inputRef.current?.focus(), 150);
@@ -192,58 +207,64 @@ export default function ChatbotWidget() {
     }
   }, [isOpen, isMaximized]);
 
-  /* ── Reset messages on language change ── */
   useEffect(() => {
     if (prevLangRef.current !== currentLang) {
       prevLangRef.current = currentLang;
       setMessages(getInitialMessages(currentLang));
+      setShowQuickReplies(true);
     }
   }, [currentLang]);
 
-  /* ── Send message ── */
-  const handleSendMessage = useCallback(async () => {
-    const trimmed = input.trim();
-    if (!trimmed || isLoading) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || isLoading) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: trimmed,
-      timestamp: new Date(),
-    };
+      setShowQuickReplies(false);
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setError(null);
-    setIsLoading(true);
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: trimmed,
+        timestamp: new Date(),
+      };
 
-    /* Simulated bot response (replace with real API call) */
-    setTimeout(() => {
-      try {
-        const lowerInput = trimmed.toLowerCase();
-        const responses = botResponses[currentLang];
-        const response =
-          Object.entries(responses).find(([key]) =>
-            lowerInput.includes(key)
-          )?.[1] ?? responses.default;
+      setMessages((prev) => [...prev, userMessage]);
+      setInput('');
+      setError(null);
+      setIsLoading(true);
 
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'bot',
-          content: response,
-          timestamp: new Date(),
-        };
+      setTimeout(() => {
+        try {
+          const response = getBotResponse(trimmed, currentLang);
+          const botMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'bot',
+            content: response,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, botMessage]);
+        } catch {
+          setError(ui.error);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 800);
+    },
+    [isLoading, currentLang, ui.error]
+  );
 
-        setMessages((prev) => [...prev, botMessage]);
-      } catch {
-        setError(ui.error);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 800);
-  }, [input, isLoading, currentLang, ui.error]);
+  const handleSendMessage = useCallback(() => {
+    sendMessage(input);
+  }, [input, sendMessage]);
 
-  /* ── Keyboard handler ── */
+  const handleQuickReply = useCallback(
+    (text: string) => {
+      sendMessage(text);
+    },
+    [sendMessage]
+  );
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -251,7 +272,6 @@ export default function ChatbotWidget() {
     }
   };
 
-  /* ── Close / minimize ── */
   const close = () => {
     setIsOpen(false);
     setIsMaximized(false);
@@ -261,30 +281,30 @@ export default function ChatbotWidget() {
     setIsMaximized(false);
   };
 
-  /* ════════════════════════════════════════════
-     Shared sub-renders (used by both drawer & maximized)
-     ════════════════════════════════════════════ */
-
   const renderHeader = (variant: 'drawer' | 'maximized') => (
     <div
-      className={`bg-secondary flex items-center justify-between shrink-0 ${
-        variant === 'drawer' ? 'px-4 py-3' : 'px-6 py-4'
-      }`}
+      className="flex items-center shrink-0 justify-between"
+      style={{ 
+        background: '#ffffff', 
+        borderBottom: '1px solid #e2e8f0', 
+        padding: variant === 'drawer' ? '1rem 1.25rem' : '1.25rem 2rem', 
+        gap: '1rem',
+        flexDirection: isRTL ? 'row-reverse' : 'row'
+      }}
     >
-      <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
-          <MessageCircle className="w-4 h-4 text-white" />
+      <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`} style={{ gap: '0.75rem' }}>
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: '#003DA5' }}>
+            <MessageCircle className="w-5 h-5" style={{ color: '#ffffff' }} />
+          </div>
+          <span 
+            className="absolute bottom-0 right-0 block w-3 h-3 rounded-full border-2 border-white" 
+            style={{ background: '#22c55e' }}
+          ></span>
         </div>
         <div className={isRTL ? 'text-right' : ''}>
-          <h3
-            id="chat-title"
-            className={`font-semibold text-white ${
-              variant === 'drawer' ? 'text-small' : 'text-base'
-            }`}
-          >
-            {ui.title}
-          </h3>
-          <p className="text-xs text-white/70">{ui.status}</p>
+          <h3 className="text-base font-bold" style={{ color: '#0f172a' }}>{ui.title}</h3>
+          <p className="text-xs font-medium" style={{ color: '#22c55e' }}>{ui.status}</p>
         </div>
       </div>
 
@@ -292,26 +312,26 @@ export default function ChatbotWidget() {
         {variant === 'drawer' ? (
           <button
             onClick={() => setIsMaximized(true)}
-            className="p-1.5 rounded hover:bg-white/15 text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
             aria-label={ui.maximizeAria}
           >
-            <Maximize2 className="w-4 h-4" />
+            <Maximize2 className="w-4 h-4" style={{ color: '#64748b' }} />
           </button>
         ) : (
           <button
             onClick={minimize}
-            className="p-1.5 rounded hover:bg-white/15 text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
             aria-label={ui.minimizeAria}
           >
-            <Minimize2 className="w-4 h-4" />
+            <Minimize2 className="w-4 h-4" style={{ color: '#64748b' }} />
           </button>
         )}
         <button
           onClick={close}
-          className="p-1.5 rounded hover:bg-white/15 text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
           aria-label={ui.closeAria}
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" style={{ color: '#64748b' }} />
         </button>
       </div>
     </div>
@@ -319,116 +339,159 @@ export default function ChatbotWidget() {
 
   const renderMessages = (compact?: boolean) => (
     <div
-      className="flex-1 overflow-y-auto bg-surface-alt"
+      className="flex-1 overflow-y-auto"
+      style={{ 
+        background: '#f8fafc', 
+        padding: compact ? '1.5rem' : '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.25rem'
+      }}
       role="log"
       aria-label="Chat messages"
       aria-live="polite"
     >
-      <div className={`space-y-4 ${compact ? 'p-4' : 'p-6'}`}>
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex items-end gap-2 ${
-              message.role === 'user'
-                ? isRTL
-                  ? 'flex-row-reverse'
-                  : 'flex-row'
-                : isRTL
-                  ? 'flex-row-reverse'
-                  : 'flex-row'
-            } ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {/* Bot avatar */}
-            {message.role === 'bot' && (
-              <div className="w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-[0.625rem] font-bold shrink-0">
-                AB
-              </div>
-            )}
-
-            {/* Bubble */}
-            <div
-              className={`max-w-[80%] rounded-lg px-4 py-2.5 ${
-                message.role === 'user'
-                  ? 'bg-secondary text-white rounded-br-sm'
-                  : 'bg-border text-ink rounded-bl-sm'
-              }`}
-            >
-              <p className={`leading-relaxed ${compact ? 'text-sm' : 'text-small'}`}>
-                {message.content}
-              </p>
-              <p
-                className={`text-[0.625rem] mt-1 ${
-                  message.role === 'user'
-                    ? 'text-white/60'
-                    : 'text-ink-muted'
-                }`}
-              >
-                {message.timestamp.toLocaleTimeString(
-                  currentLang === 'ar' ? 'ar-TN' : 'fr-TN',
-                  { hour: '2-digit', minute: '2-digit' }
-                )}
-              </p>
-            </div>
-          </div>
-        ))}
-
-        {/* Typing indicator */}
-        {isLoading && (
-          <div
-            className={`flex items-end gap-2 ${
-              isRTL ? 'flex-row-reverse' : ''
-            }`}
-          >
-            <div className="w-7 h-7 rounded-full bg-secondary text-white flex items-center justify-center text-[0.625rem] font-bold shrink-0">
+      {messages.map((message) => (
+        <div
+          key={message.id}
+          className="flex items-end"
+          style={{ 
+            gap: '0.5rem', 
+            justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
+            flexDirection: isRTL ? 'row-reverse' : 'row'
+          }}
+        >
+          {message.role === 'bot' && (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.65rem] font-bold shrink-0" style={{ background: '#003DA5', color: '#ffffff' }}>
               AB
             </div>
-            <div className="bg-border rounded-lg rounded-bl-sm px-4 py-3">
-              <div className="flex items-center gap-2 text-ink-muted">
-                <Loader className="w-3.5 h-3.5 animate-spin" />
-                <span className="text-sm">{ui.typing}</span>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Error alert */}
-        {error && (
           <div
-            className={`flex items-start gap-3 p-3 rounded-lg bg-error/5 border border-error/20 ${
-              isRTL ? 'flex-row-reverse text-right' : ''
-            }`}
+            className="rounded-2xl"
+            style={
+              message.role === 'user' 
+                ? { 
+                    maxWidth: '60%', 
+                    padding: '0.75rem 1.25rem', 
+                    background: '#006B3C', 
+                    color: '#ffffff', 
+                    boxShadow: '0 4px 12px rgba(0, 107, 60, 0.2)',
+                    borderBottomRightRadius: '0.375rem'
+                  } 
+                : { 
+                    maxWidth: '60%', 
+                    padding: '0.75rem 1.25rem', 
+                    background: '#ffffff', 
+                    color: '#0f172a', 
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)', 
+                    border: '1px solid #f1f5f9',
+                    borderBottomLeftRadius: '0.375rem'
+                  }
+            }
           >
-            <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-ink">{error}</p>
-              <button
-                onClick={() => {
-                  setError(null);
-                  handleSendMessage();
-                }}
-                className="text-sm font-medium text-secondary hover:text-secondary-dark transition-colors mt-1 bg-transparent border-none cursor-pointer p-0"
-              >
-                {ui.retry}
-              </button>
+            <p className="whitespace-pre-line" style={{ fontSize: '0.9rem', lineHeight: '1.5', margin: 0, color: message.role === 'user' ? '#ffffff' : '#0f172a' }}>
+              {message.content}
+            </p>
+            <p
+              className="font-medium"
+              style={{ 
+                fontSize: '0.65rem', 
+                marginTop: '0.5rem', 
+                color: message.role === 'user' ? 'rgba(255, 255, 255, 0.85)' : '#94a3b8', 
+                textAlign: message.role === 'user' ? 'right' : 'left' 
+              }}
+            >
+              {message.timestamp.toLocaleTimeString(
+                currentLang === 'ar' ? 'ar-TN' : 'fr-TN',
+                { hour: '2-digit', minute: '2-digit' }
+              )}
+            </p>
+          </div>
+        </div>
+      ))}
+
+      {isLoading && (
+        <div className="flex items-end" style={{ gap: '0.5rem', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[0.65rem] font-bold shrink-0" style={{ background: '#003DA5', color: '#ffffff' }}>
+            AB
+          </div>
+          <div className="bg-white rounded-2xl" style={{ padding: '0.75rem 1.25rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9', borderBottomLeftRadius: '0.375rem' }}>
+            <div className="flex items-center" style={{ gap: '0.5rem', color: '#94a3b8' }}>
+              <Loader className="w-4 h-4 animate-spin" />
+              <span className="text-xs font-medium">{ui.typing}</span>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <div ref={messagesEndRef} />
-      </div>
+      {error && (
+        <div className="flex items-start rounded-xl" style={{ gap: '0.75rem', padding: '1rem', background: '#fef2f2', border: '1px solid rgb(220 38 38 / 0.2)', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#dc2626' }} />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium" style={{ color: '#0f172a' }}>{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                handleSendMessage();
+              }}
+              className="text-sm font-semibold transition-colors mt-2 bg-transparent border-none cursor-pointer p-0"
+              style={{ color: '#003DA5' }}
+            >
+              {ui.retry}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div ref={messagesEndRef} />
     </div>
   );
 
+  const renderQuickReplies = () => {
+    if (!showQuickReplies) return null;
+    return (
+      <div style={{ paddingBottom: '1rem', textAlign: isRTL ? 'right' : 'left' }}>
+        <p className="text-[0.65rem] font-bold uppercase tracking-wider" style={{ color: '#94a3b8', marginBottom: '0.5rem' }}>
+          {ui.suggestions}
+        </p>
+        <div className="flex flex-wrap" style={{ gap: '0.5rem', justifyContent: isRTL ? 'flex-end' : 'flex-start' }}>
+          {quickReplies[currentLang].map((q) => (
+            <button
+              key={q}
+              onClick={() => handleQuickReply(q)}
+              className="text-xs rounded-full border transition-all bg-white cursor-pointer hover:bg-slate-50"
+              style={{ borderColor: '#cbd5e1', color: '#334155', fontWeight: 500, padding: '0.5rem 1rem' }}
+            >
+              {q}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderInput = () => (
-    <div className="p-3 border-t border-border bg-surface shrink-0">
-      <div
-        className={`flex items-center gap-2 ${
-          isRTL ? 'flex-row-reverse' : ''
-        }`}
+    <div 
+      className="shrink-0"
+      style={{ 
+        background: '#ffffff', 
+        borderTop: '1px solid #e2e8f0', 
+        padding: '1.25rem 1.5rem'
+      }}
+    >
+      {renderQuickReplies()}
+      <div 
+        className="flex items-center rounded-2xl"
+        style={{ 
+          background: '#f1f5f9', 
+          border: '1px solid #e2e8f0', 
+          padding: '0.375rem', 
+          gap: '0.5rem', 
+          flexDirection: isRTL ? 'row-reverse' : 'row'
+        }}
       >
-        <label htmlFor="chat-input" className="sr-only">
-          Message
-        </label>
+        <label htmlFor="chat-input" className="sr-only">Message</label>
         <input
           ref={inputRef}
           id="chat-input"
@@ -438,13 +501,15 @@ export default function ChatbotWidget() {
           onKeyDown={handleKeyDown}
           placeholder={ui.placeholder}
           disabled={isLoading}
-          className="input-field border-border! flex-1 py-2.5! text-sm!"
+          className="flex-1 bg-transparent border-none focus:outline-none"
+          style={{ color: '#0f172a', fontSize: '0.9rem', padding: '0.5rem 0.75rem' }}
           aria-label="Type your message"
         />
         <button
           onClick={handleSendMessage}
           disabled={!input.trim() || isLoading}
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary text-white border-none cursor-pointer transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-secondary-dark"
+          className="w-10 h-10 flex items-center justify-center rounded-xl text-white border-none cursor-pointer transition-all shrink-0 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105"
+          style={{ background: '#006B3C' }}
           aria-label={ui.sendAria}
         >
           {isLoading ? (
@@ -457,33 +522,34 @@ export default function ChatbotWidget() {
     </div>
   );
 
-  /* ════════════════════════════════════════════
-     Render
-     ════════════════════════════════════════════ */
+  // Hide the widget entirely if we are on the FAQ page
+  if (pathname.includes('/amengpt')) return null;
 
   return (
     <>
-      {/* ── FAB Button — secondary solid, no shadow, no gradient ── */}
+      {/* ── FAB Button ── */}
       {!isOpen && (
         <button
-          onClick={() => {
-            setIsOpen(true);
-          }}
-          className={`fixed bottom-6 z-50 w-14 h-14 flex items-center justify-center bg-secondary text-white rounded-lg border-none cursor-pointer transition-colors hover:bg-secondary-dark ${
-            isRTL ? 'left-6' : 'right-6'
-          }`}
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 z-50 w-14 h-14 flex items-center justify-center text-white rounded-2xl border-none cursor-pointer transition-all hover:scale-105 shadow-lg"
+          style={{ background: '#006B3C', right: isRTL ? 'auto' : '1.5rem', left: isRTL ? '1.5rem' : 'auto' }}
           aria-label={ui.openAria}
         >
           <MessageCircle className="w-6 h-6" />
         </button>
       )}
 
-      {/* ── Drawer (compact mode) ── */}
+      {/* ── Drawer (compact) ── */}
       {isOpen && !isMaximized && (
         <div
-          className={`fixed bottom-24 z-50 w-88 h-128 bg-surface border border-border rounded-lg shadow-dropdown flex flex-col overflow-hidden ${
-            isRTL ? 'left-6' : 'right-6'
-          }`}
+          className="fixed z-50 bg-white border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          style={{
+            width: '24rem',
+            height: '36rem',
+            bottom: '6rem',
+            right: isRTL ? 'auto' : '1.5rem',
+            left: isRTL ? '1.5rem' : 'auto'
+          }}
           role="dialog"
           aria-labelledby="chat-title"
         >
@@ -493,23 +559,18 @@ export default function ChatbotWidget() {
         </div>
       )}
 
-      {/* ── Maximized (overlay mode — triggered by FAQ) ── */}
+      {/* ── Maximized (overlay) ── */}
       {isOpen && isMaximized && (
         <>
-          {/* Backdrop */}
           <div
-            className="fixed inset-0 z-50 bg-ink/40 animate-fadeIn"
+            className="fixed inset-0 z-50 animate-fadeIn"
             onClick={close}
+            style={{ background: 'rgba(15, 23, 42, 0.4)' }}
             aria-hidden="true"
           />
-
-          {/* Panel */}
           <div
-            className={`fixed z-50 bg-surface border border-border rounded-lg shadow-modal flex flex-col overflow-hidden ${
-              isRTL
-                ? 'left-4 right-4 top-4 bottom-4 sm:left-8 sm:right-8 sm:top-8 sm:bottom-8'
-                : 'left-4 right-4 top-4 bottom-4 sm:left-8 sm:right-8 sm:top-8 sm:bottom-8'
-            }`}
+            className="fixed z-50 bg-white border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            style={{ left: '1rem', right: '1rem', top: '1rem', bottom: '1rem' }}
             role="dialog"
             aria-labelledby="chat-title"
           >

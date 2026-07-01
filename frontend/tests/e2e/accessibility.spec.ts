@@ -138,7 +138,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should load all pages quickly', async ({ page }) => {
-    const pages = ['/', '/agencies', '/contact', '/faq'];
+    const pages = ['/', '/agencies', '/contact', '/amengpt'];
     
     for (const pagePath of pages) {
       const startTime = Date.now();
@@ -162,7 +162,7 @@ test.describe('Performance Tests', () => {
   });
 
   test('should handle rapid navigation', async ({ page }) => {
-    const pages = ['/', '/agencies', '/contact', '/faq'];
+    const pages = ['/', '/agencies', '/contact', '/amengpt'];
     
     // Rapidly navigate between pages
     for (let i = 0; i < 3; i++) {

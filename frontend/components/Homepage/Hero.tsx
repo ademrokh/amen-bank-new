@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, TrendingUp, Zap, Shield, Building2, Cpu, Loader, Smartphone } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, TrendingUp, Zap, Shield, Building2, Cpu, Loader, Smartphone, X, Trophy, Banknote } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLang } from '@/hooks/useLang';
 
@@ -9,10 +10,17 @@ type Language = 'fr' | 'ar' | 'en';
 
 export default function Hero() {
   const { lang: currentLang, isRTL } = useLang();
-  const [exchangeRates, setExchangeRates] = useState({ EUR: 3.39, USD: 3.17, CAD: 2.38 });
+  
+  const [exchangeRates, setExchangeRates] = useState<Record<string, { toTND: number; fromTND: number }>>({
+    EUR: { toTND: 3.39, fromTND: 0.295 },
+    USD: { toTND: 3.17, fromTND: 0.315 },
+    CAD: { toTND: 2.38, fromTND: 0.420 },
+  });
+  
   const [sicavValues, setSicavValues] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,7 +63,7 @@ export default function Hero() {
     rateUpdate: string;
     vni: string;
     stats: { value: string; label: string }[];
-    amenPay: { badge: string; title: string; desc: string; cta: string; platforms: string };
+    amenPay: { badge: string; title: string; desc: string; cta: string; platforms: string; popupTitle: string };
   }> = {
     fr: {
       headline: 'Votre Partenaire Financier de Confiance',
@@ -63,7 +71,7 @@ export default function Hero() {
       exchangeRateLabel: 'Taux de change en TND',
       sicavLabel: "Fonds d'investissement",
       trustTitle: 'Pourquoi nous faire confiance ?',
-      trustDesc: 'Nous nous engageons à fournir des services financiers d\'excellence avec transparence et intégrité',
+      trustDesc: "Nous nous engageons à fournir des services financiers d'excellence avec transparence et intégrité",
       certificationsTitle: 'Certifications & Standards',
       trustItems: [
         { icon: Building2, title: "40+ ans d'expérience", desc: 'Leader du secteur bancaire tunisien' },
@@ -87,6 +95,7 @@ export default function Hero() {
         platforms: 'Disponible sur iOS et Android',
         desc: "Payez en toute simplicité avec AmenPay, l'application de mobile payment d'Amen Bank.",
         cta: 'Découvrir AmenPay',
+        popupTitle: 'Choisissez votre plateforme',
       },
     },
     ar: {
@@ -119,6 +128,7 @@ export default function Hero() {
         platforms: 'متاح على iOS و Android',
         desc: 'ادفع بكل سهولة مع AmenPay، تطبيق الدفع المحمول من أمين بنك.',
         cta: 'اكتشف AmenPay',
+        popupTitle: 'اختر نظام التشغيل',
       },
     },
     en: {
@@ -151,282 +161,387 @@ export default function Hero() {
         platforms: 'Available on iOS and Android',
         desc: "Pay effortlessly with AmenPay, Amen Bank's mobile payment app.",
         cta: 'Discover AmenPay',
+        popupTitle: 'Choose your platform',
       },
     },
   };
 
   const content = heroContent[currentLang];
   const errorMsg =
-    currentLang === 'ar'
-      ? '⚠ البيانات غير متاحة'
-      : currentLang === 'en'
-        ? '⚠ Data unavailable'
-        : '⚠ Données indisponibles';
+    currentLang === 'ar' ? '⚠ البيانات غير متاحة'
+    : currentLang === 'en' ? '⚠ Data unavailable'
+    : '⚠ Données indisponibles';
 
   const getFundDisplayName = (fundId: string): string => {
     const nameMap: Record<string, Record<Language, string>> = {
-      'sicav-diversif': { fr: 'Diversification', ar: 'التنويع', en: 'Diversification' },
-      'sicav-actions': { fr: 'Actions Monde', ar: 'الأسهم العالمية', en: 'Global Equities' },
-      'sicav-obligations': { fr: 'Obligations', ar: 'السندات', en: 'Bonds' },
+      'sicav-diversif':   { fr: 'Diversification', ar: 'التنويع',        en: 'Diversification' },
+      'sicav-actions':    { fr: 'Actions Monde',   ar: 'الأسهم العالمية', en: 'Global Equities' },
+      'sicav-obligations':{ fr: 'Obligations',     ar: 'السندات',         en: 'Bonds' },
     };
     return nameMap[fundId]?.[currentLang] ?? fundId.replace('sicav-', '').replace(/-/g, ' ');
+  };
+
+  // Mapping currency codes to symbols
+  const currencySymbols: Record<string, string> = {
+    EUR: '€',
+    USD: '$',
+    CAD: 'CA$',
   };
 
   return (
     <div className="w-full" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ════════════════════════════════════════════
-          HERO — #0f172a flat, no gradient, no blobs
+          HERO — dark, full-height, two-column
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 relative">
-        <div className="container py-32 md:py-40">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left — Headline + Sub + CTA + Stats */}
-            <div className="space-y-8">
-              {/* Label: plain uppercase, no pill */}
-              <span className="section-label text-white/50!">
+      <section style={{ background: '#0f172a' }}>
+        <div className="container" style={{ paddingTop: '6rem', paddingBottom: '6rem' }}>
+          <div className={`grid grid-cols-1 lg:grid-cols-2 items-center`} style={{ gap: '4rem' }}>
+
+            {/* Left */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <span style={{
+                fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', color: '#94a3b8',
+              }}>
                 Amen Bank · {currentLang === 'fr' ? 'Depuis 1980' : currentLang === 'ar' ? 'منذ 1980' : 'Since 1980'}
               </span>
 
-              <h1 className="text-[2.5rem] sm:text-display text-white leading-[1.1] tracking-tight">
+              <h1 style={{
+                fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700,
+                color: '#ffffff', lineHeight: 1.1, letterSpacing: '-0.025em',
+              }}>
                 {content.headline}
               </h1>
 
-              <p className="text-lg text-ink-muted leading-relaxed max-w-lg">
+              <p style={{ fontSize: '1.125rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: '32rem' }}>
                 {content.subheadline}
               </p>
 
-              {/* Stats bar — 3 cols, white/10 vertical dividers */}
-              <div className={`grid grid-cols-3 py-8 border-y border-white/10 ${isRTL ? 'text-right' : ''}`}>
+              {/* Stats */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+                borderTop: '1px solid rgba(255,255,255,0.08)',
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                paddingTop: '1.75rem', paddingBottom: '1.75rem',
+              }}>
                 {content.stats.map((stat, i) => (
-                  <div
-                    key={stat.label}
-                    className={`stats-divider ${isRTL ? 'pl-6' : 'pr-6'} ${i === 0 ? (isRTL ? 'pr-6' : 'pl-6') : ''}`}
-                  >
-                    <div className="text-3xl font-bold text-white">{stat.value}</div>
-                    <div className="text-small text-ink-muted mt-1">{stat.label}</div>
+                  <div key={stat.label} style={{
+                    borderRight: i < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                    paddingLeft: i > 0 ? '1.5rem' : 0,
+                    paddingRight: i < 2 ? '1.5rem' : 0,
+                  }}>
+                    <div style={{ fontSize: '1.875rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                      {stat.value}
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: '#64748b', marginTop: '0.25rem' }}>
+                      {stat.label}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* CTAs — primary green + outline-white */}
-              <div className={`flex flex-wrap gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Link
-                  href={`/${currentLang}/devenir-client`}
-                  className="btn btn-primary btn-lg"
-                >
+              {/* CTAs */}
+              <div style={{ display: 'flex', gap: '0.875rem', flexWrap: 'wrap' }}>
+                <Link href={`/${currentLang}/devenir-client`} className="btn btn-primary btn-lg">
                   {content.cta1}
-                  <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                  <ArrowRight size={18} className={isRTL ? 'rotate-180' : ''} />
                 </Link>
-                <Link
-                  href={`/${currentLang}/particuliers`}
-                  className="btn btn-outline-white btn-lg"
-                >
+                <Link href={`/${currentLang}/particuliers`} className="btn btn-outline btn-lg">
                   {content.cta2}
                 </Link>
               </div>
             </div>
 
-            {/* Right — Glass panels */}
-            <div className="space-y-5">
-              {/* Certifications panel — glass effect */}
-              <div className="glass-panel">
-                <h3 className="text-h4 text-white mb-5">{content.certificationsTitle}</h3>
-                <div className="space-y-4">
+            {/* Right — glass panels */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+              {/* Certifications */}
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '0.75rem',
+                padding: '1.75rem',
+              }}>
+                <p style={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#64748b', marginBottom: '1.25rem' }}>
+                  {content.certificationsTitle}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {[
-                    { label: 'ISO', title: 'ISO 27001', sub: 'Information Security' },
-                    { label: 'ISO', title: 'ISO 20000', sub: 'IT Service Management' },
-                    { label: '✓', title: 'PCI DSS', sub: 'Payment Card Security' },
+                    { 
+                      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi1PrlV6apvxfQ1PUBOR4fcHkRJLht-CJGDg&s', 
+                      title: 'ISO 27001', 
+                      sub: 'Information Security' 
+                    },
+                    { 
+                      logo: 'https://uaexpertcorporation.com/wp-content/uploads/2021/12/iso-20000-removebg-preview.png', 
+                      title: 'ISO 20000', 
+                      sub: 'IT Service Management' 
+                    },
+                    { 
+                      logo: 'https://www.staffordnet.com/img/logos/logo-pci-dss-500.png', 
+                      title: 'PCI DSS', 
+                      sub: 'Payment Card Security' 
+                    },
                   ].map((cert) => (
-                    <div
-                      key={cert.title}
-                      className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <div className="shrink-0 w-11 h-11 rounded-lg flex items-center justify-center text-xs font-bold text-primary bg-primary-50 border border-border">
-                        {cert.label}
+                    <div key={cert.title} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                      <div style={{
+                        width: '3rem', height: '3rem', borderRadius: '0.5rem', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: '#ffffff', padding: '0.25rem', position: 'relative'
+                      }}>
+                        <Image 
+                          src={cert.logo} 
+                          alt={`${cert.title} logo`} 
+                          fill
+                          unoptimized
+                          style={{ objectFit: 'contain', padding: '0.25rem' }}
+                        />
                       </div>
-                      <div className={isRTL ? 'text-right' : ''}>
-                        <p className="font-semibold text-white text-sm">{cert.title}</p>
-                        <p className="text-xs text-ink-muted">{cert.sub}</p>
+                      <div>
+                        <p style={{ fontWeight: 600, color: '#ffffff', fontSize: '0.9375rem' }}>{cert.title}</p>
+                        <p style={{ fontSize: '0.8125rem', color: '#64748b' }}>{cert.sub}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Award panel — glass + accent left-border */}
-              <div className="glass-panel border-l-2! border-l-accent!">
-                <p className="text-small font-medium text-accent mb-1">🏆 Award Winning</p>
-                <p className="text-h4 text-white">
-                  {currentLang === 'fr'
-                    ? 'Élu Service Client de l\'Année 2024'
-                    : currentLang === 'ar'
-                      ? 'تم انتخاب خدمة العملاء لعام 2024'
-                      : 'Elected Customer Service of the Year 2024'}
+              {/* Award - Compact Strip */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(232, 160, 0, 0.15) 0%, rgba(255,255,255,0.03) 100%)',
+                border: '1px solid rgba(232, 160, 0, 0.4)',
+                borderLeft: '4px solid #E8A000',
+                borderRadius: '0.75rem',
+                padding: '1.25rem 1.5rem',
+                boxShadow: '0 4px 20px rgba(232, 160, 0, 0.1)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <Trophy size={16} style={{ color: '#E8A000' }} />
+                  <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#E8A000', margin: 0 }}>
+                    Award Winning
+                  </p>
+                </div>
+                <p style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.3, margin: 0 }}>
+                  {currentLang === 'fr' ? "Élu Service Client de l'Année 2024"
+                    : currentLang === 'ar' ? 'تم انتخاب خدمة العملاء لعام 2024'
+                    : 'Elected Customer Service of the Year 2024'}
                 </p>
-                <p className="text-small text-ink-muted mt-1">
-                  {currentLang === 'fr'
-                    ? 'Pour la 3ème année consécutive'
-                    : currentLang === 'ar'
-                      ? 'للسنة الثالثة على التوالي'
-                      : 'For the 3rd consecutive year'}
+                <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '0.25rem', marginBottom: 0 }}>
+                  {currentLang === 'fr' ? 'Pour la 3ème année consécutive'
+                    : currentLang === 'ar' ? 'للسنة الثالثة على التوالي'
+                    : 'For the 3rd consecutive year'}
                 </p>
               </div>
+
+              {/* Award Image Hyperlink Container */}
+              <a 
+                href="https://www.facebook.com/AMENBANK.page.officielle/posts/pour-la-3ème-année-consécutive-amen-bank-a-obtenu-le-label-elu-service-client-de/349859677676333/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block cursor-pointer transition-opacity hover:opacity-80"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(232, 160, 0, 0.4)',
+                  borderRadius: '0.75rem',
+                  padding: '1rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  width: '100%',
+                  height: '200px'
+                }}
+              >
+                <Image 
+                  src="https://i.gyazo.com/e063ce088344468575867819058ddde2.png" 
+                  alt="Service Client de l'Année 2024 Certificate" 
+                  fill
+                  unoptimized
+                  style={{ objectFit: 'contain' }}
+                />
+              </a>
             </div>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          AMENPAY STRIP — #0f172a, full-bleed, no radius
+          AMENPAY STRIP — secondary blue, visually distinct
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900">
-        <div className="container py-8">
-          <div className={`flex flex-col sm:flex-row items-center justify-between gap-6 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center border border-white/10 bg-white/6">
-                <Smartphone className="w-6 h-6 text-white" />
+      <section style={{ background: '#003DA5', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="container" style={{ paddingTop: '1.75rem', paddingBottom: '1.75rem' }}>
+          <div style={{
+            display: 'flex', flexDirection: 'row', alignItems: 'center',
+            justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{
+                width: '2.75rem', height: '2.75rem', borderRadius: '0.625rem', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
+              }}>
+                <Smartphone size={20} color="#ffffff" />
               </div>
-              <div className={isRTL ? 'text-right' : ''}>
-                {/* Badge: plain uppercase text, no pill */}
-                <span className="section-label text-white/50! mb-0.5! block!">
+              <div>
+                <p style={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: '0.125rem' }}>
                   {content.amenPay.badge}
-                </span>
-                <p className="font-bold text-white">{content.amenPay.title}</p>
-                <p className="text-small text-ink-muted">{content.amenPay.platforms}</p>
+                </p>
+                <p style={{ fontWeight: 700, color: '#ffffff', fontSize: '1rem' }}>{content.amenPay.title}</p>
+                <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.6)' }}>{content.amenPay.platforms}</p>
               </div>
             </div>
-            <Link
-              href={`/${currentLang}/particuliers#amenpay`}
-              className="btn btn-secondary shrink-0"
+            
+            {/* Button that triggers popup */}
+            <button
+              onClick={() => setIsPopupOpen(true)}
+              className="btn btn-lg"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.75rem 1.5rem', background: '#ffffff', color: '#003DA5',
+                borderRadius: '0.5rem', fontWeight: 700, fontSize: '0.9375rem',
+                whiteSpace: 'nowrap', flexShrink: 0,
+                cursor: 'pointer', border: 'none',
+              }}
             >
               {content.amenPay.cta}
-              <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-            </Link>
+              <ArrowRight size={16} className={isRTL ? 'rotate-180' : ''} />
+            </button>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          RATES & SICAV — #f8fafc section, white cards
+          RATES & SICAV
           ════════════════════════════════════════════ */}
-      <section className="bg-surface-alt py-24">
+      <section className="section section-alt">
         <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
             {/* Exchange Rates */}
             <div className="card">
-              <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <div className="feature-icon">
-                  <TrendingUp className="w-5 h-5" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '1.5rem' }}>
+                <div className="feature-icon" style={{ marginBottom: 0 }}>
+                  <TrendingUp size={20} />
                 </div>
-                <h3 className="text-h4 text-ink">{content.exchangeRateLabel}</h3>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
+                  {content.exchangeRateLabel}
+                </h3>
               </div>
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-8 gap-2 text-ink-muted">
-                    <Loader className="w-4 h-4 animate-spin" />
-                    <span className="text-small">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '0.5rem', color: '#94a3b8' }}>
+                    <Loader size={16} className="animate-spin" />
+                    <span style={{ fontSize: '0.875rem' }}>
                       {currentLang === 'fr' ? 'Chargement...' : currentLang === 'ar' ? 'جار التحميل...' : 'Loading...'}
                     </span>
                   </div>
                 ) : error ? (
-                  <p className="text-small text-error py-4 text-center">{errorMsg}</p>
+                  <p style={{ fontSize: '0.875rem', color: '#dc2626', textAlign: 'center', padding: '1rem' }}>{errorMsg}</p>
                 ) : (
-                  Object.entries(exchangeRates).map(([currency, rate]) => (
-                    <div
-                      key={currency}
-                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-alt hover:bg-primary-50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <span className="currency-tag">{currency}</span>
-                        <span className="text-small font-medium text-ink-secondary">
-                          1 {currency}
-                        </span>
+                  Object.entries(exchangeRates).map(([currency, rate]) => {
+                    const symbol = currencySymbols[currency] || currency;
+                    return (
+                      <div key={currency} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '0.875rem 1rem', borderRadius: '0.5rem', background: '#f8fafc',
+                        transition: 'background 0.15s ease',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span className="currency-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <Banknote size={12} />
+                            {symbol}
+                          </span>
+                          <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>1 {symbol}</span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+                            {rate.toTND.toFixed(3)} TND
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                            1 TND = {rate.fromTND.toFixed(4)} {symbol}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-lg font-bold text-ink">
-                        {(rate as number).toFixed(3)} TND
-                      </span>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
-              <p className="text-xs text-ink-muted mt-4 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
+              <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                <span style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', background: '#006B3C', display: 'inline-block' }} />
                 {content.rateUpdate}
               </p>
             </div>
 
             {/* SICAV */}
             <div className="card">
-              <div className={`flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <div className="feature-icon">
-                  <Zap className="w-5 h-5" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', marginBottom: '1.5rem' }}>
+                <div className="feature-icon" style={{ marginBottom: 0 }}>
+                  <Zap size={20} />
                 </div>
-                <h3 className="text-h4 text-ink">{content.sicavLabel}</h3>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
+                  {content.sicavLabel}
+                </h3>
               </div>
-              <div className="space-y-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-8 gap-2 text-ink-muted">
-                    <Loader className="w-4 h-4 animate-spin" />
-                    <span className="text-small">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', gap: '0.5rem', color: '#94a3b8' }}>
+                    <Loader size={16} className="animate-spin" />
+                    <span style={{ fontSize: '0.875rem' }}>
                       {currentLang === 'fr' ? 'Chargement...' : currentLang === 'ar' ? 'جار التحميل...' : 'Loading...'}
                     </span>
                   </div>
                 ) : error ? (
-                  <p className="text-small text-error py-4 text-center">{errorMsg}</p>
+                  <p style={{ fontSize: '0.875rem', color: '#dc2626', textAlign: 'center', padding: '1rem' }}>{errorMsg}</p>
                 ) : Object.keys(sicavValues).length > 0 ? (
                   Object.entries(sicavValues).map(([fundId, value]) => (
-                    <div
-                      key={fundId}
-                      className={`flex items-center justify-between p-4 rounded-lg bg-surface-alt hover:bg-secondary-50 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <span className="text-small font-medium text-ink-secondary">
+                    <div key={fundId} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '0.875rem 1rem', borderRadius: '0.5rem', background: '#f8fafc',
+                    }}>
+                      <span style={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>
                         {getFundDisplayName(fundId)}
                       </span>
-                      <span className="text-lg font-bold text-ink">
+                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
                         {(value as number).toFixed(3)} TND
                       </span>
                     </div>
                   ))
                 ) : (
-                  <p className="text-small text-ink-muted py-4 text-center">—</p>
+                  <p style={{ fontSize: '0.875rem', color: '#94a3b8', textAlign: 'center', padding: '1rem' }}>—</p>
                 )}
               </div>
-              <p className="text-xs text-ink-muted mt-4">{content.vni}</p>
+              <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '1rem' }}>{content.vni}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          TRUST — white section, centered cards, stripe top
+          TRUST — white bg, 3 cards
           ════════════════════════════════════════════ */}
-      <section className="bg-surface py-24">
+      <section className="section section-white">
         <div className="container">
-          <div className="text-center mb-16">
-            <span className="section-label">
-              {currentLang === 'ar'
-                ? 'ثقتك أولويتنا'
-                : currentLang === 'en'
-                  ? 'Why Choose Us'
-                  : 'Pourquoi nous'}
+          <div className="section-header">
+            <span className="section-badge">
+              {currentLang === 'ar' ? 'ثقتك أولويتنا' : currentLang === 'en' ? 'Why Choose Us' : 'Pourquoi nous'}
             </span>
-            <h2 className="text-h1 text-ink mt-2">{content.trustTitle}</h2>
-            <p className="text-lg text-ink-secondary max-w-2xl mx-auto mt-4 leading-relaxed">
-              {content.trustDesc}
-            </p>
+            <h2>{content.trustTitle}</h2>
+            <p>{content.trustDesc}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {content.trustItems.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="card card-stripe-green text-center">
-                  <div className="feature-icon mx-auto">
-                    <Icon className="w-7 h-7" />
+                <div key={item.title} className="card card-accent-green" style={{ textAlign: 'center' }}>
+                  <div className="feature-icon" style={{ margin: '0 auto 1.5rem' }}>
+                    <Icon size={22} />
                   </div>
-                  <h3 className="text-h4 text-ink mt-5 mb-2">{item.title}</h3>
-                  <p className="text-small text-ink-secondary leading-relaxed">
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.625rem' }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ fontSize: '0.9375rem', color: '#64748b', lineHeight: 1.65 }}>
                     {item.desc}
                   </p>
                 </div>
@@ -437,23 +552,100 @@ export default function Hero() {
       </section>
 
       {/* ════════════════════════════════════════════
-          BOTTOM CTA — #0f172a flat, white button
+          BOTTOM CTA — dark, centered
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-h1 text-white">{content.ctaBottom}</h2>
-          <p className="text-lg text-ink-muted mt-4 mb-10 leading-relaxed">
-            {content.ctaBottomDesc}
-          </p>
-          <Link
-            href={`/${currentLang}/devenir-client`}
-            className="btn btn-white btn-lg"
-          >
-            {content.cta1}
-            <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-          </Link>
+      <section style={{ background: '#0f172a' }}>
+        <div className="container" style={{ paddingTop: '5rem', paddingBottom: '5rem' }}>
+          <div style={{ maxWidth: '40rem', margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.025em', lineHeight: 1.15 }}>
+              {content.ctaBottom}
+            </h2>
+            <p style={{ fontSize: '1.125rem', color: '#64748b', marginTop: '1rem', marginBottom: '2.5rem', lineHeight: 1.7 }}>
+              {content.ctaBottomDesc}
+            </p>
+            <Link href={`/${currentLang}/devenir-client`} className="btn btn-white btn-lg">
+              {content.cta1}
+              <ArrowRight size={18} className={isRTL ? 'rotate-180' : ''} />
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* ════════════════════════════════════════════
+          AMENPAY POPUP MODAL
+          ════════════════════════════════════════════ */}
+      {isPopupOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn"
+          style={{ background: 'rgba(15, 23, 42, 0.6)' }}
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative flex flex-col gap-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setIsPopupOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-lg transition-colors"
+              style={{ color: '#94a3b8' }}
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: '#eff6ff' }}>
+                <Smartphone size={28} style={{ color: '#003DA5' }} />
+              </div>
+              <h3 className="text-xl font-bold" style={{ color: '#0f172a' }}>
+                {content.amenPay.popupTitle}
+              </h3>
+            </div>
+
+            {/* Spacious container for App Store and Play Store badges */}
+            <div 
+              className="flex flex-col gap-6 rounded-xl"
+              style={{ 
+                background: '#f8fafc', 
+                padding: '1.5rem',
+                border: '1px solid #e2e8f0'
+              }}
+            >
+              <a 
+                href="https://play.google.com/store/apps/details?id=com.amen.projects.amenpay&hl=en" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex justify-center transition-transform hover:scale-105"
+              >
+                <Image 
+                  src="https://en.logodownload.org/wp-content/uploads/2019/06/get-it-on-google-play-badge-1.png" 
+                  alt="Get it on Google Play" 
+                  width={135}
+                  height={48}
+                  unoptimized
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+              <a 
+                href="https://apps.apple.com/tn/app/amenpay/id1528149293" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex justify-center transition-transform hover:scale-105"
+              >
+                <Image 
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/3840px-Download_on_the_App_Store_Badge.svg.png" 
+                  alt="Download on the App Store" 
+                  width={135}
+                  height={48}
+                  unoptimized
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

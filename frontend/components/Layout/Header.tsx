@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Check } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLang } from '@/hooks/useLang';
 
@@ -15,10 +15,10 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
-  const languages: { code: Language; label: string; flag: string }[] = [
-    { code: 'fr', label: 'Français', flag: '🇫🇷' },
-    { code: 'ar', label: 'العربية', flag: '🇹🇳' },
-    { code: 'en', label: 'English', flag: '🇬🇧' },
+  const languages: { code: Language; label: string }[] = [
+    { code: 'fr', label: 'Français' },
+    { code: 'ar', label: 'العربية' },
+    { code: 'en', label: 'English' },
   ];
 
   const switchLanguage = (lang: Language) => {
@@ -67,18 +67,18 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 bg-surface border-b border-border"
+      className="header"
       dir={isRTL ? 'rtl' : 'ltr'}
       role="banner"
     >
       <nav
-        className={`container flex items-center justify-between h-16 ${isRTL ? 'flex-row-reverse' : ''}`}
+        className={`container header-nav ${isRTL ? 'flex-row-reverse' : ''}`}
         aria-label="Main navigation"
       >
-        {/* ── Logo: wordmark only, no icon block ── */}
+        {/* ── Logo ── */}
         <Link
           href={`/${currentLang}/`}
-          className={`flex items-center gap-2.5 no-underline ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`header-logo ${isRTL ? 'flex-row-reverse' : ''}`}
         >
           <span className="text-2xl font-bold text-primary leading-none select-none">
             A
@@ -95,14 +95,18 @@ export default function Header() {
 
         {/* ── Desktop Navigation ── */}
         <div
-          className={`hidden lg:flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}
+          className={`header-nav-links ${isRTL ? 'flex-row-reverse' : ''}`}
           role="menubar"
         >
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`nav-link ${isLinkActive(link.href) ? 'text-ink font-semibold' : ''}`}
+              className={`header-nav-link ${
+                isLinkActive(link.href) 
+                  ? 'text-ink bg-surface-alt' 
+                  : 'text-ink-secondary hover:text-ink hover:bg-surface-alt'
+              }`}
               role="menuitem"
               aria-current={isLinkActive(link.href) ? 'page' : undefined}
             >
@@ -111,34 +115,33 @@ export default function Header() {
           ))}
         </div>
 
-        {/* ── Right Section: Language + CTA + Mobile toggle ── */}
-        <div className={`flex items-center gap-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          {/* Language Selector — text-only, no box */}
+        {/* ── Right Section ── */}
+        <div className={`header-right ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Language Selector */}
           <div className="relative">
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-              className="flex items-center gap-1.5 text-small font-medium text-ink-secondary hover:text-ink bg-transparent border-none cursor-pointer p-0 transition-colors"
+              className="header-language-button"
               aria-label={`Select language, current: ${currentLang}`}
               aria-expanded={isLangDropdownOpen}
               aria-haspopup="menu"
             >
               <span className="uppercase">{currentLang}</span>
               <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
+                className={`w-4 h-4 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`}
                 aria-hidden="true"
               />
             </button>
 
             {isLangDropdownOpen && (
               <>
-                {/* Backdrop to close on outside click */}
                 <div
                   className="fixed inset-0 z-40"
                   onClick={() => setIsLangDropdownOpen(false)}
                   aria-hidden="true"
                 />
                 <div
-                  className={`absolute top-full mt-2 z-50 bg-surface border border-border rounded-lg py-1 min-w-40 shadow-dropdown ${isRTL ? 'right-0' : 'left-0'}`}
+                  className={`header-language-dropdown ${isRTL ? 'right-0' : 'left-0'}`}
                   role="menu"
                 >
                   {languages.map((lang) => (
@@ -148,27 +151,19 @@ export default function Header() {
                         switchLanguage(lang.code);
                         setIsLangDropdownOpen(false);
                       }}
-                      className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-small bg-transparent border-none cursor-pointer transition-colors hover:bg-surface-alt ${
-                        isRTL
-                          ? 'text-right flex-row-reverse'
-                          : 'text-left'
+                      className={`header-language-option ${
+                        isRTL ? 'flex-row-reverse text-right' : 'text-left'
                       } ${
                         currentLang === lang.code
-                          ? 'text-ink font-semibold'
-                          : 'text-ink-secondary'
+                          ? 'header-language-option-active'
+                          : ''
                       }`}
                       role="menuitem"
                     >
-                      <span className="text-base leading-none" aria-hidden="true">
-                        {lang.flag}
-                      </span>
                       <span>{lang.label}</span>
                       {currentLang === lang.code && (
-                        <span
-                          className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-primary text-sm`}
-                          aria-hidden="true"
-                        >
-                          ✓
+                        <span className={`${isRTL ? 'mr-auto' : 'ml-auto'}`} aria-hidden="true">
+                          <Check className="w-4 h-4 text-primary" />
                         </span>
                       )}
                     </button>
@@ -178,7 +173,7 @@ export default function Header() {
             )}
           </div>
 
-          {/* CTA Button — Desktop: solid dark, tight radius */}
+          {/* CTA Button — Desktop */}
           <Link
             href={`/${currentLang}/devenir-client`}
             className="btn btn-dark hidden lg:inline-flex"
@@ -189,16 +184,12 @@ export default function Header() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 text-ink border-none bg-transparent cursor-pointer"
+            className="header-mobile-toggle lg:hidden"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </nav>
@@ -206,26 +197,22 @@ export default function Header() {
       {/* ── Mobile Navigation Menu ── */}
       {isMenuOpen && (
         <div
-          className="lg:hidden border-t border-border bg-surface animate-fadeIn"
+          className="header-mobile-menu lg:hidden"
           id="mobile-menu"
           role="navigation"
           aria-label="Mobile navigation"
         >
-          <div className="container py-2">
+          <div className="header-mobile-menu-content container">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`block py-3 px-4 text-small no-underline transition-colors border-b border-border last:border-b-0 ${
+                className={`header-mobile-menu-link ${
                   isRTL ? 'text-right' : 'text-left'
                 } ${
                   isLinkActive(link.href)
-                    ? `text-primary font-semibold ${
-                        isRTL
-                          ? 'border-r-2 border-r-primary pr-3'
-                          : 'border-l-2 border-l-primary pl-3'
-                      }`
-                    : 'text-ink-secondary hover:text-ink'
+                    ? 'text-primary font-semibold bg-primary-subtle'
+                    : 'text-ink-secondary hover:text-ink hover:bg-surface-alt'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
                 aria-current={isLinkActive(link.href) ? 'page' : undefined}
@@ -233,17 +220,6 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-
-            {/* Mobile CTA */}
-            <div className="pt-4 px-4 pb-2">
-              <Link
-                href={`/${currentLang}/devenir-client`}
-                className="btn btn-primary btn-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {ctaLabel}
-              </Link>
-            </div>
           </div>
         </div>
       )}

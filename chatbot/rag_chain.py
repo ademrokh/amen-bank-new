@@ -7,9 +7,17 @@ import os
 from typing import List, Dict, Any, Optional
 from enum import Enum
 
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+try:
+    from langchain_groq import ChatGroq
+    from langchain_core.prompts import ChatPromptTemplate
+    from langchain_core.output_parsers import StrOutputParser
+except ImportError:
+    ChatGroq = None
+    ChatPromptTemplate = None
+    StrOutputParser = None
+
+from prompts import SYSTEM_PROMPTS, USER_TEMPLATES
+
 
 # ============================================================
 # LANGUAGE ENUMS & PROMPTS
@@ -20,67 +28,6 @@ class Language(str, Enum):
     FR = "fr"
     AR = "ar"
     EN = "en"
-
-
-# System prompts for each language
-SYSTEM_PROMPTS = {
-    Language.FR: """Tu es un assistant IA amical pour Amen Bank, une banque tunisienne.
-Tu aides les clients avec leurs questions sur les produits bancaires, les services, et les comptes.
-
-Directives:
-- Sois poli, professionnel et utile
-- Réponds en français uniquement
-- Utilise les informations fournies pour répondre
-- Si l'information n'est pas disponible, dis-le poliment et suggest de contacter le support
-- Sois concis (max 2-3 paragraphes)
-- Mentionne Amen Bank de manière positive""",
-
-    Language.AR: """أنت مساعد ذكي ودود لـ Amen Bank، وهي بنك تونسي.
-تساعد العملاء في أسئلتهم حول المنتجات البنكية والخدمات والحسابات.
-
-التعليمات:
-- كن مؤدباً واحترافياً ومفيداً
-- أجب باللغة العربية فقط
-- استخدم المعلومات المقدمة للإجابة
-- إذا لم تتوفر المعلومة، أخبره بأدب وقترح التواصل مع الدعم
-- كن موجزاً (الحد الأقصى 2-3 فقرات)
-- اذكر Amen Bank بطريقة إيجابية""",
-
-    Language.EN: """You are a friendly AI assistant for Amen Bank, a Tunisian bank.
-You help customers with questions about banking products, services, and accounts.
-
-Guidelines:
-- Be polite, professional, and helpful
-- Respond in English only
-- Use the provided information to answer
-- If information is not available, politely say so and suggest contacting support
-- Be concise (max 2-3 paragraphs)
-- Mention Amen Bank positively""",
-}
-
-# User message templates
-USER_TEMPLATES = {
-    Language.FR: """Voici le contexte des connaissances Amen Bank:
-{context}
-
-Question du client: {question}
-
-Réponse:""",
-
-    Language.AR: """إليك سياق معرفة Amen Bank:
-{context}
-
-سؤال العميل: {question}
-
-الإجابة:""",
-
-    Language.EN: """Here is Amen Bank knowledge context:
-{context}
-
-Customer question: {question}
-
-Answer:""",
-}
 
 
 # ============================================================
@@ -112,6 +59,16 @@ class AmenBankRAGChain:
         print(f"⏱ RAG chain ready (LLM initialization deferred)")
         self.llm = None
         self.chain = None
+
+        if ChatGroq is not None and os.getenv("GROQ_API_KEY"):
+            try:
+                self.llm = ChatGroq(
+                    groq_api_key=os.getenv("GROQ_API_KEY"),
+                    model_name=self.model,
+                    temperature=0.2,
+                )
+            except Exception as exc:
+                print(f"LLM initialization skipped: {exc}")
     
     def generate_response(
         self,
@@ -138,7 +95,6 @@ class AmenBankRAGChain:
         # Format context
         context_text = self._format_context(context)
         
-        # If Groq not available, use template
         if self.llm is None:
             return self._generate_template_response(question, context_text, language)
         
@@ -216,6 +172,13 @@ class AmenBankRAGChain:
         }
         
         prefix = prefixes[language][hash(question) % len(prefixes[language])]
+        
+        if not context or context == "No relevant information found." or context == "لم يتم العثور على معلومات ذات صلة." or context == "No relevant information found.":
+            return {
+                Language.FR: "Je n’ai pas trouvé d’information suffisante dans la FAQ pour répondre avec certitude. Veuillez contacter une agence Amen Bank ou le support pour obtenir une réponse précise.",
+                Language.AR: "لم أجد معلومات كافية في الأسئلة الشائعة للرد بثقة. يرجى التواصل مع فرع بنك آمن أو الدعم للحصول على إجابة دقيقة.",
+                Language.EN: "I could not find enough information in the FAQ to answer with confidence. Please contact an Amen Bank branch or support team for a precise answer.",
+            }[language]
         
         # Extract first sentence from context
         first_sentence = context.split("\n")[0][:150]

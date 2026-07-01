@@ -46,7 +46,7 @@ test.describe('Navigation - Routes', () => {
     
     if (await faqLink.isVisible()) {
       await faqLink.click();
-      await page.waitForURL(/faq/);
+      await page.waitForURL(/amengpt/);
       
       const mainContent = page.locator('main');
       await expect(mainContent).toBeVisible();
@@ -67,7 +67,7 @@ test.describe('Navigation - Routes', () => {
 
   test('should handle direct route access', async ({ page }) => {
     // Direct access to each route
-    const routes = ['/agencies', '/contact', '/faq'];
+    const routes = ['/agencies', '/contact', '/amengpt'];
     
     for (const route of routes) {
       await page.goto(route);

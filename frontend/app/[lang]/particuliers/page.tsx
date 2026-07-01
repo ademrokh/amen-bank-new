@@ -1,17 +1,12 @@
+'use client';
+
 import Link from 'next/link';
-import { ArrowRight, Smartphone } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, Smartphone, ShieldCheck, Zap, Globe, X } from 'lucide-react';
+import { useState } from 'react';
+import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
-
-export function generateStaticParams() {
-  return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
-}
-
-export const metadata = {
-  title: 'Particuliers - Amen Bank',
-  description:
-    'Solutions bancaires pour les particuliers - Comptes, épargne, crédits',
-};
 
 /* Stripe mapping: product index → design-system stripe class */
 const PRODUCT_STRIPES = [
@@ -21,13 +16,11 @@ const PRODUCT_STRIPES = [
   'card-stripe-blue',
 ];
 
-export default async function ParticuliersPage({
-  params,
-}: {
-  params: Promise<{ lang: Language }>;
-}) {
-  const { lang } = await params;
-  const isRTL = lang === 'ar';
+const ADVANTAGE_ICONS = [ShieldCheck, Smartphone, Zap, Globe];
+
+export default function ParticuliersPage() {
+  const { lang, isRTL } = useLang();
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   const content = {
     fr: {
@@ -79,46 +72,20 @@ export default async function ParticuliersPage({
         },
       ],
       advantages: [
-        {
-          icon: '🔒',
-          title: 'Sécurisé',
-          desc: 'Chiffrement 256-bit et authentification multi-facteurs',
-        },
-        {
-          icon: '📱',
-          title: 'Mobile First',
-          desc: 'Application mobile complète disponible 24h/24',
-        },
-        {
-          icon: '⚡',
-          title: 'Rapide',
-          desc: 'Transactions instantanées et approvals rapides',
-        },
-        {
-          icon: '🌍',
-          title: 'Global',
-          desc: 'Accès international avec les meilleures devises',
-        },
+        { title: 'Sécurisé', desc: 'Chiffrement 256-bit et authentification multi-facteurs' },
+        { title: 'Mobile First', desc: 'Application mobile complète disponible 24h/24' },
+        { title: 'Rapide', desc: 'Transactions instantanées et approvals rapides' },
+        { title: 'Global', desc: 'Accès international avec les meilleures devises' },
       ],
       amenPay: {
-        label: 'Mobile Payment',
+        badge: 'Mobile Payment',
         title: 'AmenPay',
-        subtitle: "L'application mobile de paiement d'Amen Bank",
-        description:
-          "Payez en toute simplicité avec AmenPay, l'application de mobile payment d'Amen Bank.",
-        features: [
-          'Paiements mobiles instantanés',
-          "Transferts d'argent simples",
-          'Recharges de téléphone',
-          'Sécurité maximale avec biométrie',
-          'Disponible 24h/24, 7j/7',
-        ],
-        cta: 'Télécharger AmenPay',
         platforms: 'Disponible sur iOS et Android',
+        cta: 'Télécharger AmenPay',
+        popupTitle: 'Choisissez votre plateforme',
       },
       ctaTitle: 'Prêt à commencer ?',
-      ctaDesc:
-        "Ouvrez votre compte dès aujourd'hui et bénéficiez de tous nos services",
+      ctaDesc: "Ouvrez votre compte dès aujourd'hui et bénéficiez de tous nos services",
       ctaBtn: 'Ouvrir un compte',
     },
     en: {
@@ -170,42 +137,17 @@ export default async function ParticuliersPage({
         },
       ],
       advantages: [
-        {
-          icon: '🔒',
-          title: 'Secure',
-          desc: '256-bit encryption and multi-factor authentication',
-        },
-        {
-          icon: '📱',
-          title: 'Mobile First',
-          desc: 'Complete mobile app available 24/7',
-        },
-        {
-          icon: '⚡',
-          title: 'Fast',
-          desc: 'Instant transactions and quick approvals',
-        },
-        {
-          icon: '🌍',
-          title: 'Global',
-          desc: 'International access with best exchange rates',
-        },
+        { title: 'Secure', desc: '256-bit encryption and multi-factor authentication' },
+        { title: 'Mobile First', desc: 'Complete mobile app available 24/7' },
+        { title: 'Fast', desc: 'Instant transactions and quick approvals' },
+        { title: 'Global', desc: 'International access with best exchange rates' },
       ],
       amenPay: {
-        label: 'Mobile Payment',
+        badge: 'Mobile Payment',
         title: 'AmenPay',
-        subtitle: "Amen Bank's Mobile Payment Application",
-        description:
-          "Pay effortlessly with AmenPay, Amen Bank's mobile payment app.",
-        features: [
-          'Instant mobile payments',
-          'Simple money transfers',
-          'Phone recharges',
-          'Maximum security with biometrics',
-          'Available 24/7',
-        ],
-        cta: 'Download AmenPay',
         platforms: 'Available on iOS and Android',
+        cta: 'Download AmenPay',
+        popupTitle: 'Choose your platform',
       },
       ctaTitle: 'Ready to get started?',
       ctaDesc: 'Open your account today and enjoy all our services',
@@ -260,41 +202,17 @@ export default async function ParticuliersPage({
         },
       ],
       advantages: [
-        {
-          icon: '🔒',
-          title: 'آمن',
-          desc: 'التشفير 256-bit والمصادقة متعددة العوامل',
-        },
-        {
-          icon: '📱',
-          title: 'الجوال أولاً',
-          desc: 'تطبيق جوال كامل متاح 24/7',
-        },
-        {
-          icon: '⚡',
-          title: 'سريع',
-          desc: 'معاملات فورية والموافقات السريعة',
-        },
-        {
-          icon: '🌍',
-          title: 'عالمي',
-          desc: 'الوصول الدولي بأفضل أسعار صرف',
-        },
+        { title: 'آمن', desc: 'التشفير 256-bit والمصادقة متعددة العوامل' },
+        { title: 'الجوال أولاً', desc: 'تطبيق جوال كامل متاح 24/7' },
+        { title: 'سريع', desc: 'معاملات فورية والموافقات السريعة' },
+        { title: 'عالمي', desc: 'الوصول الدولي بأفضل أسعار صرف' },
       ],
       amenPay: {
-        label: 'Mobile Payment',
+        badge: 'Mobile Payment',
         title: 'AmenPay',
-        subtitle: 'تطبيق الدفع المحمول من بنك آمن',
-        description: 'ادفع بكل سهولة مع AmenPay، تطبيق الدفع المحمول من أمين بنك.',
-        features: [
-          'دفع فوري عبر الهاتف المحمول',
-          'تحويلات أموال بسيطة',
-          'إعادة شحن الهاتف',
-          'أمان قصوى مع البيومتريا',
-          'متاح 24/7',
-        ],
-        cta: 'تحميل AmenPay',
         platforms: 'متاح على iOS و Android',
+        cta: 'تحميل AmenPay',
+        popupTitle: 'اختر نظام التشغيل',
       },
       ctaTitle: 'هل أنت مستعد للبدء؟',
       ctaDesc: 'افتح حسابك اليوم والاستفادة من جميع خدماتنا',
@@ -302,55 +220,49 @@ export default async function ParticuliersPage({
     },
   };
 
-  const d = content[lang];
+  const d = content[lang as Language];
 
   return (
     <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ════════════════════════════════════════════
-          HERO — #0f172a flat
+          HERO — section-lg for proper hero spacing
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-32">
+      <section className="section-lg" style={{ background: '#0f172a' }}>
         <div className="container">
-          <span className="section-label text-white/50!">
+          <span className="section-label" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Amen Bank · {d.label}
           </span>
-          <h1 className="text-[2.5rem] sm:text-display text-white mt-2 mb-4">
+          <h1 className="text-[2.5rem] sm:text-display text-white mt-3 mb-5">
             {d.title}
           </h1>
-          <p className="text-lg text-ink-muted max-w-2xl leading-relaxed">
+          <p className="text-xl max-w-3xl leading-relaxed" style={{ color: '#94a3b8' }}>
             {d.subtitle}
           </p>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          PRODUCTS — #f8fafc, stripe cards, green dots
+          PRODUCTS — Standard section spacing
           ════════════════════════════════════════════ */}
-      <section className="bg-surface-alt py-24">
+      <section className="section" style={{ background: '#f8fafc' }}>
         <div className="container">
-          <span className="section-label">{d.productsHeading}</span>
-          <h2 className="text-h2 text-ink mt-2 mb-16">{d.productsHeading}</h2>
+          <div className="section-header">
+            <span className="section-badge">{d.productsHeading}</span>
+            <h2 className="text-h2 text-ink">{d.productsHeading}</h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {d.products.map((product, idx) => (
-              <div
-                key={product.title}
-                className={`card ${PRODUCT_STRIPES[idx]}`}
-              >
+              <div key={product.title} className={`card ${PRODUCT_STRIPES[idx]}`}>
                 <h3 className="text-h4 text-ink mb-2">{product.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed mb-6">
+                <p className="text-small text-[#64748b] leading-relaxed mb-6">
                   {product.desc}
                 </p>
-                <ul className="space-y-2.5">
+                <ul className="space-y-3">
                   {product.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className={`flex items-center gap-2.5 text-small text-ink-secondary ${
-                        isRTL ? 'flex-row-reverse' : ''
-                      }`}
-                    >
-                      <span className="w-1.25 h-1.25 rounded-full bg-primary shrink-0" />
+                    <li key={feature} className={`flex items-center gap-3 text-small text-[#64748b] ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -362,114 +274,175 @@ export default async function ParticuliersPage({
       </section>
 
       {/* ════════════════════════════════════════════
-          ADVANTAGES — white, centered, feature-icon style
+          ADVANTAGES — Smaller section spacing
           ════════════════════════════════════════════ */}
-      <section className="bg-surface py-24">
+      <section className="section-sm" style={{ background: '#ffffff' }}>
         <div className="container">
-          <div className="text-center mb-16">
-            <span className="section-label">{d.advantagesHeading}</span>
-            <h2 className="text-h2 text-ink mt-2">{d.advantagesHeading}</h2>
+          <div className="section-header">
+            <span className="section-badge">{d.advantagesHeading}</span>
+            <h2 className="text-h2 text-ink">{d.advantagesHeading}</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">
-            {d.advantages.map((adv) => (
-              <div key={adv.title} className="card text-center">
-                <div className="feature-icon mx-auto text-xl">
-                  {adv.icon}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {d.advantages.map((adv, idx) => {
+              const Icon = ADVANTAGE_ICONS[idx];
+              return (
+                <div key={adv.title} className="card text-center">
+                  <div className="feature-icon mx-auto">
+                    <Icon className="w-7 h-7 mx-auto text-primary" />
+                  </div>
+                  <h3 className="text-h4 text-ink mt-5 mb-2">{adv.title}</h3>
+                  <p className="text-small text-[#64748b] leading-relaxed">
+                    {adv.desc}
+                  </p>
                 </div>
-                <h3 className="text-h4 text-ink mt-5 mb-2">{adv.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed">
-                  {adv.desc}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          AMENPAY — #003DA5 flat, alternating layout
+          AMENPAY STRIP — compact, matches Hero's strip
           ════════════════════════════════════════════ */}
-      <section id="amenpay" className="bg-secondary py-24">
-        <div className="container">
-          <div
-            className={`flex flex-col ${
-              isRTL ? 'md:flex-row-reverse' : 'md:flex-row'
-            } gap-16 items-center`}
-          >
-            {/* Text */}
-            <div className="flex-1">
-              <span className="section-label text-white/50!">
-                {d.amenPay.label}
-              </span>
-              <h2 className="text-h1 text-white mt-2 mb-3">
-                {d.amenPay.title}
-              </h2>
-              <p className="text-lg text-white/70 mb-2">
-                {d.amenPay.subtitle}
-              </p>
-              <p className="text-ink-muted mb-8 leading-relaxed">
-                {d.amenPay.description}
-              </p>
+      <section id="amenpay" style={{ background: '#003DA5', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="container" style={{ paddingTop: '1.75rem', paddingBottom: '1.75rem' }}>
+          <div style={{
+            display: 'flex', flexDirection: 'row', alignItems: 'center',
+            justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{
+                width: '2.75rem', height: '2.75rem', borderRadius: '0.625rem', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
+              }}>
+                <Smartphone size={20} color="#ffffff" />
+              </div>
+              <div>
+                <p style={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: '0.125rem' }}>
+                  {d.amenPay.badge}
+                </p>
+                <p style={{ fontWeight: 700, color: '#ffffff', fontSize: '1rem' }}>{d.amenPay.title}</p>
+                <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.6)' }}>{d.amenPay.platforms}</p>
+              </div>
+            </div>
 
-              <ul className="space-y-3 mb-8">
-                {d.amenPay.features.map((f) => (
-                  <li
-                    key={f}
-                    className={`flex items-center gap-2.5 text-small text-white/80 ${
-                      isRTL ? 'flex-row-reverse' : ''
-                    }`}
-                  >
-                    <span className="w-1.25 h-1.25 rounded-full bg-white shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
+            {/* Button that triggers popup */}
+            <button
+              onClick={() => setIsPopupOpen(true)}
+              className="btn btn-lg"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.75rem 1.5rem', background: '#ffffff', color: '#003DA5',
+                borderRadius: '0.5rem', fontWeight: 700, fontSize: '0.9375rem',
+                whiteSpace: 'nowrap', flexShrink: 0,
+                cursor: 'pointer', border: 'none',
+              }}
+            >
+              {d.amenPay.cta}
+              <ArrowRight size={16} className={isRTL ? 'rotate-180' : ''} />
+            </button>
+          </div>
+        </div>
+      </section>
 
-              <Link
-                href={`/${lang}/particuliers`}
-                className={`btn btn-white inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                {d.amenPay.cta}
-                <ArrowRight
-                  className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`}
-                />
+      {/* ════════════════════════════════════════════
+          BOTTOM CTA — Standard section spacing to overcome button height
+          ════════════════════════════════════════════ */}
+      <section className="section" style={{ background: '#0f172a' }}>
+        <div className="container max-w-5xl">
+          <div className={`flex flex-col md:flex-row items-center justify-between gap-10 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+            <div className={`flex-1 ${isRTL ? 'md:text-right' : 'md:text-left'} text-center`}>
+              <h2 className="text-h2 text-white mb-2">{d.ctaTitle}</h2>
+              <p className="text-lg leading-relaxed" style={{ color: '#94a3b8' }}>
+                {d.ctaDesc}
+              </p>
+            </div>
+            <div className="shrink-0">
+              <Link href={`/${lang}/devenir-client`} className="btn btn-primary btn-lg inline-flex" style={{ color: '#ffffff', textDecoration: 'none', background: '#006B3C' }}>
+                {d.ctaBtn}
+                <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
               </Link>
             </div>
-
-            {/* Visual — phone icon in glass container */}
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-48 h-48 rounded-lg bg-white/6 border border-white/10 flex items-center justify-center">
-                <Smartphone className="w-20 h-20 text-white/80" />
-              </div>
-              <p className="text-small text-white/50 mt-4">
-                {d.amenPay.platforms}
-              </p>
-            </div>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          BOTTOM CTA — #0f172a flat
+          AMENPAY POPUP MODAL
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-h1 text-white">{d.ctaTitle}</h2>
-          <p className="text-lg text-ink-muted mt-4 mb-10 leading-relaxed">
-            {d.ctaDesc}
-          </p>
-          <Link
-            href={`/${lang}/devenir-client`}
-            className="btn btn-white btn-lg inline-flex"
+      {isPopupOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn"
+          style={{ background: 'rgba(15, 23, 42, 0.6)' }}
+          onClick={() => setIsPopupOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative flex flex-col gap-6"
+            onClick={(e) => e.stopPropagation()}
           >
-            {d.ctaBtn}
-            <ArrowRight
-              className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`}
-            />
-          </Link>
+            <button
+              onClick={() => setIsPopupOpen(false)}
+              className="absolute top-4 right-4 p-2 rounded-lg transition-colors"
+              style={{ color: '#94a3b8' }}
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: '#eff6ff' }}>
+                <Smartphone size={28} style={{ color: '#003DA5' }} />
+              </div>
+              <h3 className="text-xl font-bold" style={{ color: '#0f172a' }}>
+                {d.amenPay.popupTitle}
+              </h3>
+            </div>
+
+            {/* Spacious container for App Store and Play Store badges */}
+            <div
+              className="flex flex-col gap-6 rounded-xl"
+              style={{
+                background: '#f8fafc',
+                padding: '1.5rem',
+                border: '1px solid #e2e8f0'
+              }}
+            >
+              <a
+                href="https://play.google.com/store/apps/details?id=com.amen.projects.amenpay&hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex justify-center transition-transform hover:scale-105"
+              >
+                <Image
+                  src="https://en.logodownload.org/wp-content/uploads/2019/06/get-it-on-google-play-badge-1.png"
+                  alt="Get it on Google Play"
+                  width={135}
+                  height={48}
+                  unoptimized
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+              <a
+                href="https://apps.apple.com/tn/app/amenpay/id1528149293"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex justify-center transition-transform hover:scale-105"
+              >
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/3840px-Download_on_the_App_Store_Badge.svg.png"
+                  alt="Download on the App Store"
+                  width={135}
+                  height={48}
+                  unoptimized
+                  className="h-12 w-auto object-contain"
+                />
+              </a>
+            </div>
+          </div>
         </div>
-      </section>
+      )}
     </div>
   );
 }

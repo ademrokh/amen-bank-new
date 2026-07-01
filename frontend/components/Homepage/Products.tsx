@@ -6,21 +6,20 @@ import { useLang } from '@/hooks/useLang';
 
 type Language = 'fr' | 'ar' | 'en';
 
-/* 2px top-border accent per card — blue / green / gold */
 const STRIPE_CLASSES = [
-  'card-stripe-blue',
-  'card-stripe-blue',
-  'card-stripe-green',
-  'card-stripe-accent',
-  'card-stripe-blue',
-  'card-stripe-green',
+  'card-accent-blue',
+  'card-accent-blue',
+  'card-accent-green',
+  'card-accent-gold',
+  'card-accent-blue',
+  'card-accent-green',
 ];
 
 const products = [
   {
     id: 'comptes',
     icon: Wallet,
-    link: 'particuliers',
+    link: 'cartes-comptes',
     fr: {
       title: 'Comptes',
       desc: 'Comptes courants et épargne adaptés à vos besoins, avec accès mobile 24/7',
@@ -43,7 +42,7 @@ const products = [
   {
     id: 'cartes',
     icon: CreditCard,
-    link: 'particuliers',
+    link: 'cartes-comptes',
     fr: {
       title: 'Cartes Bancaires',
       desc: 'Cartes de débit et crédit avec protection maximale et avantages exclusifs',
@@ -162,99 +161,109 @@ export default function Products() {
   const l = lang as Language;
 
   const heading =
-    l === 'ar'
-      ? 'منتجاتنا والخدمات'
-      : l === 'en'
-        ? 'Our Products & Services'
-        : 'Nos Produits & Services';
+    l === 'ar' ? 'منتجاتنا والخدمات'
+    : l === 'en' ? 'Our Products & Services'
+    : 'Nos Produits & Services';
+
   const sub =
-    l === 'ar'
-      ? 'حلول مصرفية شاملة مناسبة لملفك الشخصي وأهدافك'
-      : l === 'en'
-        ? 'Complete banking solutions tailored to your profile and goals'
-        : 'Solutions bancaires complètes adaptées à votre profil et vos objectifs';
+    l === 'ar' ? 'حلول مصرفية شاملة مناسبة لملفك الشخصي وأهدافك'
+    : l === 'en' ? 'Complete banking solutions tailored to your profile and goals'
+    : 'Solutions bancaires complètes adaptées à votre profil et vos objectifs';
+
   const badge =
     l === 'ar' ? 'خدماتنا' : l === 'en' ? 'Our Services' : 'Nos Services';
+
   const notFound =
-    l === 'ar'
-      ? 'لا تجد ما تبحث عنه؟'
-      : l === 'en'
-        ? "Can't find what you're looking for?"
-        : "Vous ne trouvez pas ce qu'il vous faut ?";
+    l === 'ar' ? 'لا تجد ما تبحث عنه؟'
+    : l === 'en' ? "Can't find what you're looking for?"
+    : "Vous ne trouvez pas ce qu'il vous faut ?";
+
   const contactLabel =
-    l === 'ar'
-      ? 'تواصل مع فريقنا'
-      : l === 'en'
-        ? 'Contact Our Team'
-        : 'Contactez notre équipe';
+    l === 'ar' ? 'تواصل مع فريقنا'
+    : l === 'en' ? 'Contact Our Team'
+    : 'Contactez notre équipe';
 
   return (
-    <section className="bg-surface-alt py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+    <section className="section section-alt" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
-        {/* ── Section Header: Label → Headline → Sub ── */}
-        <div className="text-center mb-16">
-          <span className="section-label">{badge}</span>
-          <h2 className="text-h2 text-ink mt-2">{heading}</h2>
-          <p className="text-lg text-ink-secondary max-w-2xl mx-auto mt-4 leading-relaxed">
-            {sub}
-          </p>
+
+        {/* Header */}
+        <div className="section-header">
+          <span className="section-badge">{badge}</span>
+          <h2>{heading}</h2>
+          <p>{sub}</p>
         </div>
 
-        {/* ── Products Grid: 3 / 2 / 1 ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product, idx) => {
             const c = product[l];
             const Icon = product.icon;
             return (
               <div
                 key={product.id}
-                className={`card flex flex-col ${STRIPE_CLASSES[idx]}`}
+                className={`card flex flex-col h-full ${STRIPE_CLASSES[idx]}`}
               >
+                {/* Icon */}
                 <div className="feature-icon">
-                  <Icon className="w-6 h-6" />
+                  <Icon size={22} />
                 </div>
-                <h3 className="text-h4 text-ink mt-5 mb-2">{c.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed mb-6 flex-1">
+
+                {/* Title */}
+                <h3 className="text-lg font-bold text-[#0f172a] mt-6 mb-3">
+                  {c.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm text-[#64748b] leading-relaxed mb-6">
                   {c.desc}
                 </p>
 
-                {/* Feature list: 5px green dot, not an icon */}
+                {/* Feature list */}
                 <ul className="space-y-2.5 mb-8">
                   {c.features.map((f) => (
                     <li
                       key={f}
-                      className={`flex items-center gap-2.5 text-small text-ink-secondary ${isRTL ? 'flex-row-reverse' : ''}`}
+                      className={`flex items-center gap-3 text-sm text-[#64748b] ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
-                      <span className="w-1.25 h-1.25 rounded-full bg-primary shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                       {f}
                     </li>
                   ))}
                 </ul>
+                <br></br>
 
-                {/* Full-width primary CTA */}
-                <Link
-                  href={`/${lang}/${product.link}`}
-                  className={`btn btn-primary btn-full justify-center ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  {c.cta}
-                  <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-                </Link>
+                {/* CTA */}
+                <div className="mt-auto">
+                  <Link
+                    href={`/${lang}/${product.link}`}
+                    className={`btn btn-primary w-full justify-center text-white no-underline ${isRTL ? 'flex-row-reverse' : ''}`}
+                    style={{ color: '#ffffff', textDecoration: 'none' }}
+                  >
+                    {c.cta}
+                    <ArrowRight size={16} className={isRTL ? 'rotate-180 ml-2' : 'mr-2'} />
+                  </Link>
+                </div>
               </div>
             );
           })}
         </div>
+        <br></br>
 
-        {/* ── Fallback CTA ── */}
-        <div className="mt-16 text-center">
-          <p className="text-ink-secondary mb-5">{notFound}</p>
+        {/* Fallback CTA */}
+        <div className="mt-24 text-center">
+          <p className="text-[#64748b] mb-5 text-base">{notFound}</p>
+          <br></br>
           <Link
             href={`/${lang}/contact`}
-            className={`btn btn-outline inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
+            className={`btn btn-outline-dark inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
+            style={{ color: '#64748b', textDecoration: 'none' }}
           >
             {contactLabel}
-            <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <ArrowRight size={16} className={isRTL ? 'rotate-180 ml-2' : 'mr-2'} />
           </Link>
         </div>
+
       </div>
     </section>
   );

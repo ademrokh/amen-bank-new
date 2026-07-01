@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 
 // Type definitions
+interface CurrencyRate {
+  toTND: number;   // 1 unit of currency = X TND
+  fromTND: number; // 1 TND = X unit of currency
+}
+
 interface ExchangeRates {
   base: string;
   timestamp: string;
   rates: {
-    EUR: number;
-    USD: number;
-    CAD: number;
+    EUR: CurrencyRate;
+    USD: CurrencyRate;
+    CAD: CurrencyRate;
   };
 }
 
@@ -19,14 +24,6 @@ interface SICAVFund {
   value: number;
   performance: number;
   currency: string;
-}
-
-interface ExchangeRateResponse {
-  rates: {
-    EUR: number;
-    USD: number;
-    CAD: number;
-  };
 }
 
 interface APIResponse {
@@ -86,9 +83,10 @@ async function fetchExchangeRates(): Promise<ExchangeRates> {
   }
 
   try {
-    // Fetch from frankfurter.app API
-    // This API provides free exchange rates without authentication
-    const response = await fetch('https://api.frankfurter.app/latest?from=TND&to=EUR,USD,CAD', {
+    // Fetch from open.er-api.com API
+    // This API provides free exchange rates without authentication and supports TND
+    // Base is TND, so data.rates.EUR means 1 TND = X EUR
+    const response = await fetch('https://open.er-api.com/v6/latest/TND', {
       next: { revalidate: 3600 }, // Revalidate every hour
     });
 
@@ -96,17 +94,28 @@ async function fetchExchangeRates(): Promise<ExchangeRates> {
       throw new Error(`Exchange rate API error: ${response.status}`);
     }
 
-    const data: ExchangeRateResponse = await response.json();
+    const data = await response.json();
     
-    // Transform frankfurter response to our format
-    // Invert rates so they show as "1 EUR = X TND" instead of "1 TND = X EUR"
+    if (!data.rates || !data.rates.EUR || !data.rates.USD || !data.rates.CAD) {
+      throw new Error('Missing currency rates in API response');
+    }
+
     cachedRates = {
       base: 'TND',
       timestamp: new Date().toISOString(),
       rates: {
-        EUR: 1 / data.rates.EUR,
-        USD: 1 / data.rates.USD,
-        CAD: 1 / data.rates.CAD,
+        EUR: {
+          fromTND: data.rates.EUR,
+          toTND: 1 / data.rates.EUR,
+        },
+        USD: {
+          fromTND: data.rates.USD,
+          toTND: 1 / data.rates.USD,
+        },
+        CAD: {
+          fromTND: data.rates.CAD,
+          toTND: 1 / data.rates.CAD,
+        },
       },
     };
     
@@ -116,13 +125,14 @@ async function fetchExchangeRates(): Promise<ExchangeRates> {
     console.error('Failed to fetch exchange rates:', error);
     
     // Fallback to realistic mock data if API fails
+    // 1 EUR = 3.39 TND -> 1 TND = 0.295 EUR
     return {
       base: 'TND',
       timestamp: new Date().toISOString(),
       rates: {
-        EUR: 3.39,  // 1 EUR = 3.39 TND
-        USD: 3.17,  // 1 USD = 3.17 TND
-        CAD: 2.38,  // 1 CAD = 2.38 TND
+        EUR: { toTND: 3.39, fromTND: 0.295 },
+        USD: { toTND: 3.17, fromTND: 0.315 },
+        CAD: { toTND: 2.38, fromTND: 0.420 },
       },
     };
   }

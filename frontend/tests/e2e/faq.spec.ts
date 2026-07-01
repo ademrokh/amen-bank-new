@@ -2,21 +2,21 @@ import { test, expect } from '@playwright/test';
 
 test.describe('FAQ Page', () => {
   test('should load FAQ page in English', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     const mainContent = page.locator('main');
     await expect(mainContent).toBeVisible();
   });
 
   test('should load FAQ page in French', async ({ page }) => {
-    await page.goto('/fr/faq');
+    await page.goto('/fr/amengpt');
     
     const mainContent = page.locator('main');
     await expect(mainContent).toBeVisible();
   });
 
   test('should load FAQ page in Arabic', async ({ page }) => {
-    await page.goto('/ar/faq');
+    await page.goto('/ar/amengpt');
     
     const mainContent = page.locator('main');
     await expect(mainContent).toHaveAttribute('dir', 'rtl');
@@ -24,7 +24,7 @@ test.describe('FAQ Page', () => {
   });
 
   test('should display FAQ items', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     // Look for FAQ items/questions
     const faqItems = page.locator('[class*="faq"], [class*="question"], [class*="accordion"]');
@@ -34,7 +34,7 @@ test.describe('FAQ Page', () => {
   });
 
   test('should display FAQ categories if available', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     // Look for category filters or tabs
     const categories = page.locator('[class*="category"], button[class*="tab"]');
@@ -48,7 +48,7 @@ test.describe('FAQ Page', () => {
 
 test.describe('FAQ Page - Accordion Interactions', () => {
   test('should expand FAQ item on click', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     // Get first FAQ item
     const firstItem = page.locator('[class*="faq"], [class*="question"], [class*="accordion"]').first();
@@ -67,7 +67,7 @@ test.describe('FAQ Page - Accordion Interactions', () => {
   });
 
   test('should collapse FAQ item on second click', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     const firstItem = page.locator('[class*="faq"], [class*="question"], [class*="accordion"]').first();
     
@@ -83,7 +83,7 @@ test.describe('FAQ Page - Accordion Interactions', () => {
   });
 
   test('should handle multiple FAQ items', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     const items = page.locator('[class*="faq"], [class*="question"], [class*="accordion"]');
     const count = await items.count();
@@ -101,7 +101,7 @@ test.describe('FAQ Page - Accordion Interactions', () => {
 
 test.describe('FAQ Page - Search/Filter', () => {
   test('should filter FAQs by category if available', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     // Look for category buttons/tabs
     const categoryButtons = page.locator('button[class*="category"], button[class*="tab"]');
@@ -117,7 +117,7 @@ test.describe('FAQ Page - Search/Filter', () => {
   });
 
   test('should have working search if available', async ({ page }) => {
-    await page.goto('/faq');
+    await page.goto('/amengpt');
     
     // Look for search input
     const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]');
@@ -137,21 +137,21 @@ test.describe('FAQ Page - Search/Filter', () => {
 
 test.describe('FAQ Page - Language Support', () => {
   test('should display FAQs in French', async ({ page }) => {
-    await page.goto('/fr/faq');
+    await page.goto('/fr/amengpt');
     
     const content = await page.content();
     expect(content.length).toBeGreaterThan(0);
   });
 
   test('should display FAQs in Arabic with RTL layout', async ({ page }) => {
-    await page.goto('/ar/faq');
+    await page.goto('/ar/amengpt');
     
     const mainContent = page.locator('main');
     await expect(mainContent).toHaveAttribute('dir', 'rtl');
   });
 
   test('should display FAQs in English with LTR layout', async ({ page }) => {
-    await page.goto('/en/faq');
+    await page.goto('/en/amengpt');
     
     const mainContent = page.locator('main');
     

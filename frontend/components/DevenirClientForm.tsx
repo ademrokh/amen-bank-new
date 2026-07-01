@@ -81,45 +81,53 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     }
   };
 
+  const inputClasses = "w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base";
+  const labelClasses = "block text-sm font-semibold text-slate-900 mb-3";
+
   return (
-    <main className="bg-surface-alt py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+    <main className="section" style={{ background: '#f8fafc' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 items-start">
 
             {/* ── Left Column: Form ── */}
             <div>
-              <span className="section-label">Amen Bank</span>
-              <h1 className="text-h1 text-ink mt-2 mb-4">{page.title}</h1>
-              <p className="text-lg text-ink-secondary leading-relaxed mb-3">
-                {page.subtitle}
-              </p>
-              <p className="text-ink-secondary leading-relaxed mb-10">
-                {page.intro}
-              </p>
+              <div 
+                className="section-header" 
+                style={{ textAlign: isRTL ? 'right' : 'left', marginBottom: '3rem', alignItems: isRTL ? 'flex-end' : 'flex-start' }}
+              >
+                <span className="section-badge">Amen Bank</span>
+                <h1 className="text-h1 text-ink">{page.title}</h1>
+                <p className="text-lg leading-relaxed" style={{ color: '#64748b', margin: 0 }}>
+                  {page.subtitle}
+                </p>
+                <p className="leading-relaxed" style={{ color: '#64748b', margin: '1rem 0 0 0' }}>
+                  {page.intro}
+                </p>
+              </div>
 
-              <div className="card p-8!">
-                <h2 className="text-h3 text-ink mb-6">{page.formTitle}</h2>
-
-                <form className="space-y-5" onSubmit={handleSubmit}>
+              <div className="card">
+                <h2 className="text-h3 text-ink mb-8">{page.formTitle}</h2>
+                <br></br>
+                <form onSubmit={handleSubmit}>
                   {page.fields.map((field) => (
-                    <div key={field.name}>
-                      <label className="block text-small font-semibold text-ink mb-2">
+                    <div key={field.name} className="mb-8">
+                      <label className={labelClasses}>
                         {field.label}
                       </label>
                       <input
                         name={field.name}
                         value={formData[field.name as keyof typeof formData]}
                         onChange={handleChange}
-                        className="input-field"
+                        className={inputClasses}
                         placeholder={field.placeholder}
                         required={field.name !== 'accountType'}
                       />
                     </div>
                   ))}
 
-                  <div>
-                    <label className="block text-small font-semibold text-ink mb-2">
+                  <div className="mb-10">
+                    <label className={labelClasses}>
                       {page.messageLabel}
                     </label>
                     <textarea
@@ -127,41 +135,42 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
-                      className="input-field resize-none"
+                      className={`${inputClasses} resize-none`}
                       placeholder={page.messagePlaceholder}
                     />
                   </div>
 
                   {/* Feedback alert */}
                   {feedback.type && (
-                    <div
-                      className={`flex items-start gap-3 p-4 rounded-lg ${
-                        feedback.type === 'success'
-                          ? 'bg-primary-50 border border-primary-100'
-                          : 'bg-error/5 border border-error/20'
-                      } ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                    <div 
+                      className={`flex items-start gap-3 p-4 rounded-lg border mb-8 ${
+                        feedback.type === 'success' 
+                          ? 'bg-green-50 border-green-200' 
+                          : 'bg-red-50 border-red-200'
+                      }`}
+                      style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
                     >
                       {feedback.type === 'success' ? (
-                        <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#006B3C' }} />
                       ) : (
-                        <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
+                        <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#dc2626' }} />
                       )}
-                      <p
-                        className={`text-small font-medium ${
-                          feedback.type === 'success' ? 'text-primary' : 'text-error'
-                        }`}
+                      <p 
+                        className="text-sm font-medium" 
+                        style={{ color: feedback.type === 'success' ? '#166534' : '#991b1b' }}
                       >
                         {feedback.message}
                       </p>
                     </div>
                   )}
 
-                  {/* Buttons */}
-                  <div className={`flex flex-wrap gap-4 pt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  {/* Buttons separated with explicit top margin, top padding, and a subtle border */}
+                  <div className="flex flex-wrap items-center gap-6 mt-2 pt-8 border-t border-slate-100">
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className="btn btn-primary"
+                      style={{ color: '#ffffff', textDecoration: 'none', padding: '0.875rem 2rem' }}
                     >
                       {isSubmitting ? (
                         <>
@@ -174,10 +183,11 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                     </button>
                     <Link
                       href={`/${lang}/particuliers`}
-                      className={`btn btn-outline inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
+                      className="btn btn-outline-dark"
+                      style={{ color: '#64748b', textDecoration: 'none', padding: '0.875rem 2rem' }}
                     >
                       {page.secondary}
-                      <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+                      <ArrowRight className={`w-4 h-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
                     </Link>
                   </div>
                 </form>
@@ -185,18 +195,27 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
             </div>
 
             {/* ── Right Column: Notes ── */}
-            <div className="bg-slate-900 rounded-lg p-8 lg:sticky lg:top-24">
-              <h2 className="text-h3 text-white mb-6">{page.notesHeading}</h2>
+            <div 
+              className="lg:sticky lg:top-24" 
+              style={{ background: '#0f172a', padding: '2.5rem', borderRadius: '0.75rem' }}
+            >
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', marginBottom: '1.5rem' }}>
+                {page.notesHeading}
+              </h2>
               <ul className="space-y-4">
                 {page.notes.map((note) => (
-                  <li
-                    key={note}
-                    className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                  <li 
+                    key={note} 
+                    className="flex items-start gap-3"
+                    style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
                   >
-                    <span className="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/80">
+                    <span 
+                      className="mt-1 shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs"
+                      style={{ background: 'rgba(255,255,255,0.1)', color: '#ffffff' }}
+                    >
                       ✓
                     </span>
-                    <span className="text-small text-white/70 leading-relaxed">
+                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9375rem', lineHeight: '1.6' }}>
                       {note}
                     </span>
                   </li>

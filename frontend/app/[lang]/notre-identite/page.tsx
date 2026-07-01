@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Scale, Star, Rocket, HeartHandshake } from 'lucide-react';
+import Timeline from '@/components/Timeline';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -13,6 +14,8 @@ export const metadata = {
     "À propos d'Amen Bank - Histoire, mission, valeurs et équipe",
 };
 
+const VALUE_ICONS = [Scale, Star, Rocket, HeartHandshake];
+
 export default async function NotreIdentitePage({
   params,
 }: {
@@ -25,150 +28,84 @@ export default async function NotreIdentitePage({
     fr: {
       label: 'Notre Identité',
       title: 'Notre Identité',
-      subtitle: "40+ ans d'excellence bancaire",
       valuesHeading: 'Nos Valeurs',
       historyTitle: 'Notre Histoire',
       certsTitle: 'Nos Certifications',
       ctaTitle: 'Rejoignez notre communauté',
       ctaDesc: "Faites partie d'une institution bancaire de confiance",
       ctaBtn: 'En savoir plus',
+      groupBtn: 'Découvrir notre groupe',
       mission: {
         title: 'Notre Mission',
         desc: "Être le partenaire financier de confiance en Tunisie, en offrant des solutions bancaires innovantes et personnalisées qui contribuent au développement économique et social du pays.",
       },
       values: [
-        {
-          title: 'Intégrité',
-          desc: 'Nous agissons avec honnêteté et transparence dans toutes nos relations',
-          icon: '⚖️',
-        },
-        {
-          title: 'Excellence',
-          desc: 'Nous nous efforçons de fournir les meilleurs services bancaires',
-          icon: '⭐',
-        },
-        {
-          title: 'Innovation',
-          desc: 'Nous adoptons les dernières technologies pour améliorer nos services',
-          icon: '🚀',
-        },
-        {
-          title: 'Responsabilité',
-          desc: 'Nous prenons soin de nos clients et de la communauté',
-          icon: '🤲',
-        },
+        { title: 'Intégrité', desc: 'Nous agissons avec honnêteté et transparence dans toutes nos relations' },
+        { title: 'Excellence', desc: 'Nous nous efforçons de fournir les meilleurs services bancaires' },
+        { title: 'Innovation', desc: 'Nous adoptons les dernières technologies pour améliorer nos services' },
+        { title: 'Responsabilité', desc: 'Nous prenons soin de nos clients et de la communauté' },
       ],
       history: {
         events: [
           { year: '1980', event: "Fondation d'Amen Bank" },
           { year: '1990', event: 'Expansion du réseau à 50 agences' },
-          {
-            year: '2000',
-            event: 'Entrée en bourse et cotation à la Bourse de Tunis',
-          },
+          { year: '2000', event: 'Entrée en bourse et cotation à la Bourse de Tunis' },
           { year: '2010', event: 'Lancement de la plateforme digitale' },
-          {
-            year: '2020',
-            event: 'Atteinte de 164 agences dans toute la Tunisie',
-          },
-          {
-            year: '2024',
-            event: 'Obtention des certifications ISO 27001 et ISO 20000',
-          },
+          { year: '2020', event: 'Atteinte de 164 agences dans toute la Tunisie' },
+          { year: '2024', event: 'Obtention des certifications ISO 27001 et ISO 20000' },
         ],
       },
     },
     en: {
       label: 'About Us',
       title: 'Our Identity',
-      subtitle: '40+ years of banking excellence',
       valuesHeading: 'Our Values',
       historyTitle: 'Our History',
       certsTitle: 'Our Certifications',
       ctaTitle: 'Join our community',
       ctaDesc: 'Be part of a trusted banking institution',
       ctaBtn: 'Learn more',
+      groupBtn: 'Discover our group',
       mission: {
         title: 'Our Mission',
         desc: "To be Tunisia's trusted financial partner by offering innovative and personalized banking solutions that contribute to the economic and social development of the country.",
       },
       values: [
-        {
-          title: 'Integrity',
-          desc: 'We act with honesty and transparency in all our relationships',
-          icon: '⚖️',
-        },
-        {
-          title: 'Excellence',
-          desc: 'We strive to provide the best banking services',
-          icon: '⭐',
-        },
-        {
-          title: 'Innovation',
-          desc: 'We embrace the latest technologies to improve our services',
-          icon: '🚀',
-        },
-        {
-          title: 'Responsibility',
-          desc: 'We care for our customers and the community',
-          icon: '🤲',
-        },
+        { title: 'Integrity', desc: 'We act with honesty and transparency in all our relationships' },
+        { title: 'Excellence', desc: 'We strive to provide the best banking services' },
+        { title: 'Innovation', desc: 'We embrace the latest technologies to improve our services' },
+        { title: 'Responsibility', desc: 'We care for our customers and the community' },
       ],
       history: {
         events: [
           { year: '1980', event: 'Foundation of Amen Bank' },
           { year: '1990', event: 'Network expansion to 50 branches' },
-          {
-            year: '2000',
-            event: 'Stock market listing on Tunis Stock Exchange',
-          },
+          { year: '2000', event: 'Stock market listing on Tunis Stock Exchange' },
           { year: '2010', event: 'Launch of digital platform' },
-          {
-            year: '2020',
-            event: 'Reached 164 branches across Tunisia',
-          },
-          {
-            year: '2024',
-            event: 'Obtained ISO 27001 and ISO 20000 certifications',
-          },
+          { year: '2020', event: 'Reached 164 branches across Tunisia' },
+          { year: '2024', event: 'Obtained ISO 27001 and ISO 20000 certifications' },
         ],
       },
     },
     ar: {
       label: 'هويتنا',
       title: 'هويتنا',
-      subtitle: 'أكثر من 40 سنة من التفوق المصرفي',
       valuesHeading: 'قيمنا',
       historyTitle: 'تاريخنا',
       certsTitle: 'شهاداتنا',
       ctaTitle: 'انضم إلى مجتمعنا',
       ctaDesc: 'كن جزءًا من مؤسسة مصرفية موثوقة',
       ctaBtn: 'اعرف أكثر',
+      groupBtn: 'اكتشف مجموعتنا',
       mission: {
         title: 'مهمتنا',
         desc: 'أن نكون الشريك المالي الموثوق به في تونس، من خلال تقديم حلول مصرفية مبتكرة وشخصية تساهم في التنمية الاقتصادية والاجتماعية للبلاد.',
       },
       values: [
-        {
-          title: 'النزاهة',
-          desc: 'نتصرف بصدق وشفافية في جميع علاقاتنا',
-          icon: '⚖️',
-        },
-        {
-          title: 'التميز',
-          desc: 'نسعى لتقديم أفضل الخدمات المصرفية',
-          icon: '⭐',
-        },
-        {
-          title: 'الابتكار',
-          desc: 'نتبنى أحدث التقنيات لتحسين خدماتنا',
-          icon: '🚀',
-        },
-        {
-          title: 'المسؤولية',
-          desc: 'نعتني بعملائنا والمجتمع',
-          icon: '🤲',
-        },
+        { title: 'النزاهة', desc: 'نتصرف بصدق وشفافية في جميع علاقاتنا' },
+        { title: 'التميز', desc: 'نسعى لتقديم أفضل الخدمات المصرفية' },
+        { title: 'الابتكار', desc: 'نتبنى أحدث التقنيات لتحسين خدماتنا' },
+        { title: 'المسؤولية', desc: 'نعتني بعملائنا والمجتمع' },
       ],
       history: {
         events: [
@@ -177,10 +114,7 @@ export default async function NotreIdentitePage({
           { year: '2000', event: 'الإدراج في بورصة تونس' },
           { year: '2010', event: 'إطلاق المنصة الرقمية' },
           { year: '2020', event: 'الوصول إلى 164 فرعًا في جميع أنحاء تونس' },
-          {
-            year: '2024',
-            event: 'الحصول على شهادات ISO 27001 و ISO 20000',
-          },
+          { year: '2024', event: 'الحصول على شهادات ISO 27001 و ISO 20000' },
         ],
       },
     },
@@ -191,26 +125,15 @@ export default async function NotreIdentitePage({
   const stats = [
     {
       value: '164',
-      label:
-        lang === 'ar'
-          ? 'فرع'
-          : lang === 'en'
-            ? 'Branches'
-            : 'Agences',
+      label: lang === 'ar' ? 'فرع' : lang === 'en' ? 'Branches' : 'Agences',
     },
     {
       value: '500K+',
-      label:
-        lang === 'ar' ? 'عملاء' : lang === 'en' ? 'Clients' : 'Clients',
+      label: lang === 'ar' ? 'عملاء' : lang === 'en' ? 'Clients' : 'Clients',
     },
     {
       value: '40+',
-      label:
-        lang === 'ar'
-          ? 'سنة خبرة'
-          : lang === 'en'
-            ? 'Years'
-            : 'Ans',
+      label: lang === 'ar' ? 'سنة من التفوق المصرفي' : lang === 'en' ? 'Years of banking excellence' : "Ans d'excellence bancaire",
     },
   ];
 
@@ -218,39 +141,27 @@ export default async function NotreIdentitePage({
     <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ════════════════════════════════════════════
-          HERO — #0f172a flat
+          HERO & KEY FIGURES 
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-32">
+      <section className="section-sm" style={{ background: '#0f172a' }}>
         <div className="container">
-          <span className="section-label text-white/50!">
+          <span className="section-badge" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem' }}>
             Amen Bank · Since 1980
           </span>
-          <h1 className="text-[2.5rem] sm:text-display text-white mt-2 mb-4">
+          <h1 className="text-4xl md:text-5xl text-white mt-2 mb-3" style={{ fontWeight: 700, lineHeight: 1.15 }}>
             {d.title}
           </h1>
-          <p className="text-lg text-ink-muted max-w-2xl leading-relaxed">
-            {d.subtitle}
-          </p>
         </div>
-      </section>
 
-      {/* ════════════════════════════════════════════
-          KEY FIGURES — same dark band, white/10 dividers
-          ════════════════════════════════════════════ */}
-      <section className="bg-slate-900">
-        <div className="container py-10">
-          <div className="grid grid-cols-3 gap-6">
-            {stats.map((s, i) => (
-              <div
-                key={s.label}
-                className={`stats-divider text-center ${
-                  i === 0 ? (isRTL ? 'pr-6' : 'pl-6') : ''
-                } ${isRTL ? 'pl-6' : 'pr-6'}`}
-              >
-                <div className="text-3xl font-bold text-white">
+        {/* Increased top margin (mt-20) and top padding (pt-12) for better separation */}
+        <div className="container mt-20 pt-12" style={{ borderTop: '1px rgba(255,255,255,0.1)' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {stats.map((s) => (
+              <div key={s.label} className="text-center">
+                <div className="text-4xl font-bold text-white">
                   {s.value}
                 </div>
-                <div className="text-small text-ink-muted mt-1">
+                <div className="text-sm mt-1" style={{ color: '#94a3b8' }}>
                   {s.label}
                 </div>
               </div>
@@ -260,107 +171,83 @@ export default async function NotreIdentitePage({
       </section>
 
       {/* ════════════════════════════════════════════
-          MISSION — white, card with accent stripe
+          MISSION 
           ════════════════════════════════════════════ */}
-      <section className="bg-surface py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="card card-stripe-green">
-            <span className="section-label">{d.mission.title}</span>
-            <h2 className="text-h2 text-ink mt-2 mb-6">{d.mission.title}</h2>
-            <p className="text-lg text-ink-secondary leading-relaxed">
-              {d.mission.desc}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════
-          VALUES — #f8fafc, feature-icon cards
-          ════════════════════════════════════════════ */}
-      <section className="bg-surface-alt py-24">
-        <div className="container">
-          <div className="text-center mb-16">
-            <span className="section-label">{d.valuesHeading}</span>
-            <h2 className="text-h2 text-ink mt-2">{d.valuesHeading}</h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">
-            {d.values.map((value) => (
-              <div key={value.title} className="card text-center">
-                <div className="feature-icon mx-auto text-xl">
-                  {value.icon}
-                </div>
-                <h3 className="text-h4 text-ink mt-5 mb-2">{value.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed">
-                  {value.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════
-          HISTORY TIMELINE — white, clean vertical line
-          ════════════════════════════════════════════ */}
-      <section className="bg-surface py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <span className="section-label">{d.historyTitle}</span>
-          <h2 className="text-h2 text-ink mt-2 mb-16">{d.historyTitle}</h2>
-
-          <div className="relative">
-            {/* Vertical line */}
-            <div
-              className={`absolute top-0 bottom-0 w-px bg-border ${
-                isRTL ? 'right-10' : 'left-10'
-              }`}
-            />
-
-            <div className="space-y-10">
-              {d.history.events.map((event, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-center gap-6 ${
-                    isRTL ? 'flex-row-reverse' : ''
-                  }`}
-                >
-                  {/* Year dot */}
-                  <div
-                    className={`shrink-0 w-20 h-10 rounded-lg bg-primary-50 border border-border flex items-center justify-center ${
-                      isRTL ? 'mr-6' : 'ml-6'
-                    }`}
-                  >
-                    <span className="text-small font-bold text-primary">
-                      {event.year}
-                    </span>
-                  </div>
-
-                  {/* Event card */}
-                  <div className="flex-1 rounded-lg border border-border bg-surface px-6 py-5">
-                    <p className="text-small text-ink-secondary font-medium leading-relaxed">
-                      {event.event}
-                    </p>
-                  </div>
-                </div>
-              ))}
+      <section className="section-sm" style={{ background: '#ffffff' }}>
+        <div className="container max-w-4xl">
+          <div className="card card-stripe-green" style={{ padding: '2.5rem' }}>
+            <div className="space-y-4">
+              <span className="section-badge" style={{ marginBottom: '0', display: 'block' }}>{d.mission.title}</span>
+              <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.mission.title}</h2>
+              <p className="text-lg leading-relaxed" style={{ color: '#64748b' }}>
+                {d.mission.desc}
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════
-          CERTIFICATIONS — #f8fafc, simple bordered tags
+          VALUES 
           ════════════════════════════════════════════ */}
-      <section className="bg-surface-alt py-24">
+      <section className="section-sm" style={{ background: '#f8fafc' }}>
+        <div className="container">
+          <div className="section-header" style={{ marginBottom: '3rem' }}>
+            <span className="section-badge">{d.valuesHeading}</span>
+            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.valuesHeading}</h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {d.values.map((value, idx) => {
+              const Icon = VALUE_ICONS[idx];
+              return (
+                <div key={value.title} className="card text-center" style={{ padding: '2rem 1.5rem' }}>
+                  <div className="feature-icon mx-auto">
+                    <Icon className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="text-xl text-ink mt-4 mb-2" style={{ fontWeight: 600 }}>{value.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#64748b' }}>
+                    {value.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          HISTORY TIMELINE (Horizontal & Interactive)
+          ════════════════════════════════════════════ */}
+      <section className="section-sm" style={{ background: '#ffffff' }}>
+        <div className="container">
+          <div className="section-header" style={{ textAlign: 'center', marginBottom: '6rem' }}>
+            <span className="section-badge">{d.historyTitle}</span>
+            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.historyTitle}</h2>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <Timeline events={d.history.events} isRTL={isRTL} />
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          CERTIFICATIONS 
+          ════════════════════════════════════════════ */}
+      <section className="section-sm" style={{ background: '#f8fafc' }}>
         <div className="container text-center">
-          <span className="section-label">{d.certsTitle}</span>
-          <h2 className="text-h2 text-ink mt-2 mb-12">{d.certsTitle}</h2>
+          <div className="section-header" style={{ marginBottom: '2.5rem' }}>
+            <span className="section-badge">{d.certsTitle}</span>
+            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.certsTitle}</h2>
+          </div>
 
           <div className="flex flex-wrap justify-center gap-4">
             {['ISO 27001', 'ISO 20000', 'PCI DSS'].map((cert) => (
               <div
                 key={cert}
-                className="px-8 py-4 rounded-lg border border-border bg-surface font-bold text-ink"
+                className="rounded-lg font-bold text-ink"
+                style={{ padding: '1rem 1.75rem', border: '1px solid #e2e8f0', background: '#ffffff' }}
               >
                 {cert}
               </div>
@@ -370,23 +257,40 @@ export default async function NotreIdentitePage({
       </section>
 
       {/* ════════════════════════════════════════════
-          BOTTOM CTA — #0f172a flat
+          BOTTOM CTA 
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-h1 text-white">{d.ctaTitle}</h2>
-          <p className="text-lg text-ink-muted mt-4 mb-10 leading-relaxed">
+      <section className="section-sm" style={{ background: '#0f172a' }}>
+        <div className="container max-w-3xl text-center">
+          <h2 className="text-4xl text-white" style={{ fontWeight: 700 }}>{d.ctaTitle}</h2>
+          <p className="text-lg mt-3 mb-10 leading-relaxed" style={{ color: '#94a3b8' }}>
             {d.ctaDesc}
           </p>
-          <Link
-            href={`/${lang}/notre-identite`}
-            className="btn btn-white btn-lg inline-flex"
-          >
-            {d.ctaBtn}
-            <ArrowRight
-              className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`}
-            />
-          </Link>
+          
+          {/* Added flex container to hold both buttons neatly */}
+          <div className={`flex flex-wrap items-center justify-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Link
+              href={`/${lang}/particuliers`}
+              className="btn btn-white btn-lg inline-flex"
+              style={{ color: '#0f172a', textDecoration: 'none' }}
+            >
+              {d.ctaBtn}
+              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
+            </Link>
+            
+            <Link
+              href={`/${lang}/groupe`}
+              className="btn btn-lg inline-flex"
+              style={{ 
+                color: '#ffffff', 
+                textDecoration: 'none', 
+                background: '#006B3C', 
+                border: '1px solid #006B3C' 
+              }}
+            >
+              {d.groupBtn}
+              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
+            </Link>
+          </div>
         </div>
       </section>
     </div>

@@ -1,466 +1,132 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { MapPin, Phone, Clock, Search } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
-
-/* ════════════════════════════════════════════
-   Types & Data
-   ════════════════════════════════════════════ */
 
 type Language = 'fr' | 'ar' | 'en';
 
-interface Branch {
-  id: number;
-  name_fr: string;
-  name_ar: string;
-  name_en: string;
-  city_fr: string;
-  city_ar: string;
-  city_en: string;
-  region: string;
-  address_fr: string;
-  address_ar: string;
-  address_en: string;
-  phone: string;
-  hours_fr: string;
-  hours_ar: string;
-  hours_en: string;
-  latitude: number;
-  longitude: number;
-}
-
-const branches: Branch[] = [
-  {
-    id: 1,
-    name_fr: 'Siege Social',
-    name_ar: 'المقر الرئيسي',
-    name_en: 'Head Office',
-    city_fr: 'Tunis',
-    city_ar: 'تونس',
-    city_en: 'Tunis',
-    region: 'Tunis',
-    address_fr: 'Avenue Mohamed V, 1002 Tunis',
-    address_ar: 'جادة محمد الخامس، 1002 تونس',
-    address_en: 'Avenue Mohamed V, 1002 Tunis',
-    phone: '71 833 517',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 36.8065,
-    longitude: 10.1815,
-  },
-  {
-    id: 2,
-    name_fr: 'Agence Marsa',
-    name_ar: 'فرع المرسى',
-    name_en: 'Marsa Branch',
-    city_fr: 'La Marsa',
-    city_ar: 'المرسى',
-    city_en: 'La Marsa',
-    region: 'Tunis',
-    address_fr: 'Avenue Bourguiba, La Marsa',
-    address_ar: 'جادة بورقيبة، المرسى',
-    address_en: 'Avenue Bourguiba, La Marsa',
-    phone: '71 748 000',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 36.8626,
-    longitude: 10.3256,
-  },
-  {
-    id: 3,
-    name_fr: 'Agence Sfax',
-    name_ar: 'فرع صفاقس',
-    name_en: 'Sfax Branch',
-    city_fr: 'Sfax',
-    city_ar: 'صفاقس',
-    city_en: 'Sfax',
-    region: 'Sfax',
-    address_fr: 'Rue Ali Belhouane, Sfax',
-    address_ar: 'شارع علي بلهوان، صفاقس',
-    address_en: 'Rue Ali Belhouane, Sfax',
-    phone: '74 298 555',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 34.7406,
-    longitude: 10.7603,
-  },
-  {
-    id: 4,
-    name_fr: 'Agence Sousse',
-    name_ar: 'فرع سوسة',
-    name_en: 'Sousse Branch',
-    city_fr: 'Sousse',
-    city_ar: 'سوسة',
-    city_en: 'Sousse',
-    region: 'Sousse',
-    address_fr: 'Avenue Bourguiba, Sousse',
-    address_ar: 'جادة بورقيبة، سوسة',
-    address_en: 'Avenue Bourguiba, Sousse',
-    phone: '73 225 300',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 35.8356,
-    longitude: 10.6348,
-  },
-  {
-    id: 5,
-    name_fr: 'Agence Gafsa',
-    name_ar: 'فرع قفصة',
-    name_en: 'Gafsa Branch',
-    city_fr: 'Gafsa',
-    city_ar: 'قفصة',
-    city_en: 'Gafsa',
-    region: 'Gafsa',
-    address_fr: 'Avenue de la Victoire, Gafsa',
-    address_ar: 'جادة النصر، قفصة',
-    address_en: 'Avenue de la Victoire, Gafsa',
-    phone: '76 224 455',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 34.4267,
-    longitude: 8.7845,
-  },
-  {
-    id: 6,
-    name_fr: 'Agence Kairouan',
-    name_ar: 'فرع القيروان',
-    name_en: 'Kairouan Branch',
-    city_fr: 'Kairouan',
-    city_ar: 'القيروان',
-    city_en: 'Kairouan',
-    region: 'Kairouan',
-    address_fr: 'Rue du Bey, Kairouan',
-    address_ar: 'شارع الباي، القيروان',
-    address_en: 'Rue du Bey, Kairouan',
-    phone: '77 224 677',
-    hours_fr: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
-    hours_ar: 'الإثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
-    hours_en: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
-    latitude: 35.6713,
-    longitude: 9.9176,
-  },
+const CITIES = [
+  { id: 'tunis', fr: 'Tunis', ar: 'تونس', en: 'Tunis', lat: 36.8065, lng: 10.1815, zoom: 12 },
+  { id: 'ariana', fr: 'Ariana', ar: 'أريانة', en: 'Ariana', lat: 36.8623, lng: 10.1934, zoom: 12 },
+  { id: 'ben_arous', fr: 'Ben Arous', ar: 'بن عروس', en: 'Ben Arous', lat: 36.7530, lng: 10.2278, zoom: 12 },
+  { id: 'manouba', fr: 'Manouba', ar: 'منوبة', en: 'Manouba', lat: 36.8088, lng: 10.1010, zoom: 12 },
+  { id: 'nabeul', fr: 'Nabeul', ar: 'نابل', en: 'Nabeul', lat: 36.4557, lng: 10.7360, zoom: 12 },
+  { id: 'zaghouan', fr: 'Zaghouan', ar: 'زغوان', en: 'Zaghouan', lat: 36.4029, lng: 10.1430, zoom: 12 },
+  { id: 'bizerte', fr: 'Bizerte', ar: 'بنزرت', en: 'Bizerte', lat: 37.2744, lng: 9.8737, zoom: 12 },
+  { id: 'beja', fr: 'Béja', ar: 'باجة', en: 'Béja', lat: 36.7256, lng: 9.1817, zoom: 12 },
+  { id: 'jendouba', fr: 'Jendouba', ar: 'جندوبة', en: 'Jendouba', lat: 36.5011, lng: 8.7803, zoom: 12 },
+  { id: 'kef', fr: 'Le Kef', ar: 'الكاف', en: 'Le Kef', lat: 36.1742, lng: 8.7045, zoom: 12 },
+  { id: 'siliana', fr: 'Siliana', ar: 'سليانة', en: 'Siliana', lat: 36.0849, lng: 9.3712, zoom: 12 },
+  { id: 'sousse', fr: 'Sousse', ar: 'سوسة', en: 'Sousse', lat: 35.8245, lng: 10.6346, zoom: 12 },
+  { id: 'monastir', fr: 'Monastir', ar: 'المنستير', en: 'Monastir', lat: 35.7643, lng: 10.8113, zoom: 12 },
+  { id: 'mahdia', fr: 'Mahdia', ar: 'المهدية', en: 'Mahdia', lat: 35.5047, lng: 11.0622, zoom: 12 },
+  { id: 'sfax', fr: 'Sfax', ar: 'صفاقس', en: 'Sfax', lat: 34.7406, lng: 10.7602, zoom: 12 },
+  { id: 'kairouan', fr: 'Kairouan', ar: 'القيروان', en: 'Kairouan', lat: 35.6759, lng: 10.0913, zoom: 12 },
+  { id: 'kasserine', fr: 'Kasserine', ar: 'القصرين', en: 'Kasserine', lat: 35.1676, lng: 8.8347, zoom: 12 },
+  { id: 'sidi_bouzid', fr: 'Sidi Bouzid', ar: 'سيدي بوزيد', en: 'Sidi Bouzid', lat: 35.0382, lng: 9.4846, zoom: 12 },
+  { id: 'gabes', fr: 'Gabès', ar: 'قابس', en: 'Gabès', lat: 33.8434, lng: 10.0982, zoom: 12 },
+  { id: 'medenine', fr: 'Médenine', ar: 'مدنين', en: 'Médenine', lat: 33.3400, lng: 10.4980, zoom: 12 },
+  { id: 'tataouine', fr: 'Tataouine', ar: 'تطاوين', en: 'Tataouine', lat: 32.9297, lng: 10.4526, zoom: 12 },
+  { id: 'gafsa', fr: 'Gafsa', ar: 'قفصة', en: 'Gafsa', lat: 34.4250, lng: 8.7842, zoom: 12 },
+  { id: 'tozeur', fr: 'Tozeur', ar: 'توزر', en: 'Tozeur', lat: 33.9197, lng: 8.1335, zoom: 12 },
+  { id: 'kebili', fr: 'Kébili', ar: 'قبلي', en: 'Kébili', lat: 33.7050, lng: 8.9645, zoom: 12 },
 ];
-
-/* ════════════════════════════════════════════
-   Helpers
-   ════════════════════════════════════════════ */
-
-function getBranchContent(branch: Branch, lang: Language) {
-  return {
-    name: lang === 'fr' ? branch.name_fr : lang === 'ar' ? branch.name_ar : branch.name_en,
-    city: lang === 'fr' ? branch.city_fr : lang === 'ar' ? branch.city_ar : branch.city_en,
-    address: lang === 'fr' ? branch.address_fr : lang === 'ar' ? branch.address_ar : branch.address_en,
-    hours: lang === 'fr' ? branch.hours_fr : lang === 'ar' ? branch.hours_ar : branch.hours_en,
-  };
-}
-
-/* ════════════════════════════════════════════
-   Map — all Leaflet code inside dynamic()
-   to prevent SSR crashes. Marker/Popup
-   inline styles MUST stay — they're raw HTML
-   strings passed to Leaflet's API, not
-   React-rendered elements.
-   ════════════════════════════════════════════ */
-
-const TUNISIA_CENTER: [number, number] = [35.2, 9.6];
-const DEFAULT_ZOOM = 7;
-const BRANCH_ZOOM = 14;
-
-interface MapInnerProps {
-  branches: Branch[];
-  selectedBranch: Branch | null;
-  onSelectBranch: (branch: Branch) => void;
-  lang: Language;
-}
-
-const MapView = dynamic<MapInnerProps>(
-  () =>
-    Promise.all([import('react-leaflet'), import('leaflet')]).then(
-      ([
-        { MapContainer, TileLayer, Marker, Popup, useMap },
-        L,
-      ]) => {
-        const markerDefault = L.divIcon({
-          className: '',
-          html: '<div style="width:14px;height:14px;border-radius:50%;background:#64748b;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.18)"></div>',
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-          popupAnchor: [0, -10],
-        });
-
-        const markerSelected = L.divIcon({
-          className: '',
-          html: '<div style="width:18px;height:18px;border-radius:50%;background:#006B3C;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.22)"></div>',
-          iconSize: [18, 18],
-          iconAnchor: [9, 9],
-          popupAnchor: [0, -12],
-        });
-
-        function FlyController({ branch }: { branch: Branch | null }) {
-          const map = useMap();
-          useEffect(() => {
-            if (branch) {
-              map.flyTo([branch.latitude, branch.longitude], BRANCH_ZOOM, {
-                duration: 0.8,
-              });
-            }
-          }, [branch, map]);
-          return null;
-        }
-
-        function MapInner({
-          branches,
-          selectedBranch,
-          onSelectBranch,
-          lang,
-        }: MapInnerProps) {
-          return (
-            <MapContainer
-              center={TUNISIA_CENTER}
-              zoom={DEFAULT_ZOOM}
-              scrollWheelZoom={true}
-              className="w-full h-full rounded-lg"
-              style={{ minHeight: '380px' }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-
-              <FlyController branch={selectedBranch} />
-
-              {branches.map((branch) => {
-                const c = getBranchContent(branch, lang);
-                const isSelected = selectedBranch?.id === branch.id;
-                return (
-                  <Marker
-                    key={branch.id}
-                    position={[branch.latitude, branch.longitude]}
-                    icon={isSelected ? markerSelected : markerDefault}
-                    eventHandlers={{
-                      click: () => onSelectBranch(branch),
-                    }}
-                  >
-                    <Popup>
-                      <span style={{ fontWeight: 600, fontSize: '0.8125rem', color: '#0f172a', lineHeight: 1.4 }}>
-                        {c.name}
-                      </span>
-                      <br />
-                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        {c.city}
-                      </span>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-            </MapContainer>
-          );
-        }
-
-        return MapInner;
-      }
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-full min-h-95 bg-surface-alt border border-border rounded-lg flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-small text-ink-muted">Loading map…</p>
-        </div>
-      </div>
-    ),
-  }
-);
-
-/* ════════════════════════════════════════════
-   Main Component
-   ════════════════════════════════════════════ */
 
 export default function AgencyLocator() {
   const { lang: currentLang, isRTL } = useLang();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
-
-  const filteredBranches = branches.filter((branch) => {
-    const q = searchQuery.toLowerCase();
-    const c = getBranchContent(branch, currentLang);
-    return (
-      c.name.toLowerCase().includes(q) ||
-      c.city.toLowerCase().includes(q) ||
-      c.address.toLowerCase().includes(q) ||
-      branch.region.toLowerCase().includes(q)
-    );
-  });
+  const [selectedCity, setSelectedCity] = useState('all');
 
   const ui = {
     fr: {
       sectionTitle: "Réseau d'Agences",
       sectionDescription: "Trouvez l'agence Amen Bank la plus proche de vous",
-      searchPlaceholder: 'Rechercher par ville ou région…',
-      selectPrompt: 'Sélectionnez une agence sur la carte pour voir les détails',
-      address: 'Adresse',
-      phone: 'Téléphone',
-      hours: 'Horaires',
-      infoBox: 'Amen Bank dispose de 164 agences réparties dans 14 régions tunisiennes',
-      infoSub: 'Visitez-nous pour une consultation gratuite avec nos experts',
-      branchCount: (n: number) => `${n} agence${n !== 1 ? 's' : ''} trouvée${n !== 1 ? 's' : ''}`,
-      noResults: 'Aucune agence trouvée.',
+      selectLabel: 'Sélectionner un gouvernorat',
+      allOption: 'Toute la Tunisie',
+      infoBox: "Localisation exacte fournie par Google Maps. Sélectionnez une région pour zoomer sur ses agences.",
     },
     ar: {
       sectionTitle: 'شبكة الفروع',
       sectionDescription: 'جد فرع أمين بنك الأقرب إليك',
-      searchPlaceholder: 'ابحث حسب المدينة أو المنطقة…',
-      selectPrompt: 'حدد فرعا على الخريطة لعرض التفاصيل',
-      address: 'العنوان',
-      phone: 'الهاتف',
-      hours: 'الساعات',
-      infoBox: 'يوجد لدى أمين بنك 164 فرعا موزعة على 14 منطقة تونسية',
-      infoSub: 'قم بزيارتنا للحصول على استشارة مجانية من خبرائنا',
-      branchCount: (n: number) => `${n} فرع موجود`,
-      noResults: 'لم يتم العثور على أي فرع.',
+      selectLabel: 'اختر ولاية',
+      allOption: 'كامل تونس',
+      infoBox: 'موقع دقيق مقدمة من خرائط جوجل. حدد منطقة للتكبير على فروعها.',
     },
     en: {
       sectionTitle: 'Branch Network',
       sectionDescription: 'Find the nearest Amen Bank branch to you',
-      searchPlaceholder: 'Search by city or region…',
-      selectPrompt: 'Select a branch on the map to view details',
-      address: 'Address',
-      phone: 'Phone',
-      hours: 'Hours',
-      infoBox: 'Amen Bank has 164 branches distributed across 14 Tunisian regions',
-      infoSub: 'Visit us for a free consultation with our experts',
-      branchCount: (n: number) => `${n} branch${n !== 1 ? 'es' : ''} found`,
-      noResults: 'No branches found.',
+      selectLabel: 'Select a Governorate',
+      allOption: 'All of Tunisia',
+      infoBox: 'Exact location provided by Google Maps. Select a region to zoom in on its branches.',
     },
   }[currentLang];
 
+  // Construct the map URL dynamically based on the selected city
+  const getMapUrl = () => {
+    const baseUrl = "https://www.google.com/maps/d/u/0/embed?mid=1AhxlBmBN4Z7Gwo_V09BwVmDk_At2KhRm";
+    
+    if (selectedCity === 'all') {
+      // Default view for all of Tunisia
+      return `${baseUrl}&ll=36.13510056307994%2C11.015413355445013&z=7`;
+    }
+    
+    const city = CITIES.find(c => c.id === selectedCity);
+    if (city) {
+      return `${baseUrl}&ll=${city.lat}%2C${city.lng}&z=${city.zoom}`;
+    }
+    
+    return baseUrl;
+  };
+
   return (
-    <section className="bg-surface-alt py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+    <section className="section" style={{ background: '#f8fafc' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
-
+        
         {/* ── Header ── */}
-        <div className="section-header mb-16">
-          <h1>{ui.sectionTitle}</h1>
-          <p>{ui.sectionDescription}</p>
+        <div className="section-header">
+          <h1 style={{ color: '#0f172a' }}>{ui.sectionTitle}</h1>
+          <p style={{ color: '#64748b' }}>{ui.sectionDescription}</p>
         </div>
 
-        {/* ── Search ── */}
-        <div className="max-w-2xl mx-auto mb-12">
+        {/* ── Dropdown ── */}
+        <div className="max-w-md mx-auto mb-12">
           <div className="relative">
-            <input
-              type="text"
-              placeholder={ui.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`input-field ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'}`}
-            />
-            <div className={`absolute top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none ${isRTL ? 'right-4' : 'left-4'}`}>
-              <Search className="w-5 h-5" />
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="form-input-base appearance-none cursor-pointer"
+              style={{ paddingRight: isRTL ? '1rem' : '2.5rem', paddingLeft: isRTL ? '2.5rem' : '1rem' }}
+            >
+              <option value="all">{ui.allOption}</option>
+              {CITIES.map((city) => (
+                <option key={city.id} value={city.id}>{city[currentLang]}</option>
+              ))}
+            </select>
+            <div className={`absolute top-1/2 -translate-y-1/2 pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>
+              <ChevronDown className="w-5 h-5" style={{ color: '#94a3b8' }} />
             </div>
           </div>
         </div>
-
-        {/* ── Map + Info Panel ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-
-          {/* Map — no inline style, uses Tailwind min-h */}
-          <div className="lg:col-span-2">
-            <div className="bg-surface-alt border border-border rounded-lg overflow-hidden min-h-95">
-              <MapView
-                branches={filteredBranches}
-                selectedBranch={selectedBranch}
-                onSelectBranch={setSelectedBranch}
-                lang={currentLang}
-              />
-            </div>
-          </div>
-
-          {/* Info Panel */}
-          <div className="lg:col-span-1">
-            {selectedBranch ? (
-              <div className="card sticky top-24 border-primary!">
-                <h3 className="text-h4 text-ink mb-5">
-                  {getBranchContent(selectedBranch, currentLang).name}
-                </h3>
-
-                <div className={`flex items-start gap-3 mb-5 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                  <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.address}</p>
-                    <p className="text-small text-ink">{getBranchContent(selectedBranch, currentLang).address}</p>
-                  </div>
-                </div>
-
-                <div className={`flex items-start gap-3 mb-5 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                  <Phone className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.phone}</p>
-                    <a href={`tel:${selectedBranch.phone}`} className="text-small font-medium text-secondary hover:text-secondary-dark transition-colors">
-                      {selectedBranch.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                  <Clock className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-0.5">{ui.hours}</p>
-                    <p className="text-small text-ink-secondary">{getBranchContent(selectedBranch, currentLang).hours}</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-secondary-50 border border-border rounded-lg p-8 text-center sticky top-24">
-                <MapPin className="w-8 h-8 text-ink-muted mx-auto mb-3" />
-                <p className="text-small text-ink-secondary leading-relaxed">{ui.selectPrompt}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Branch List ── */}
-        <div className="mb-16">
-          <h3 className="text-h3 text-ink mb-6">{ui.branchCount(filteredBranches.length)}</h3>
-
-          {filteredBranches.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredBranches.map((branch) => {
-                const c = getBranchContent(branch, currentLang);
-                const isSelected = selectedBranch?.id === branch.id;
-                return (
-                  <button
-                    key={branch.id}
-                    onClick={() => setSelectedBranch(branch)}
-                    className={`text-left p-5 rounded-lg border transition-colors cursor-pointer ${
-                      isSelected ? 'border-primary bg-primary-50' : 'border-border bg-surface hover:border-primary'
-                    } ${isRTL ? 'text-right' : ''}`}
-                  >
-                    <h4 className={`font-semibold text-sm mb-1 ${isSelected ? 'text-primary' : 'text-ink'}`}>{c.name}</h4>
-                    <p className="text-small text-ink-secondary mb-1.5">{c.city}</p>
-                    <p className="text-xs text-ink-muted leading-relaxed">{c.address}</p>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="py-16 text-center">
-              <p className="text-ink-muted">{ui.noResults}</p>
-            </div>
-          )}
+        <br></br>
+        {/* ── Map Embed ── */}
+        <div 
+          className="rounded-xl overflow-hidden shadow-sm mb-12"
+          style={{ border: '1px solid #e2e8f0', height: '600px' }}
+        >
+          <iframe 
+            key={selectedCity} // Key forces iframe to reload/refresh when city changes
+            src={getMapUrl()} 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            loading="lazy"
+            title="Amen Bank Agency Locator"
+          ></iframe>
         </div>
 
         {/* ── Info Box ── */}
-        <div className="bg-secondary-50 border border-border rounded-lg p-10 text-center">
-          <p className="text-ink-secondary mb-2">{ui.infoBox}</p>
-          <p className="text-small text-ink-muted">{ui.infoSub}</p>
+        <div className="rounded-xl p-8 text-center" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          <p style={{ color: '#64748b' }}>{ui.infoBox}</p>
         </div>
       </div>
     </section>

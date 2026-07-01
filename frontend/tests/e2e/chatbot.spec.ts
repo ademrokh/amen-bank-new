@@ -32,7 +32,7 @@ test.describe('Chatbot Widget - Visibility and Interaction', () => {
   });
 
   test('should display chatbot on all pages', async ({ page }) => {
-    const pages = ['/', '/agencies', '/contact', '/faq'];
+    const pages = ['/', '/agencies', '/contact', '/amengpt'];
     
     for (const pagePath of pages) {
       await page.goto(pagePath);

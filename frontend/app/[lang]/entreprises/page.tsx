@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Briefcase, Rocket, Wrench, Handshake } from 'lucide-react';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -20,6 +20,8 @@ const PRODUCT_STRIPES = [
   'card-stripe-accent',
   'card-stripe-blue',
 ];
+
+const ADVANTAGE_ICONS = [Briefcase, Rocket, Wrench, Handshake];
 
 export default async function EntreprisesPage({
   params,
@@ -83,26 +85,10 @@ export default async function EntreprisesPage({
         },
       ],
       advantages: [
-        {
-          icon: '💼',
-          title: 'Expérience',
-          desc: '40+ ans de partenariat avec les entreprises tunisiennes',
-        },
-        {
-          icon: '🚀',
-          title: 'Croissance',
-          desc: 'Financement flexible pour votre développement',
-        },
-        {
-          icon: '🔧',
-          title: 'Solutions',
-          desc: 'Produits personnalisés selon vos besoins',
-        },
-        {
-          icon: '🤝',
-          title: 'Partenariat',
-          desc: 'Relation durable basée sur la confiance',
-        },
+        { title: 'Expérience', desc: '40+ ans de partenariat avec les entreprises tunisiennes' },
+        { title: 'Croissance', desc: 'Financement flexible pour votre développement' },
+        { title: 'Solutions', desc: 'Produits personnalisés selon vos besoins' },
+        { title: 'Partenariat', desc: 'Relation durable basée sur la confiance' },
       ],
     },
     en: {
@@ -157,26 +143,10 @@ export default async function EntreprisesPage({
         },
       ],
       advantages: [
-        {
-          icon: '💼',
-          title: 'Experience',
-          desc: '40+ years of partnership with Tunisian businesses',
-        },
-        {
-          icon: '🚀',
-          title: 'Growth',
-          desc: 'Flexible financing for your development',
-        },
-        {
-          icon: '🔧',
-          title: 'Solutions',
-          desc: 'Customized products according to your needs',
-        },
-        {
-          icon: '🤝',
-          title: 'Partnership',
-          desc: 'Lasting relationship based on trust',
-        },
+        { title: 'Experience', desc: '40+ years of partnership with Tunisian businesses' },
+        { title: 'Growth', desc: 'Flexible financing for your development' },
+        { title: 'Solutions', desc: 'Customized products according to your needs' },
+        { title: 'Partnership', desc: 'Lasting relationship based on trust' },
       ],
     },
     ar: {
@@ -231,26 +201,10 @@ export default async function EntreprisesPage({
         },
       ],
       advantages: [
-        {
-          icon: '💼',
-          title: 'الخبرة',
-          desc: 'أكثر من 40 سنة من الشراكة مع المؤسسات التونسية',
-        },
-        {
-          icon: '🚀',
-          title: 'النمو',
-          desc: 'تمويل مرن لتطورك',
-        },
-        {
-          icon: '🔧',
-          title: 'الحلول',
-          desc: 'منتجات مخصصة حسب احتياجاتك',
-        },
-        {
-          icon: '🤝',
-          title: 'الشراكة',
-          desc: 'علاقة دائمة قائمة على الثقة',
-        },
+        { title: 'الخبرة', desc: 'أكثر من 40 سنة من الشراكة مع المؤسسات التونسية' },
+        { title: 'النمو', desc: 'تمويل مرن لتطورك' },
+        { title: 'الحلول', desc: 'منتجات مخصصة حسب احتياجاتك' },
+        { title: 'الشراكة', desc: 'علاقة دائمة قائمة على الثقة' },
       ],
     },
   };
@@ -263,15 +217,15 @@ export default async function EntreprisesPage({
       {/* ════════════════════════════════════════════
           HERO — #0f172a flat
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-32">
+      <section className="section-lg" style={{ background: '#0f172a' }}>
         <div className="container">
-          <span className="section-label text-white/50!">
+          <span className="section-badge" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '1rem', display: 'block' }}>
             Amen Bank · {d.label}
           </span>
-          <h1 className="text-[2.5rem] sm:text-display text-white mt-2 mb-4">
+          <h1 className="text-4xl md:text-5xl text-white mt-2 mb-4" style={{ fontWeight: 700, lineHeight: 1.15 }}>
             {d.title}
           </h1>
-          <p className="text-lg text-ink-muted max-w-2xl leading-relaxed">
+          <p className="text-lg max-w-3xl leading-relaxed" style={{ color: '#94a3b8' }}>
             {d.subtitle}
           </p>
         </div>
@@ -280,30 +234,32 @@ export default async function EntreprisesPage({
       {/* ════════════════════════════════════════════
           PRODUCTS — #f8fafc, stripe cards, green dots
           ════════════════════════════════════════════ */}
-      <section className="bg-surface-alt py-24">
+      <section className="section" style={{ background: '#f8fafc' }}>
         <div className="container">
-          <span className="section-label">{d.productsHeading}</span>
-          <h2 className="text-h2 text-ink mt-2 mb-16">{d.productsHeading}</h2>
+          <div className="section-header" style={{ marginBottom: '4rem' }}>
+            <span className="section-badge">{d.productsHeading}</span>
+            <h2 className="text-h2 text-ink">{d.productsHeading}</h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {d.products.map((product, idx) => (
               <div
                 key={product.title}
                 className={`card ${PRODUCT_STRIPES[idx]}`}
+                style={{ padding: '2.5rem' }}
               >
-                <h3 className="text-h4 text-ink mb-2">{product.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed mb-6">
+                <h3 className="text-xl mb-2" style={{ fontWeight: 600, color: '#0f172a' }}>{product.title}</h3>
+                <p className="text-sm leading-relaxed mb-6" style={{ color: '#64748b' }}>
                   {product.desc}
                 </p>
-                <ul className="space-y-2.5">
+                <ul className="space-y-3">
                   {product.features.map((feature) => (
                     <li
                       key={feature}
-                      className={`flex items-center gap-2.5 text-small text-ink-secondary ${
-                        isRTL ? 'flex-row-reverse' : ''
-                      }`}
+                      className={`flex items-center gap-3 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
+                      style={{ color: '#64748b' }}
                     >
-                      <span className="w-1.25 h-1.25 rounded-full bg-primary shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -317,25 +273,28 @@ export default async function EntreprisesPage({
       {/* ════════════════════════════════════════════
           ADVANTAGES — white, centered, feature-icon style
           ════════════════════════════════════════════ */}
-      <section className="bg-surface py-24">
+      <section className="section-sm" style={{ background: '#ffffff' }}>
         <div className="container">
-          <div className="text-center mb-16">
-            <span className="section-label">{d.advantagesHeading}</span>
-            <h2 className="text-h2 text-ink mt-2">{d.advantagesHeading}</h2>
+          <div className="section-header" style={{ marginBottom: '3rem' }}>
+            <span className="section-badge">{d.advantagesHeading}</span>
+            <h2 className="text-h2 text-ink">{d.advantagesHeading}</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-16">
-            {d.advantages.map((adv) => (
-              <div key={adv.title} className="card text-center">
-                <div className="feature-icon mx-auto text-xl">
-                  {adv.icon}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {d.advantages.map((adv, idx) => {
+              const Icon = ADVANTAGE_ICONS[idx];
+              return (
+                <div key={adv.title} className="card text-center" style={{ padding: '2rem 1.5rem' }}>
+                  <div className="feature-icon mx-auto">
+                    <Icon className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="text-xl text-ink mt-4 mb-2" style={{ fontWeight: 600 }}>{adv.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#64748b' }}>
+                    {adv.desc}
+                  </p>
                 </div>
-                <h3 className="text-h4 text-ink mt-5 mb-2">{adv.title}</h3>
-                <p className="text-small text-ink-secondary leading-relaxed">
-                  {adv.desc}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -343,19 +302,20 @@ export default async function EntreprisesPage({
       {/* ════════════════════════════════════════════
           BOTTOM CTA — #0f172a flat
           ════════════════════════════════════════════ */}
-      <section className="bg-slate-900 py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-h1 text-white">{d.ctaTitle}</h2>
-          <p className="text-lg text-ink-muted mt-4 mb-10 leading-relaxed">
+      <section className="section-sm" style={{ background: '#0f172a' }}>
+        <div className="container max-w-3xl text-center">
+          <h2 className="text-4xl text-white" style={{ fontWeight: 700 }}>{d.ctaTitle}</h2>
+          <p className="text-lg mt-3 mb-8 leading-relaxed" style={{ color: '#94a3b8' }}>
             {d.ctaDesc}
           </p>
           <Link
             href={`/${lang}/contact`}
             className="btn btn-white btn-lg inline-flex"
+            style={{ color: '#0f172a', textDecoration: 'none' }}
           >
             {d.ctaBtn}
             <ArrowRight
-              className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`}
             />
           </Link>
         </div>

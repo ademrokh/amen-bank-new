@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle, Clock, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { Mail, Phone, MapPin, Send, CheckCircle, Clock, MessageCircle } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
-
-type Language = 'fr' | 'ar' | 'en';
 
 export default function Contact() {
   const { lang: currentLang, isRTL } = useLang();
@@ -71,9 +68,9 @@ export default function Contact() {
       location: 'Localisation',
       workingHours: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
       subjects: ['Général', 'Support Client', 'Demande de Crédit', 'Plainte', 'Autre'],
-      faqTitle: 'Questions Fréquemment Posées',
-      faqDesc: 'Consultez notre section FAQ pour trouver des réponses à vos questions',
-      faqLink: 'Voir la FAQ',
+      faqTitle: 'Besoin d\'aide immédiate ?',
+      faqDesc: 'Notre assistant virtuel est disponible 24h/24 pour répondre à vos questions fréquentes.',
+      faqLink: 'Discuter avec l\'assistant',
     },
     ar: {
       pageTitle: 'اتصل بنا',
@@ -94,9 +91,9 @@ export default function Contact() {
       location: 'الموقع',
       workingHours: 'الاثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
       subjects: ['عام', 'دعم العملاء', 'طلب قرض', 'شكوى', 'أخرى'],
-      faqTitle: 'الأسئلة الشائعة',
-      faqDesc: 'تحقق من قسم الأسئلة الشائعة للعثور على إجابات لأسئلتك',
-      faqLink: 'عرض الأسئلة',
+      faqTitle: 'بحاجة إلى مساعدة فورية؟',
+      faqDesc: 'مساعدنا الافتراضي متاح 24/7 للإجابة على أسئلتك الشائعة.',
+      faqLink: 'تحدث مع المساعد',
     },
     en: {
       pageTitle: 'Contact Us',
@@ -117,110 +114,134 @@ export default function Contact() {
       location: 'Location',
       workingHours: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
       subjects: ['General', 'Customer Support', 'Loan Request', 'Complaint', 'Other'],
-      faqTitle: 'Frequently Asked Questions',
-      faqDesc: 'Check our FAQ section to find answers to your questions',
-      faqLink: 'View FAQ',
+      faqTitle: 'Need immediate help?',
+      faqDesc: 'Our virtual assistant is available 24/7 to answer your frequently asked questions.',
+      faqLink: 'Chat with Assistant',
     },
   };
 
-  const lang = content[currentLang];
+  const lang = content[currentLang as keyof typeof content];
 
   return (
-    <section className="bg-surface py-24" dir={isRTL ? 'rtl' : 'ltr'}>
+    <section className="section" style={{ background: '#ffffff' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
         {/* ── Header ── */}
-        <div className="section-header mb-16">
-          <h1>{lang.pageTitle}</h1>
-          <p>{lang.pageDescription}</p>
+        <div className="section-header">
+          <h1 style={{ color: '#0f172a' }}>{lang.pageTitle}</h1>
+          <p style={{ color: '#64748b' }}>{lang.pageDescription}</p>
         </div>
 
         {/* ── Main Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Left — Contact Info */}
           <div>
-            <h2 className="text-h2 text-ink mb-8">{lang.contactInfo}</h2>
+            <h2 className="text-3xl mb-10" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.contactInfo}</h2>
 
-            <div className="space-y-4">
-              {/* Email — blue tint */}
+            {/* Explicit flex layout with 2rem gap for uncramped spacing */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              
+              {/* Email */}
               <div
-                className={`flex items-start gap-4 p-5 rounded-lg bg-blue-50 border border-blue-100 ${
-                  isRTL ? 'flex-row-reverse text-right' : ''
-                }`}
+                style={{ 
+                  display: 'flex', 
+                  gap: '1.5rem', 
+                  padding: '2rem 2.5rem', 
+                  borderRadius: '0.75rem', 
+                  background: '#eff6ff', 
+                  border: '1px solid rgb(0 61 165 / 0.15)', 
+                  flexDirection: isRTL ? 'row-reverse' : 'row' 
+                }}
               >
-                <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <Mail className="w-6 h-6 shrink-0 mt-1" style={{ color: '#003DA5' }} />
                 <div>
-                  <h3 className="text-small font-semibold text-ink mb-1">{lang.email}</h3>
+                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.email}</h3>
                   <a
                     href="mailto:amenbank@amenbank.com.tn"
-                    className="text-small text-blue-800 hover:text-blue-600 font-medium transition-colors"
+                    className="text-base font-medium transition-colors"
+                    style={{ color: '#1a56c4' }}
                   >
                     amenbank@amenbank.com.tn
                   </a>
                 </div>
               </div>
 
-              {/* Phone — cyan tint */}
+              {/* Phone */}
               <div
-                className={`flex items-start gap-4 p-5 rounded-lg bg-cyan-50 border border-cyan-100 ${
-                  isRTL ? 'flex-row-reverse text-right' : ''
-                }`}
+                style={{ 
+                  display: 'flex', 
+                  gap: '1.5rem', 
+                  padding: '2rem 2.5rem', 
+                  borderRadius: '0.75rem', 
+                  background: '#f0f9ff', 
+                  border: '1px solid rgb(14 165 233 / 0.2)', 
+                  flexDirection: isRTL ? 'row-reverse' : 'row' 
+                }}
               >
-                <Phone className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
+                <Phone className="w-6 h-6 shrink-0 mt-1" style={{ color: '#0284c7' }} />
                 <div>
-                  <h3 className="text-small font-semibold text-ink mb-1">{lang.phone}</h3>
-                  <div className="space-y-0.5">
-                    <a
-                      href="tel:+21671833517"
-                      className="block text-small text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
-                    >
+                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.phone}</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                    <a href="tel:+21671833517" className="text-base font-medium transition-colors" style={{ color: '#0369a1' }}>
                       +216 71 833 517
                     </a>
-                    <a
-                      href="tel:+21671148000"
-                      className="block text-small text-cyan-700 hover:text-cyan-900 font-medium transition-colors"
-                    >
+                    <a href="tel:+21671148000" className="text-base font-medium transition-colors" style={{ color: '#0369a1' }}>
                       +216 71 148 000
                     </a>
                   </div>
                 </div>
               </div>
 
-              {/* Address — purple tint */}
+              {/* Address */}
               <div
-                className={`flex items-start gap-4 p-5 rounded-lg bg-purple-50 border border-purple-100 ${
-                  isRTL ? 'flex-row-reverse text-right' : ''
-                }`}
+                style={{ 
+                  display: 'flex', 
+                  gap: '1.5rem', 
+                  padding: '2rem 2.5rem', 
+                  borderRadius: '0.75rem', 
+                  background: '#faf5ff', 
+                  border: '1px solid rgb(126 34 206 / 0.15)', 
+                  flexDirection: isRTL ? 'row-reverse' : 'row' 
+                }}
               >
-                <MapPin className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                <MapPin className="w-6 h-6 shrink-0 mt-1" style={{ color: '#7e22ce' }} />
                 <div>
-                  <h3 className="text-small font-semibold text-ink mb-1">{lang.address}</h3>
-                  <p className="text-small text-ink-secondary">
+                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.address}</h3>
+                  <p className="text-base" style={{ color: '#64748b' }}>
                     Avenue Mohamed V, 1002 Tunis, Tunisia
                   </p>
                 </div>
               </div>
 
-              {/* Hours — green tint */}
+              {/* Hours */}
               <div
-                className={`flex items-start gap-4 p-5 rounded-lg bg-primary-50 border border-primary-100 ${
-                  isRTL ? 'flex-row-reverse text-right' : ''
-                }`}
+                style={{ 
+                  display: 'flex', 
+                  gap: '1.5rem', 
+                  padding: '2rem 2.5rem', 
+                  borderRadius: '0.75rem', 
+                  background: '#f0fdf4', 
+                  border: '1px solid rgb(0 107 60 / 0.15)', 
+                  flexDirection: isRTL ? 'row-reverse' : 'row' 
+                }}
               >
-                <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <Clock className="w-6 h-6 shrink-0 mt-1" style={{ color: '#006B3C' }} />
                 <div>
-                  <h3 className="text-small font-semibold text-ink mb-1">{lang.hours}</h3>
-                  <p className="text-small text-ink-secondary">{lang.workingHours}</p>
+                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.hours}</h3>
+                  <p className="text-base" style={{ color: '#64748b' }}>{lang.workingHours}</p>
                 </div>
               </div>
             </div>
 
             {/* Map Placeholder */}
-            <div className="mt-8">
-              <h3 className="text-h4 text-ink mb-4">{lang.location}</h3>
-              <div className="bg-surface-alt border border-border rounded-lg h-64 flex items-center justify-center">
+            <div className="mt-16">
+              <h3 className="text-2xl mb-6" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.location}</h3>
+              <div 
+                className="rounded-xl h-72 flex items-center justify-center"
+                style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+              >
                 <div className="text-center">
-                  <MapPin className="w-8 h-8 text-ink-muted mx-auto mb-2" />
-                  <p className="text-small text-ink-muted">Leaflet Map</p>
+                  <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: '#94a3b8' }} />
+                  <p className="text-lg font-medium" style={{ color: '#94a3b8' }}>Leaflet Map</p>
                 </div>
               </div>
             </div>
@@ -228,84 +249,68 @@ export default function Contact() {
 
           {/* Right — Form */}
           <div>
-            <div className="card">
-              <h2 className="text-h2 text-ink mb-2">{lang.formTitle}</h2>
-              <p className="text-ink-secondary mb-8 leading-relaxed">{lang.formDesc}</p>
+            <div className="card" style={{ padding: '2.5rem' }}>
+              <h2 className="text-3xl mb-3" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.formTitle}</h2>
+              <p className="mb-8 leading-relaxed" style={{ color: '#64748b' }}>{lang.formDesc}</p>
 
               {/* Success Alert */}
               {submitted && (
-                <div
-                  className={`flex items-start gap-3 p-4 mb-6 rounded-lg bg-primary-50 border border-primary-100 ${
-                    isRTL ? 'flex-row-reverse text-right' : ''
-                  }`}
-                >
-                  <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 mb-6 rounded-lg" style={{ background: '#f0fdf4', border: '1px solid rgb(0 107 60 / 0.2)', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+                  <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#006B3C' }} />
                   <div>
-                    <p className="text-small font-semibold text-ink">{lang.success}</p>
-                    <p className="text-small text-ink-secondary mt-0.5">{lang.successMsg}</p>
+                    <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{lang.success}</p>
+                    <p className="text-sm mt-0.5" style={{ color: '#64748b' }}>{lang.successMsg}</p>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Name */}
-                <div>
-                  <label className="block text-small font-semibold text-ink mb-2">
-                    {lang.name}
-                  </label>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="form-group">
+                  <label className="form-label">{lang.name}</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="input-field"
+                    className="form-input-base"
                     placeholder={lang.name}
                   />
                 </div>
 
-                {/* Email */}
-                <div>
-                  <label className="block text-small font-semibold text-ink mb-2">
-                    {lang.email}
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">{lang.email}</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="input-field"
+                    className="form-input-base"
                     placeholder="your@email.com"
                   />
                 </div>
 
-                {/* Phone */}
-                <div>
-                  <label className="block text-small font-semibold text-ink mb-2">
-                    {lang.phone}
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">{lang.phone}</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="input-field"
+                    className="form-input-base"
                     placeholder="+216 XX XXX XXX"
                   />
                 </div>
 
-                {/* Subject */}
-                <div>
-                  <label className="block text-small font-semibold text-ink mb-2">
-                    {lang.subject}
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">{lang.subject}</label>
                   <select
                     name="subject"
                     value={formData.subject}
                     onChange={handleInputChange}
                     required
-                    className="input-field"
+                    className="form-input-base"
                   >
                     <option value="">{lang.subject}</option>
                     {lang.subjects.map((subject) => (
@@ -316,27 +321,24 @@ export default function Contact() {
                   </select>
                 </div>
 
-                {/* Message */}
-                <div>
-                  <label className="block text-small font-semibold text-ink mb-2">
-                    {lang.message}
-                  </label>
+                <div className="form-group">
+                  <label className="form-label">{lang.message}</label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
                     required
                     rows={5}
-                    className="input-field resize-none"
+                    className="form-input-base resize-none"
                     placeholder={lang.message}
                   />
                 </div>
 
-                {/* Submit — primary solid green, full width */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="btn btn-primary btn-full"
+                  className="btn btn-primary w-full justify-center"
+                  style={{ color: '#ffffff', textDecoration: 'none' }}
                 >
                   {isLoading ? (
                     <>
@@ -354,24 +356,34 @@ export default function Contact() {
             </div>
           </div>
         </div>
-
-        {/* ── FAQ CTA ── */}
-        <div
-          className={`bg-secondary-50 border border-secondary-100 rounded-lg p-10 text-center ${
-            isRTL ? 'text-right' : ''
-          }`}
+        <br></br>
+        {/* ── Chatbot / FAQ CTA (Restructured for perfect alignment) ── */}
+                {/* ── Chatbot / FAQ CTA (Restructured for perfect alignment) ── */}
+        <div 
+          className="mt-20 rounded-xl flex flex-col md:flex-row items-center justify-between gap-8"
+          style={{ 
+            background: '#eff6ff', 
+            border: '1px solid rgb(0 61 165 / 0.1)', 
+            padding: '3rem 2.5rem', 
+            flexDirection: isRTL ? 'row-reverse' : 'row' 
+          }}
         >
-          <h3 className="text-h3 text-ink mb-3">{lang.faqTitle}</h3>
-          <p className="text-ink-secondary mb-6 max-w-lg mx-auto leading-relaxed">
-            {lang.faqDesc}
-          </p>
-          <Link
-            href={`/${currentLang}/faq`}
-            className={`btn btn-outline inline-flex ${isRTL ? 'flex-row-reverse' : ''}`}
-          >
-            {lang.faqLink}
-            <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-          </Link>
+          <div className={`text-center md:text-left flex-1 ${isRTL ? 'md:text-right' : ''}`}>
+            <h3 className="text-2xl mb-3" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.faqTitle}</h3>
+            <p className="max-w-lg leading-relaxed" style={{ color: '#64748b' }}>
+              {lang.faqDesc}
+            </p>
+          </div>
+          <div className="shrink-0">
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-chatbot'))}
+              className="btn btn-secondary inline-flex"
+              style={{ color: '#ffffff', textDecoration: 'none', padding: '1rem 2rem' }}
+            >
+              <MessageCircle className="w-5 h-5 mr-2" />
+              {lang.faqLink}
+            </button>
+          </div>
         </div>
       </div>
     </section>

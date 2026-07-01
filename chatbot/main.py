@@ -15,9 +15,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 import uvicorn
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+try:
+    from slowapi import Limiter
+    from slowapi.util import get_remote_address
+    from slowapi.errors import RateLimitExceeded
+except ImportError:
+    Limiter = None
+    get_remote_address = None
+    RateLimitExceeded = None
 
 # Local imports
 from services.chromadb_manager import ChromaDBManager, ChromaDBSetup
@@ -105,16 +110,19 @@ app = FastAPI(
 )
 
 # Rate limiting
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
+if Limiter is not None and get_remote_address is not None:
+    limiter = Limiter(key_func=get_remote_address)
+    app.state.limiter = limiter
 
-async def rate_limit_handler(req: Request, exc: Exception) -> JSONResponse:
-    return JSONResponse(
-        status_code=429,
-        content={"detail": "Too many requests. Please try again later."}
-    )
+    async def rate_limit_handler(req: Request, exc: Exception) -> JSONResponse:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Too many requests. Please try again later."}
+        )
 
-app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+    app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+else:
+    limiter = None
 
 # CORS configuration
 app.add_middleware(
@@ -130,14 +138,12 @@ chromadb_manager: Optional[ChromaDBManager] = None
 rag_chain: Optional[AmenBankRAGChain] = None
 
 
-# ============================================================
-# STARTUP & SHUTDOWN
-# ============================================================
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup"""
+def initialize_services() -> None:
+    """Initialize ChromaDB and the RAG chain once for the app lifecycle."""
     global chromadb_manager, rag_chain
+
+    if chromadb_manager is not None and rag_chain is not None:
+        return
 
     chatbot_dir = Path(__file__).parent
     persist_dir = chatbot_dir / "chroma_data"
@@ -146,7 +152,6 @@ async def startup_event():
     try:
         print("🚀 Initializing Amen Bank AI Chatbot...")
 
-        # Initialize ChromaDB
         if ingestion_state_path.exists():
             print("  ✓ Loading existing ChromaDB collection...")
             chromadb_manager = ChromaDBSetup.setup_from_ingestion_state(
@@ -157,8 +162,7 @@ async def startup_event():
             print("  ⚠ No ingestion state found. Run FAQ ingestion first.")
             chromadb_manager = None
 
-        # Initialize RAG chain
-        print("  ✓ Initializing RAG chain with Groq...")
+        print("  ✓ Initializing RAG chain with local fallback...")
         rag_chain = create_rag_chain(language=RAGLanguage.FR)
 
         print("✅ Chatbot initialization complete")
@@ -168,6 +172,16 @@ async def startup_event():
         rag_chain = None
 
 
+# ============================================================
+# STARTUP & SHUTDOWN
+# ============================================================
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup."""
+    initialize_services()
+
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
@@ -175,6 +189,9 @@ async def shutdown_event():
     if chromadb_manager:
         chromadb_manager.persist()
         print("✓ ChromaDB persisted to disk")
+
+
+initialize_services()
 
 
 # ============================================================
@@ -298,7 +315,6 @@ async def ingest_faqs(background_tasks: BackgroundTasks):
 
 
 @app.post("/chat", response_model=ChatResponse)
-@limiter.limit("10/minute")
 async def chat(request: Request, chat_request: ChatRequest):
     """
     Main chat endpoint with RAG pipeline
@@ -333,17 +349,23 @@ async def chat(request: Request, chat_request: ChatRequest):
                 for c in context[:3]
             ]
 
-            # Generate response
             response_text = rag_chain.generate_response(
                 chat_request.message,
                 rag_context,
                 language=rag_language,
             )
 
-            # Get metadata
             metadata = rag_chain.get_response_metadata(rag_context)
             confidence = metadata.get("confidence", 0.5)
             sources = metadata.get("sources", [])
+            confidence = max(0.0, min(1.0, float(confidence)))
+
+            if not rag_context and not sources:
+                response_text = (
+                    "I could not find enough information in the FAQ to answer with confidence. "
+                    "Please contact an Amen Bank branch or support team for a precise answer."
+                )
+                confidence = 0.3
 
         return ChatResponse(
             status="success",
