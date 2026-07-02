@@ -123,139 +123,98 @@ export default function Contact() {
   const lang = content[currentLang as keyof typeof content];
 
   return (
-    <section className="section" style={{ background: '#ffffff' }} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="container">
-        {/* ── Header ── */}
-        <div className="section-header">
-          <h1 style={{ color: '#0f172a' }}>{lang.pageTitle}</h1>
-          <p style={{ color: '#64748b' }}>{lang.pageDescription}</p>
+    <section className="min-h-screen" style={{ background: '#ffffff' }} dir={isRTL ? 'rtl' : 'ltr'}>
+      <section className="section-lg" style={{ background: '#0f172a' }}>
+        <div className="container max-w-4xl text-center">
+          <span className="section-badge section-badge-light">Amen Bank</span>
+          <h1 className="text-h1 text-white mt-2 mb-4">{lang.pageTitle}</h1>
+          <p className="text-lg leading-relaxed mx-auto max-w-2xl" style={{ color: '#94a3b8' }}>
+            {lang.pageDescription}
+          </p>
         </div>
+      </section>
 
-        {/* ── Main Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left — Contact Info */}
-          <div>
-            <h2 className="text-3xl mb-10" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.contactInfo}</h2>
+      <section className="section" style={{ background: '#f8fafc' }}>
+        <div className="container">
+          <div className="section-header">
+            <span className="section-badge">{lang.contactInfo}</span>
+            <h2 className="text-h2 text-ink">{lang.contactInfo}</h2>
+          </div>
 
-            {/* Explicit flex layout with 2rem gap for uncramped spacing */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              
-              {/* Email */}
-              <div
-                style={{ 
-                  display: 'flex', 
-                  gap: '1.5rem', 
-                  padding: '2rem 2.5rem', 
-                  borderRadius: '0.75rem', 
-                  background: '#eff6ff', 
-                  border: '1px solid rgb(0 61 165 / 0.15)', 
-                  flexDirection: isRTL ? 'row-reverse' : 'row' 
-                }}
-              >
-                <Mail className="w-6 h-6 shrink-0 mt-1" style={{ color: '#003DA5' }} />
-                <div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.email}</h3>
-                  <a
-                    href="mailto:amenbank@amenbank.com.tn"
-                    className="text-base font-medium transition-colors"
-                    style={{ color: '#1a56c4' }}
-                  >
-                    amenbank@amenbank.com.tn
-                  </a>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 items-start">
+            <div>
+              <div className="space-y-6">
+                <div className="card" style={{ padding: '2rem 2.25rem', background: '#eff6ff', borderColor: 'rgb(0 61 165 / 0.14)' }}>
+                  <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Mail className="w-6 h-6 shrink-0 mt-1" style={{ color: '#003DA5' }} />
+                    <div>
+                      <h3 className="text-h4 text-ink mb-2">{lang.email}</h3>
+                      <a href="mailto:amenbank@amenbank.com.tn" className="text-base font-medium" style={{ color: '#1a56c4' }}>
+                        amenbank@amenbank.com.tn
+                      </a>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Phone */}
-              <div
-                style={{ 
-                  display: 'flex', 
-                  gap: '1.5rem', 
-                  padding: '2rem 2.5rem', 
-                  borderRadius: '0.75rem', 
-                  background: '#f0f9ff', 
-                  border: '1px solid rgb(14 165 233 / 0.2)', 
-                  flexDirection: isRTL ? 'row-reverse' : 'row' 
-                }}
-              >
-                <Phone className="w-6 h-6 shrink-0 mt-1" style={{ color: '#0284c7' }} />
-                <div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.phone}</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-                    <a href="tel:+21671833517" className="text-base font-medium transition-colors" style={{ color: '#0369a1' }}>
-                      +216 71 833 517
-                    </a>
-                    <a href="tel:+21671148000" className="text-base font-medium transition-colors" style={{ color: '#0369a1' }}>
-                      +216 71 148 000
-                    </a>
+                <div className="card" style={{ padding: '2rem 2.25rem', background: '#f0f9ff', borderColor: 'rgb(14 165 233 / 0.18)' }}>
+                  <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Phone className="w-6 h-6 shrink-0 mt-1" style={{ color: '#0284c7' }} />
+                    <div>
+                      <h3 className="text-h4 text-ink mb-2">{lang.phone}</h3>
+                      <div className="flex flex-col gap-1">
+                        <a href="tel:+21671833517" className="text-base font-medium" style={{ color: '#0369a1' }}>
+                          +216 71 833 517
+                        </a>
+                        <a href="tel:+21671148000" className="text-base font-medium" style={{ color: '#0369a1' }}>
+                          +216 71 148 000
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: '2rem 2.25rem', background: '#faf5ff', borderColor: 'rgb(126 34 206 / 0.16)' }}>
+                  <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <MapPin className="w-6 h-6 shrink-0 mt-1" style={{ color: '#7e22ce' }} />
+                    <div>
+                      <h3 className="text-h4 text-ink mb-2">{lang.address}</h3>
+                      <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>
+                        Avenue Mohamed V, 1002 Tunis, Tunisia
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: '2rem 2.25rem', background: '#f0fdf4', borderColor: 'rgb(0 107 60 / 0.14)' }}>
+                  <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Clock className="w-6 h-6 shrink-0 mt-1" style={{ color: '#006B3C' }} />
+                    <div>
+                      <h3 className="text-h4 text-ink mb-2">{lang.hours}</h3>
+                      <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>
+                        {lang.workingHours}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Address */}
-              <div
-                style={{ 
-                  display: 'flex', 
-                  gap: '1.5rem', 
-                  padding: '2rem 2.5rem', 
-                  borderRadius: '0.75rem', 
-                  background: '#faf5ff', 
-                  border: '1px solid rgb(126 34 206 / 0.15)', 
-                  flexDirection: isRTL ? 'row-reverse' : 'row' 
-                }}
-              >
-                <MapPin className="w-6 h-6 shrink-0 mt-1" style={{ color: '#7e22ce' }} />
-                <div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.address}</h3>
-                  <p className="text-base" style={{ color: '#64748b' }}>
-                    Avenue Mohamed V, 1002 Tunis, Tunisia
-                  </p>
-                </div>
-              </div>
-
-              {/* Hours */}
-              <div
-                style={{ 
-                  display: 'flex', 
-                  gap: '1.5rem', 
-                  padding: '2rem 2.5rem', 
-                  borderRadius: '0.75rem', 
-                  background: '#f0fdf4', 
-                  border: '1px solid rgb(0 107 60 / 0.15)', 
-                  flexDirection: isRTL ? 'row-reverse' : 'row' 
-                }}
-              >
-                <Clock className="w-6 h-6 shrink-0 mt-1" style={{ color: '#006B3C' }} />
-                <div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: '#0f172a' }}>{lang.hours}</h3>
-                  <p className="text-base" style={{ color: '#64748b' }}>{lang.workingHours}</p>
+              <div className="mt-10">
+                <h3 className="text-h3 text-ink mb-6">{lang.location}</h3>
+                <div className="rounded-xl h-72 flex items-center justify-center" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                  <div className="text-center">
+                    <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: '#94a3b8' }} />
+                    <p className="text-lg font-medium" style={{ color: '#94a3b8' }}>Leaflet Map</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Map Placeholder */}
-            <div className="mt-16">
-              <h3 className="text-2xl mb-6" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.location}</h3>
-              <div 
-                className="rounded-xl h-72 flex items-center justify-center"
-                style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
-              >
-                <div className="text-center">
-                  <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: '#94a3b8' }} />
-                  <p className="text-lg font-medium" style={{ color: '#94a3b8' }}>Leaflet Map</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right — Form */}
-          <div>
             <div className="card" style={{ padding: '2.5rem' }}>
-              <h2 className="text-3xl mb-3" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.formTitle}</h2>
+              <h2 className="text-h3 text-ink mb-3">{lang.formTitle}</h2>
               <p className="mb-8 leading-relaxed" style={{ color: '#64748b' }}>{lang.formDesc}</p>
 
-              {/* Success Alert */}
               {submitted && (
-                <div className="flex items-start gap-3 p-4 mb-6 rounded-lg" style={{ background: '#f0fdf4', border: '1px solid rgb(0 107 60 / 0.2)', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+                <div className={`flex items-start gap-3 p-4 mb-6 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`} style={{ background: '#f0fdf4', border: '1px solid rgb(0 107 60 / 0.2)' }}>
                   <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#006B3C' }} />
                   <div>
                     <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>{lang.success}</p>
@@ -265,81 +224,37 @@ export default function Contact() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="form-group">
-                  <label className="form-label">{lang.name}</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="form-input-base"
-                    placeholder={lang.name}
-                  />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">{lang.name}</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} required className="w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base" placeholder={lang.name} />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">{lang.email}</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="form-input-base"
-                    placeholder="your@email.com"
-                  />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">{lang.email}</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base" placeholder="your@email.com" />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">{lang.phone}</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="form-input-base"
-                    placeholder="+216 XX XXX XXX"
-                  />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">{lang.phone}</label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base" placeholder="+216 XX XXX XXX" />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">{lang.subject}</label>
-                  <select
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="form-input-base"
-                  >
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">{lang.subject}</label>
+                  <select name="subject" value={formData.subject} onChange={handleInputChange} required className="w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base">
                     <option value="">{lang.subject}</option>
                     {lang.subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
+                      <option key={subject} value={subject}>{subject}</option>
                     ))}
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">{lang.message}</label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required
-                    rows={5}
-                    className="form-input-base resize-none"
-                    placeholder={lang.message}
-                  />
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-3">{lang.message}</label>
+                  <textarea name="message" value={formData.message} onChange={handleInputChange} required rows={5} className="w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base resize-none" placeholder={lang.message} />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary w-full justify-center"
-                  style={{ color: '#ffffff', textDecoration: 'none' }}
-                >
+                <button type="submit" disabled={isLoading} className="btn btn-primary w-full justify-center" style={{ color: '#ffffff', textDecoration: 'none' }}>
                   {isLoading ? (
                     <>
                       <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -356,36 +271,26 @@ export default function Contact() {
             </div>
           </div>
         </div>
-        <br></br>
-        {/* ── Chatbot / FAQ CTA (Restructured for perfect alignment) ── */}
-                {/* ── Chatbot / FAQ CTA (Restructured for perfect alignment) ── */}
-        <div 
-          className="mt-20 rounded-xl flex flex-col md:flex-row items-center justify-between gap-8"
-          style={{ 
-            background: '#eff6ff', 
-            border: '1px solid rgb(0 61 165 / 0.1)', 
-            padding: '3rem 2.5rem', 
-            flexDirection: isRTL ? 'row-reverse' : 'row' 
-          }}
-        >
-          <div className={`text-center md:text-left flex-1 ${isRTL ? 'md:text-right' : ''}`}>
-            <h3 className="text-2xl mb-3" style={{ color: '#0f172a', fontWeight: 700 }}>{lang.faqTitle}</h3>
-            <p className="max-w-lg leading-relaxed" style={{ color: '#64748b' }}>
-              {lang.faqDesc}
-            </p>
-          </div>
-          <div className="shrink-0">
-            <button 
-              onClick={() => window.dispatchEvent(new CustomEvent('open-chatbot'))}
-              className="btn btn-secondary inline-flex"
-              style={{ color: '#ffffff', textDecoration: 'none', padding: '1rem 2rem' }}
-            >
-              <MessageCircle className="w-5 h-5 mr-2" />
-              {lang.faqLink}
-            </button>
+      </section>
+
+      <section className="section-sm" style={{ background: '#ffffff' }}>
+        <div className="container">
+          <div className={`rounded-2xl border border-slate-200 bg-slate-50 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+            <div className={`text-center md:text-left flex-1 ${isRTL ? 'md:text-right' : ''}`}>
+              <h3 className="text-h3 text-ink mb-3">{lang.faqTitle}</h3>
+              <p className="max-w-2xl leading-relaxed" style={{ color: '#64748b' }}>
+                {lang.faqDesc}
+              </p>
+            </div>
+            <div className="shrink-0">
+              <button onClick={() => window.dispatchEvent(new CustomEvent('open-chatbot'))} className="btn btn-secondary inline-flex" style={{ color: '#ffffff', textDecoration: 'none', padding: '1rem 2rem' }}>
+                <MessageCircle className="w-5 h-5 mr-2" />
+                {lang.faqLink}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </section>
   );
 }

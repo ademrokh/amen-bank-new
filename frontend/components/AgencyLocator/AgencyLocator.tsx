@@ -81,15 +81,13 @@ export default function AgencyLocator() {
   return (
     <section className="section" style={{ background: '#f8fafc' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
-        
-        {/* ── Header ── */}
         <div className="section-header">
-          <h1 style={{ color: '#0f172a' }}>{ui.sectionTitle}</h1>
-          <p style={{ color: '#64748b' }}>{ui.sectionDescription}</p>
+          <span className="section-badge">{ui.sectionTitle}</span>
+          <h1 className="text-h1 text-ink">{ui.sectionTitle}</h1>
+          <p className="text-lg leading-relaxed" style={{ color: '#64748b' }}>{ui.sectionDescription}</p>
         </div>
 
-        {/* ── Dropdown ── */}
-        <div className="max-w-md mx-auto mb-12">
+        <div className="mx-auto mb-10 max-w-md">
           <div className="relative">
             <select
               value={selectedCity}
@@ -102,31 +100,26 @@ export default function AgencyLocator() {
                 <option key={city.id} value={city.id}>{city[currentLang]}</option>
               ))}
             </select>
-            <div className={`absolute top-1/2 -translate-y-1/2 pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>
-              <ChevronDown className="w-5 h-5" style={{ color: '#94a3b8' }} />
+            <div className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'}`}>
+              <ChevronDown className="h-5 w-5" style={{ color: '#94a3b8' }} />
             </div>
           </div>
         </div>
-        <br></br>
-        {/* ── Map Embed ── */}
-        <div 
-          className="rounded-xl overflow-hidden shadow-sm mb-12"
-          style={{ border: '1px solid #e2e8f0', height: '600px' }}
-        >
-          <iframe 
-            key={selectedCity} // Key forces iframe to reload/refresh when city changes
-            src={getMapUrl()} 
-            width="100%" 
-            height="100%" 
-            style={{ border: 0 }} 
+
+        <div className="mb-10 overflow-hidden rounded-2xl border border-border shadow-sm" style={{ height: '600px' }}>
+          <iframe
+            key={selectedCity}
+            src={getMapUrl()}
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
             loading="lazy"
             title="Amen Bank Agency Locator"
           ></iframe>
         </div>
 
-        {/* ── Info Box ── */}
-        <div className="rounded-xl p-8 text-center" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-          <p style={{ color: '#64748b' }}>{ui.infoBox}</p>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
+          <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>{ui.infoBox}</p>
         </div>
       </div>
     </section>

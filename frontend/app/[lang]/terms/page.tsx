@@ -1,5 +1,3 @@
-// Removed: import { useLang } from '@/hooks/useLang';
-
 type Language = 'fr' | 'ar' | 'en';
 
 export function generateStaticParams() {
@@ -8,13 +6,12 @@ export function generateStaticParams() {
 
 export const metadata = {
   title: 'Conditions Générales - Amen Bank',
-  description: 'Conditions générales d\'utilisation des services Amen Bank.',
+  description: "Conditions générales d'utilisation des services Amen Bank.",
 };
 
-// Changed to async and added params prop
 export default async function TermsPage({ params }: { params: Promise<{ lang: Language }> }) {
   const { lang } = await params;
-  const isRTL = lang === 'ar'; // Replaced useLang() with manual check
+  const isRTL = lang === 'ar';
 
   const content = {
     fr: {
@@ -106,39 +103,39 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
     ar: {
       title: 'الشروط العامة للاستخدام',
       lastUpdated: 'آخر تحديث: 1 يناير 2025',
-      intro: 'تنظم هذه الشروط العامة استخدام جميع الخدمات المقدمة من بنك آمن، عبر موقعنا الإلكتروني تطبيق بنك فيرست، فروعنا وأي قناصر آخر مصرح. باستخدام خدماتنا، فإنك تقبل هذه الشروط بالكامل.',
+      intro: 'تنظم هذه الشروط العامة استخدام جميع الخدمات المقدمة من بنك آمن، عبر موقعنا الإلكتروني تطبيق بنك فيرست، فروعنا وأي قناة أخرى مصرح بها. باستخدام خدماتنا، فإنك تقبل هذه الشروط بالكامل.',
       sections: [
         {
           title: '1. النطاق',
-          text: 'تنظم هذه الشروط العامة شروط استخدام جميع الخدمات المقدمة من بنك آمن، عبر موقعنا الإلكتروني تطبيق بنك فيرست، فروعنا وأي قناصر آخر مصرح.',
+          text: 'تنظم هذه الشروط العامة شروط استخدام جميع الخدمات المقدمة من بنك آمن، عبر موقعنا الإلكتروني تطبيق بنك فيرست، فروعنا وأي قناة أخرى مصرح بها.',
         },
         {
           title: 'فتح حساب',
-          text: 'فتح حساب يعني قبول هذه الشروط، وتقديم معلومات دقيقة وصحيحة، والامتثال الشروط المحددة لنوع الحساب المختار.',
+          text: 'فتح حساب يعني قبول هذه الشروط، وتقديم معلومات دقيقة وصحيحة، والامتثال للشروط المحددة لنوع الحساب المختار.',
         },
         {
           title: 'استخدام الخدمات',
-          text: 'خضع استخدام خدماتنا يخضع الشروط التعرفة السارية المعمول بها وحدود المعاملات والأنظمة المعمول.',
+          text: 'يخضع استخدام خدماتنا للشروط التعريفة السارية، وحدود المعاملات، والأنظمة المعمول بها.',
         },
         {
           title: 'الأمان',
-          text: 'العميل مسؤول عن سرية بيانات تسجيل الدخول. في حالة الاشتباه في الاحتيال أو الاستخدام غير المصرح، يحتفظ بنك آمن الحق في تعليق الحساب دون إشعار.',
+          text: 'العميل مسؤول عن سرية بيانات تسجيل الدخول. في حالة الاشتباه في الاحتيال أو الاستخدام غير المصرح، يحتفظ بنك آمن بالحق في تعليق الحساب دون إشعار.',
         },
         {
           title: 'الملكية الفكرية',
-          text: 'جميع المحتوى على الموقع والتطبيق ووسائل الاتصال هي ملك بنك آمن. أي نسخ غير مصرح ممنوع صراحةًا تم حظره.',
+          text: 'جميع المحتوى على الموقع والتطبيق ووسائل الاتصال ملك بنك آمن. أي نسخ غير مصرح به ممنوع صراحةً.',
         },
         {
           title: 'حدود المسؤولية',
-          text: 'يبذل بنك آمن قصار جهده لتقديم موثوق الخدمات، لكنه لن يكون مسؤولاً عن الخسائر غير المباشرة بسبب عوامل خارج عن سيطرته.',
+          text: 'يبذل بنك آمن قصارى جهده لضمان موثوقية الخدمات، لكنه لن يكون مسؤولاً عن الخسائر غير المباشرة الناتجة عن عوامل خارج سيطرته.',
         },
         {
           title: 'تعديلات',
-          text: 'يحتفظ بنك آمن الحق في تعديل هذه الشروط في أي وقت. يتم الإخطار بالمستخدمين عبر القنوات الرسمية للبنك.',
+          text: 'يحتفظ بنك آمن بالحق في تعديل هذه الشروط في أي وقت. يتم إخطار المستخدمين عبر القنوات الرسمية للبنك.',
         },
         {
-          title: 'القانون المعمول',
-          text: 'هذه الشروط تخضع للقانون التونسي. في حالة النزاع، يكون محكمة تونس هي المختص بالوحيد.',
+          title: 'القانون المعمول به',
+          text: 'تخضع هذه الشروط للقانون التونسي. وفي حال النزاع، تكون محكمة تونس المختصة وحدها هي المختصة.',
         },
         {
           title: 'اتصل بنا',
@@ -151,27 +148,36 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
   const d = content[lang];
 
   return (
-    <div className="bg-surface py-24" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="container">
-        {/* ── Header ── */}
-        <div className="mb-16">
-          <span className="section-label">{d.lastUpdated}</span>
-          <h1 className="text-h1 text-ink mt-2 mb-4">{d.title}</h1>
-          <p className="text-ink-secondary leading-relaxed max-w-3xl">
+    <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>
+      <section className="section-lg" style={{ background: '#0f172a' }}>
+        <div className="container max-w-4xl">
+          <span className="section-badge section-badge-light">{d.lastUpdated}</span>
+          <h1 className="text-h1 text-white mt-2 mb-4">{d.title}</h1>
+          <p className="text-lg leading-relaxed max-w-3xl" style={{ color: '#94a3b8' }}>
             {d.intro}
           </p>
         </div>
+      </section>
 
-        {/* ── Sections ── */}
-        <div className="max-w-3xl mx-auto space-y-0">
-          {d.sections.map((section) => (
-            <div key={section.title} className="py-8 border-b border-border first:pt-0">
-              <h2 className="text-h3 text-ink mb-3">{section.title}</h2>
-              <p className="text-ink-secondary text-body leading-relaxed">{section.text}</p>
-            </div>
-          ))}
+      <section className="section" style={{ background: '#f8fafc' }}>
+        <div className="container max-w-4xl">
+          <div className="section-header">
+            <span className="section-badge">Informations</span>
+            <h2 className="text-h2 text-ink">{d.title}</h2>
+          </div>
+
+          <div className="space-y-6">
+            {d.sections.map((section) => (
+              <div key={section.title} className="card">
+                <h2 className="text-h4 text-ink mb-3">{section.title}</h2>
+                <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>
+                  {section.text}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

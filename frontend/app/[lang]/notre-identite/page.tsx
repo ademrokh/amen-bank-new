@@ -143,27 +143,26 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           HERO & KEY FIGURES 
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#0f172a' }}>
-        <div className="container">
-          <span className="section-badge" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem' }}>
+      <section className="section-lg" style={{ background: '#0f172a' }}>
+        <div className="container max-w-3xl text-left">
+          <span className="section-badge section-badge-light">{d.label}</span>
+          <h1 className="text-h1 mt-3 mb-4 text-white">{d.title}</h1>
+          <p className="text-lg leading-relaxed" style={{ color: '#94a3b8' }}>
             Amen Bank · Since 1980
-          </span>
-          <h1 className="text-4xl md:text-5xl text-white mt-2 mb-3" style={{ fontWeight: 700, lineHeight: 1.15 }}>
-            {d.title}
-          </h1>
+          </p>
         </div>
 
-        {/* Increased top margin (mt-20) and top padding (pt-12) for better separation */}
-        <div className="container mt-20 pt-12" style={{ borderTop: '1px rgba(255,255,255,0.1)' }}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Key figures with increased spacing */}
+        <div className="container max-w-3xl mt-12 pt-10" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="grid gap-10 sm:grid-cols-3">
             {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-4xl font-bold text-white">
+              <div key={s.label} className="text-left">
+                <div className="text-h2 font-bold text-white">
                   {s.value}
                 </div>
-                <div className="text-sm mt-1" style={{ color: '#94a3b8' }}>
+                <p className="text-small mt-2" style={{ color: '#94a3b8' }}>
                   {s.label}
-                </div>
+                </p>
               </div>
             ))}
           </div>
@@ -173,16 +172,16 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           MISSION 
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#ffffff' }}>
-        <div className="container max-w-4xl">
-          <div className="card card-stripe-green" style={{ padding: '2.5rem' }}>
-            <div className="space-y-4">
-              <span className="section-badge" style={{ marginBottom: '0', display: 'block' }}>{d.mission.title}</span>
-              <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.mission.title}</h2>
-              <p className="text-lg leading-relaxed" style={{ color: '#64748b' }}>
-                {d.mission.desc}
-              </p>
-            </div>
+      <section className="section-lg" style={{ background: '#f8fafc' }}>
+        <div className="container max-w-3xl">
+          <div className="section-header mb-10">
+            <span className="section-badge">{d.mission.title}</span>
+            <h2 className="text-h2 mt-3 text-ink">{d.mission.title}</h2>
+          </div>
+          <div className="card p-10">
+            <p className="text-lg leading-relaxed" style={{ color: '#64748b' }}>
+              {d.mission.desc}
+            </p>
           </div>
         </div>
       </section>
@@ -190,23 +189,23 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           VALUES 
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#f8fafc' }}>
+      <section className="section-lg" style={{ background: '#ffffff' }}>
         <div className="container">
-          <div className="section-header" style={{ marginBottom: '3rem' }}>
+          <div className="section-header max-w-3xl mx-auto mb-10">
             <span className="section-badge">{d.valuesHeading}</span>
-            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.valuesHeading}</h2>
+            <h2 className="text-h2 mt-3 text-ink">{d.valuesHeading}</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {d.values.map((value, idx) => {
               const Icon = VALUE_ICONS[idx];
               return (
-                <div key={value.title} className="card text-center" style={{ padding: '2rem 1.5rem' }}>
-                  <div className="feature-icon mx-auto">
-                    <Icon className="w-7 h-7 text-primary" />
+                <div key={value.title} className="card p-8 text-left">
+                  <div className="mb-4 rounded-full bg-primary-subtle p-3 w-fit text-primary">
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl text-ink mt-4 mb-2" style={{ fontWeight: 600 }}>{value.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: '#64748b' }}>
+                  <h3 className="text-h4 text-ink font-semibold mb-3">{value.title}</h3>
+                  <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>
                     {value.desc}
                   </p>
                 </div>
@@ -219,11 +218,11 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           HISTORY TIMELINE (Horizontal & Interactive)
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#ffffff' }}>
+      <section className="section-lg" style={{ background: '#f8fafc' }}>
         <div className="container">
-          <div className="section-header" style={{ textAlign: 'center', marginBottom: '6rem' }}>
+          <div className="section-header max-w-3xl mx-auto mb-12 text-center">
             <span className="section-badge">{d.historyTitle}</span>
-            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.historyTitle}</h2>
+            <h2 className="text-h2 mt-3 text-ink">{d.historyTitle}</h2>
           </div>
 
           <div className="max-w-5xl mx-auto">
@@ -235,19 +234,19 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           CERTIFICATIONS 
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#f8fafc' }}>
-        <div className="container text-center">
-          <div className="section-header" style={{ marginBottom: '2.5rem' }}>
+      <section className="section-lg" style={{ background: '#ffffff' }}>
+        <div className="container max-w-3xl mx-auto">
+          <div className="section-header text-center mb-10">
             <span className="section-badge">{d.certsTitle}</span>
-            <h2 className="text-3xl text-ink" style={{ fontWeight: 700 }}>{d.certsTitle}</h2>
+            <h2 className="text-h2 mt-3 text-ink">{d.certsTitle}</h2>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-6">
             {['ISO 27001', 'ISO 20000', 'PCI DSS'].map((cert) => (
               <div
                 key={cert}
-                className="rounded-lg font-bold text-ink"
-                style={{ padding: '1rem 1.75rem', border: '1px solid #e2e8f0', background: '#ffffff' }}
+                className="card px-8 py-4 font-semibold text-ink border-2"
+                style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}
               >
                 {cert}
               </div>
@@ -259,36 +258,36 @@ export default async function NotreIdentitePage({
       {/* ════════════════════════════════════════════
           BOTTOM CTA 
           ════════════════════════════════════════════ */}
-      <section className="section-sm" style={{ background: '#0f172a' }}>
-        <div className="container max-w-3xl text-center">
-          <h2 className="text-4xl text-white" style={{ fontWeight: 700 }}>{d.ctaTitle}</h2>
-          <p className="text-lg mt-3 mb-10 leading-relaxed" style={{ color: '#94a3b8' }}>
+      <section className="section-lg" style={{ background: '#0f172a' }}>
+        <div className="container max-w-2xl text-center">
+          <h2 className="text-h2 text-white mb-4">{d.ctaTitle}</h2>
+          <p className="text-lg leading-relaxed mb-10" style={{ color: '#94a3b8' }}>
             {d.ctaDesc}
           </p>
           
-          {/* Added flex container to hold both buttons neatly */}
-          <div className={`flex flex-wrap items-center justify-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Added flex container with proper spacing */}
+          <div className={`flex flex-wrap items-center justify-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Link
               href={`/${lang}/particuliers`}
-              className="btn btn-white btn-lg inline-flex"
+              className="btn btn-white btn-lg inline-flex gap-2"
               style={{ color: '#0f172a', textDecoration: 'none' }}
             >
               {d.ctaBtn}
-              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
+              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
             </Link>
             
             <Link
               href={`/${lang}/groupe`}
-              className="btn btn-lg inline-flex"
+              className="btn btn-lg inline-flex gap-2"
               style={{ 
                 color: '#ffffff', 
                 textDecoration: 'none', 
-                background: '#006B3C', 
-                border: '1px solid #006B3C' 
+                background: '#003DA5', 
+                border: '2px solid #003DA5' 
               }}
             >
               {d.groupBtn}
-              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180 mr-3' : 'ml-3'}`} />
+              <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
             </Link>
           </div>
         </div>

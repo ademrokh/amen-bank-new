@@ -181,6 +181,7 @@ export default function Footer() {
               <div className="footer-col-links">
                 <Link href={`/${currentLang}/amengpt`} className="footer-col-link">{content.amenGpt}</Link>
                 <Link href={`/${currentLang}/contact`} className="footer-col-link">{content.contact}</Link>
+                <Link href={`/${currentLang}/acces-information`} className="footer-col-link">{currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information'}</Link>
                 <Link href={`/${currentLang}/agencies`} className="footer-col-link">{content.branches}</Link>
               </div>
             </div>

@@ -228,16 +228,16 @@ export default function FAQ() {
   };
 
   return (
-    <section className="section" style={{ background: '#f0f2f5', padding: '4rem 1rem' }} dir={isRTL ? 'rtl' : 'ltr'}>
+    <section className="section" style={{ background: '#f8fafc' }} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container">
         <div className="section-header">
-          <h1 style={{ color: '#0f172a' }}>{ui.title}</h1>
-          <p style={{ color: '#64748b' }}>{ui.status}</p>
+          <span className="section-badge">{ui.suggestions}</span>
+          <h1 className="text-h1 text-ink">{ui.title}</h1>
+          <p className="text-lg leading-relaxed" style={{ color: '#64748b' }}>{ui.status}</p>
         </div>
 
-        {/* Chat Window Container - Increased to max-w-6xl and 85vh height */}
         <div 
-          className="max-w-6xl mx-auto bg-white shadow-2xl flex flex-col overflow-hidden"
+          className="mx-auto flex max-w-6xl flex-col overflow-hidden bg-white shadow-sm"
           style={{ 
             height: '85vh', 
             minHeight: '700px',
