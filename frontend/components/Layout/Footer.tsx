@@ -222,6 +222,9 @@ export default function Footer() {
             <a href={`/${currentLang}/security`} className="footer-bottom-link">
               {currentLang === 'fr' ? 'Sécurité' : currentLang === 'ar' ? 'الأمان' : 'Security'}
             </a>
+            <Link href={`/${currentLang}/admin/login`} className="footer-admin-login-button">
+              {currentLang === 'fr' ? 'Admin' : currentLang === 'ar' ? 'المسؤول' : 'Admin'}
+            </Link>
           </div>
         </div>
       </div>

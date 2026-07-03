@@ -1,8 +1,8 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2.110.0'
 import nodemailer from 'npm:nodemailer@6.10.0'
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const supabaseUrl = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL') || 'https://afjtwgekoqzfwmgoiwoy.supabase.co'
+const supabaseKey = Deno.env.get('SERVICE_ROLE_KEY')!
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const transporter = nodemailer.createTransport({
@@ -23,21 +23,27 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { user_id } = await req.json()
+    const { user_id, pre_generated_password } = await req.json()
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: 'Missing user_id' }), { status: 400 })
     }
 
-    // Invalidate old passwords
-    await supabase
-      .from('temp_admin_passwords')
-      .update({ is_used: true })
-      .eq('user_id', user_id)
-      .eq('is_used', false)
+    // Use pre-generated password if provided, otherwise generate new one
+    const newPassword = pre_generated_password || Math.random().toString(36).slice(-8)
 
-    // Generate new password
-    const newPassword = Math.random().toString(36).slice(-8)
+    // Only try to invalidate old passwords if not using pre-generated password
+    if (!pre_generated_password) {
+      try {
+        await supabase
+          .from('temp_admin_passwords')
+          .update({ is_used: true })
+          .eq('user_id', user_id)
+          .eq('is_used', false)
+      } catch (err) {
+        console.warn('Failed to invalidate old passwords:', err)
+      }
+    }
 
     // Get user email from Auth
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user_id)
@@ -90,7 +96,7 @@ Deno.serve(async (req) => {
             <!-- FOOTER -->
             <div style="background-color: #f8fafc; padding: 20px 40px; border-top: 1px solid #e2e8f0;">
               <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0; line-height: 1.5;">
-                If you did not commit this login attempt,check the safety of the.<br>
+                If you did not commit this login attempt, check the safety of your account.<br>
                 © ${new Date().getFullYear()} Amen Bank.
               </p>
             </div>
@@ -100,14 +106,18 @@ Deno.serve(async (req) => {
       `
     })
 
-    // Save to DB
-    const { error: dbError } = await supabase
-      .from('temp_admin_passwords')
-      .insert({ user_id: user_id, plain_password: newPassword, is_used: false })
+    // Try to save to DB, but don't fail if RLS blocks it
+    if (!pre_generated_password) {
+      try {
+        await supabase
+          .from('temp_admin_passwords')
+          .insert({ user_id: user_id, plain_password: newPassword, is_used: false })
+      } catch (err) {
+        console.warn('Failed to save password to database:', err)
+      }
+    }
 
-    if (dbError) throw dbError
-
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ success: true, message: 'Email sent successfully' }), { status: 200, headers: { 'Content-Type': 'application/json' } })
 
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown server error'

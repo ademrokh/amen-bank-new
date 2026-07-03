@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { findActiveAdminPassword, rotateAdminPasswordEntry } from '../helpers'
 
 export async function POST(req: Request) {
   try {
@@ -14,45 +14,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid username' }, { status: 401 })
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! 
-    )
+    const record = await findActiveAdminPassword(userId)
 
-    // 1. Find the active password
-    const { data: record, error } = await supabase
-      .from('temp_admin_passwords')
-      .select('id, plain_password')
-      .eq('user_id', userId)
-      .eq('is_used', false)
-      .single()
-
-    if (error || !record) {
+    if (!record) {
       return NextResponse.json({ error: 'No active password found. Please request a new one.' }, { status: 401 })
     }
 
-    // 2. Check if password matches
     if (password !== record.plain_password) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
     }
 
-    // 3. Invalidate the current password
-    await supabase
-      .from('temp_admin_passwords')
-      .update({ is_used: true })
-      .eq('id', record.id)
+    await rotateAdminPasswordEntry(userId)
 
-    // 4. AUTO-RESET: Trigger a new email in the background
-    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/rotate-admin-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({ user_id: userId })
-    }).catch(() => console.error('Failed to trigger auto-password reset'))
+    const response = NextResponse.json({ success: true });
+    response.cookies.set({
+      name: 'admin_session',
+      value: 'true',
+      httpOnly: true,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 8,
+    });
 
-    return NextResponse.json({ success: true })
+    return response
 
   } catch (err) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

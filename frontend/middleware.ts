@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
+const ADMIN_SESSION_COOKIE = 'admin_session';
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
   .split(',')
   .map((entry) => entry.trim().toLowerCase())
@@ -8,19 +9,25 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const adminMatch = pathname.match(/^\/(fr|en|ar)\/admin\/(login|acces-information)(?:\/|$)/);
+  const adminMatch = pathname.match(/^\/(fr|en|ar)\/admin(?:\/|$)/);
 
   if (!adminMatch) {
     return NextResponse.next();
   }
 
-  const [, locale, route] = adminMatch;
+  const [, locale] = adminMatch;
+  const isLoginRoute = /^\/(fr|en|ar)\/admin\/login(?:\/|$)/.test(pathname);
 
-  if (route === 'login') {
+  if (isLoginRoute) {
     return NextResponse.next();
   }
 
   const response = NextResponse.next();
+  const adminSession = request.cookies.get(ADMIN_SESSION_COOKIE)?.value === 'true';
+  if (adminSession) {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,

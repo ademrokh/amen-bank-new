@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -67,29 +66,8 @@ export default function AdminAccessInformationPage({}: AdminAccessInformationPag
   }, [router]);
 
   useEffect(() => {
-    const initialize = async () => {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-          },
-        }
-      );
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace('/fr/admin/login');
-        return;
-      }
-
-      await loadDocuments();
-    };
-
-    void initialize();
-  }, [loadDocuments, router]);
+    void loadDocuments();
+  }, [loadDocuments]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

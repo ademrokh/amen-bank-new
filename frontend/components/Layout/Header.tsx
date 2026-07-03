@@ -38,16 +38,27 @@ export default function Header() {
     router.push(`${newPath}${query ? `?${query}` : ''}`);
   };
 
-  const navLinks = [
-    { label: currentLang === 'fr' ? 'Accueil' : currentLang === 'ar' ? 'الرئيسية' : 'Home', href: `/${currentLang}/` },
-    { label: currentLang === 'fr' ? 'Devenir client' : currentLang === 'ar' ? 'انضم إلينا' : 'Become a client', href: `/${currentLang}/devenir-client` },
-    { label: currentLang === 'fr' ? 'Particuliers' : currentLang === 'ar' ? 'للأفراد' : 'Retail', href: `/${currentLang}/particuliers` },
-    { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات' : 'Business', href: `/${currentLang}/entreprises` },
-    { label: currentLang === 'fr' ? 'Actualités' : currentLang === 'ar' ? 'الأخبار' : 'News', href: `/${currentLang}/actualites` },
-    { label: currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information', href: `/${currentLang}/acces-information` },
-    { label: currentLang === 'fr' ? 'Notre Identité' : currentLang === 'ar' ? 'هويتنا' : 'About Us', href: `/${currentLang}/notre-identite` },
-    { label: currentLang === 'fr' ? 'Agences' : currentLang === 'ar' ? 'الفروع' : 'Branches', href: `/${currentLang}/agencies` },
+  const isAdminRoute = /^\/(fr|en|ar)\/admin(\/|$)/.test(pathname);
+
+  const adminNavLinks = [
+    { label: currentLang === 'fr' ? 'Vue utilisateur' : currentLang === 'ar' ? 'عرض المستخدم' : 'User View', href: `/${currentLang}/` },
+    { label: currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to Info', href: `/${currentLang}/acces-information` },
+    { label: currentLang === 'fr' ? 'Documenting' : currentLang === 'ar' ? 'توثيق' : 'Documenting', href: `/${currentLang}/admin/acces-information` },
+    { label: currentLang === 'fr' ? 'Presse' : currentLang === 'ar' ? 'الصحافة' : 'Press', href: `/${currentLang}/admin/press` },
   ];
+
+  const navLinks = isAdminRoute
+    ? adminNavLinks
+    : [
+        { label: currentLang === 'fr' ? 'Accueil' : currentLang === 'ar' ? 'الرئيسية' : 'Home', href: `/${currentLang}/` },
+        { label: currentLang === 'fr' ? 'Devenir client' : currentLang === 'ar' ? 'انضم إلينا' : 'Become a client', href: `/${currentLang}/devenir-client` },
+        { label: currentLang === 'fr' ? 'Particuliers' : currentLang === 'ar' ? 'للأفراد' : 'Retail', href: `/${currentLang}/particuliers` },
+        { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات' : 'Business', href: `/${currentLang}/entreprises` },
+        { label: currentLang === 'fr' ? 'Actualités' : currentLang === 'ar' ? 'الأخبار' : 'News', href: `/${currentLang}/actualites` },
+        { label: currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information', href: `/${currentLang}/acces-information` },
+        { label: currentLang === 'fr' ? 'Notre Identité' : currentLang === 'ar' ? 'هويتنا' : 'About Us', href: `/${currentLang}/notre-identite` },
+        { label: currentLang === 'fr' ? 'Agences' : currentLang === 'ar' ? 'الفروع' : 'Branches', href: `/${currentLang}/agencies` },
+      ];
 
   const ctaLabel =
     currentLang === 'fr' ? 'Ouvrir un compte' :

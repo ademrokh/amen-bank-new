@@ -1,9 +1,56 @@
 import ActualitesList, { Article } from '@/components/ActualitesList';
+import { createClient } from '@supabase/supabase-js';
 
 type Language = 'fr' | 'ar' | 'en';
 
 export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
+}
+
+function isMissingPressArticlesTableError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'PGRST205';
+}
+
+async function fetchPublishedPressArticles(lang: Language) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return [] as Article[];
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { data, error } = await supabase
+    .from('press_articles')
+    .select('*')
+    .eq('is_published', true)
+    .order('display_order', { ascending: true })
+    .order('published_at', { ascending: false });
+
+  if (error || !data) {
+    if (!isMissingPressArticlesTableError(error)) {
+      console.error('Unable to load published press articles', error);
+    }
+    return [] as Article[];
+  }
+
+  return data.map((item: any) => ({
+    date: item.published_at ? new Date(item.published_at).toLocaleDateString(lang === 'ar' ? 'ar-TN' : lang === 'fr' ? 'fr-FR' : 'en-GB', { year: 'numeric', month: 'short', day: 'numeric' }) : item.date ?? '',
+    title: item[lang === 'fr' ? 'title_fr' : lang === 'ar' ? 'title_ar' : 'title_en'] ?? '',
+    excerpt: item[lang === 'fr' ? 'excerpt_fr' : lang === 'ar' ? 'excerpt_ar' : 'excerpt_en'] ?? '',
+    body: String(item[lang === 'fr' ? 'body_fr' : lang === 'ar' ? 'body_ar' : 'body_en'] ?? '')
+      .split(/\n{2,}|\r\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean),
+    category: item.category ?? '',
+    icon: item.icon ?? 'governance',
+  }));
 }
 
 export const metadata = {
@@ -396,6 +443,7 @@ export default async function ActualitesPage({
   };
 
   const d = content[lang];
+  const articles = (await fetchPublishedPressArticles(lang)) || d.articles;
 
   return (
     <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'}>

@@ -1,20 +1,14 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
-
-type Language = 'fr' | 'ar' | 'en';
-
-interface AdminLoginPageProps {
-  params: Promise<{ lang: Language }>;
-}
+import { useRouter, useParams } from 'next/navigation';
 
 // Hardcoded Admin UUID
 const ADMIN_ID_MAP = {
   adminamenbank: 'b2e91d6d-d391-408a-a6bc-61f575eaf375', 
 };
 
-export default function AdminLoginPage({ params }: AdminLoginPageProps) {
+export default function AdminLoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -23,36 +17,38 @@ export default function AdminLoginPage({ params }: AdminLoginPageProps) {
   const [isResetting, setIsResetting] = useState(false);
   
   const router = useRouter();
+  const params = useParams();
+  const locale = (params as { lang?: string })?.lang ?? 'fr';
 
   async function handleResetPassword() {
     setIsResetting(true);
     setErrorMessage(null);
     setRequestMessage(null);
 
-    const userId = ADMIN_ID_MAP[username as keyof typeof ADMIN_ID_MAP];
-    if (!userId) {
-      setRequestMessage('Invalid username.');
+    if (!username.trim()) {
+      setRequestMessage('Please enter a username first.');
       setIsResetting(false);
       return;
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/rotate-admin-password`, {
+      const res = await fetch('/api/admin/password/reset', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
         },
-        body: JSON.stringify({ user_id: userId })
+        body: JSON.stringify({ username: username.trim() })
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
-        setRequestMessage('Previous password invalidated. New password sent to thesg103@gmail.com!');
+        setRequestMessage(data.message || 'A new temporary password was generated.');
       } else {
-        setRequestMessage('Failed to reset password.');
+        setRequestMessage(data.error || 'Failed to reset password.');
       }
     } catch {
-      setRequestMessage('An error occurred.');
+      setRequestMessage('An error occurred while resetting the password.');
     } finally {
       setIsResetting(false);
     }
@@ -74,7 +70,7 @@ export default function AdminLoginPage({ params }: AdminLoginPageProps) {
       const data = await res.json();
 
       if (res.ok) {
-        router.push('/fr/admin/acces-information');
+        router.push(`/${locale}/admin/acces-information`);
       } else {
         setErrorMessage(data.error || 'Login failed');
       }

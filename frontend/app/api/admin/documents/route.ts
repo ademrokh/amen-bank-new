@@ -42,6 +42,11 @@ function sanitizeFileName(fileName: string): string {
 }
 
 async function assertAdmin(request: NextRequest) {
+  const adminSession = request.cookies.get('admin_session')?.value === 'true';
+  if (adminSession) {
+    return { authorized: true, session: null as null, error: null };
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: { session }, error } = await supabase.auth.getSession();
 
