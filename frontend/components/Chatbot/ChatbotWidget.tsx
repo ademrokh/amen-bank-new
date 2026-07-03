@@ -125,19 +125,25 @@ export default function ChatbotWidget() {
   const [error, setError] = useState<string | null>(null);
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
   const [showQuickReplies, setShowQuickReplies] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const prevLangRef = useRef(currentLang);
-  const conversationIdRef = useRef<string>(
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`
-  );
+  const prevMessageCountRef = useRef(messages.length);
+  const conversationIdRef = useRef<string>('');
 
   const ui = uiMap[currentLang];
 
   useEffect(() => {
+    // Initialize conversation ID once on mount (avoid impure function calls during render)
+    if (!conversationIdRef.current) {
+      conversationIdRef.current =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `session-${Math.random()}-${Math.random().toString(36).slice(2)}`;
+    }
+
     const handler = () => {
       setIsOpen(true);
       setIsMaximized(true);
@@ -146,9 +152,15 @@ export default function ChatbotWidget() {
     return () => window.removeEventListener('open-chatbot', handler);
   }, []);
 
+  // Only scroll when a NEW message is added (not on every render or isLoading change)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (messages.length > prevMessageCountRef.current) {
+      prevMessageCountRef.current = messages.length;
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 0);
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (isOpen) {
@@ -156,6 +168,13 @@ export default function ChatbotWidget() {
       return () => clearTimeout(timer);
     }
   }, [isOpen, isMaximized]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIsHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (prevLangRef.current !== currentLang) {
@@ -361,10 +380,12 @@ export default function ChatbotWidget() {
                 textAlign: message.role === 'user' ? 'right' : 'left'
               }}
             >
-              {message.timestamp.toLocaleTimeString(
-                currentLang === 'ar' ? 'ar-TN' : 'fr-TN',
-                { hour: '2-digit', minute: '2-digit' }
-              )}
+              {isHydrated
+                ? message.timestamp.toLocaleTimeString(
+                    currentLang === 'ar' ? 'ar-TN' : 'fr-TN',
+                    { hour: '2-digit', minute: '2-digit' }
+                  )
+                : ''}
             </p>
           </div>
         </div>

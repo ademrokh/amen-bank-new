@@ -5,7 +5,7 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: 'FAQ - Amen Bank',
+  title: 'AmenGPT - Amen Bank',
   description: "Foire aux questions sur les services bancaires d'Amen Bank",
 };
 

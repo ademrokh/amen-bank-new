@@ -65,7 +65,7 @@ class AmenBankRAGChain:
                 self.llm = ChatGroq(
                     groq_api_key=os.getenv("GROQ_API_KEY"),
                     model_name=self.model,
-                    temperature=0.2,
+                    temperature=float(os.getenv("GROQ_TEMPERATURE", "0.2")),
                 )
             except Exception as exc:
                 print(f"LLM initialization skipped: {exc}")
@@ -107,13 +107,15 @@ class AmenBankRAGChain:
     
     def _format_context(self, context: List[Dict[str, Any]]) -> str:
         """
-        Format retrieved chunks into context string
+        Format retrieved chunks into context string (clean answer text only).
+        Returns only the FIRST (most relevant) chunk to provide a focused answer.
+        Removes category prefix and question, keeping only the answer text.
         
         Args:
             context: List of retrieved chunks
             
         Returns:
-            Formatted context string
+            Formatted answer text only (cleaned)
         """
         if not context:
             template = {
@@ -123,14 +125,37 @@ class AmenBankRAGChain:
             }
             return template.get(self.language, template[Language.EN])
         
-        # Format top 3 chunks
-        formatted = []
-        for i, chunk in enumerate(context[:3], 1):
-            text = chunk.get("text", "")
-            relevance = chunk.get("relevance", 0)
-            formatted.append(f"[{i}] {text} (Pertinence: {relevance:.1%})")
+        # Use only the FIRST (most relevant) chunk
+        text = context[0].get("text", "").strip()
         
-        return "\n\n".join(formatted)
+        if not text:
+            template = {
+                Language.FR: "Aucune information pertinente trouvée.",
+                Language.AR: "لم يتم العثور على معلومات ذات صلة.",
+                Language.EN: "No relevant information found.",
+            }
+            return template.get(self.language, template[Language.EN])
+        
+        # Text format is "category. question\nanswer"
+        # First, remove the category prefix
+        lines = text.split('\n', 1)
+        first_line = lines[0]
+        
+        # Remove category prefix (e.g., "particuliers. " -> "")
+        if '. ' in first_line:
+            parts = first_line.split('. ', 1)
+            # If first part looks like a category (lowercase word), remove it
+            if len(parts) > 1 and parts[0] and parts[0][0].islower():
+                # Now we have just the question in first_line
+                if len(lines) > 1:
+                    # Return the answer part (second line onwards)
+                    return lines[1].strip()
+                else:
+                    # No answer part, return the question (unlikely but handle it)
+                    return parts[1].strip()
+        
+        # If no category prefix found, return the text as-is
+        return text.strip()
     
     def _generate_template_response(
         self,
@@ -150,40 +175,83 @@ class AmenBankRAGChain:
             Template-based response
         """
         template = USER_TEMPLATES[language]
-        prompt_text = template.format(context=context, question=question)
         
-        # Simple mock response generation
-        prefixes = {
-            Language.FR: [
-                "Basé sur nos connaissances: ",
-                "Selon nos informations: ",
-                "Amen Bank propose: ",
-            ],
-            Language.AR: [
-                "بناءً على معلوماتنا: ",
-                "وفقاً لقاعدتنا: ",
-                "يوفر Amen Bank: ",
-            ],
-            Language.EN: [
-                "Based on our knowledge: ",
-                "According to our information: ",
-                "Amen Bank offers: ",
-            ],
-        }
-        
-        prefix = prefixes[language][hash(question) % len(prefixes[language])]
-        
-        if not context or context == "No relevant information found." or context == "لم يتم العثور على معلومات ذات صلة." or context == "No relevant information found.":
+        # Check if context is empty or no relevant information found
+        if not context or "No relevant information found" in context:
             return {
-                Language.FR: "Je n’ai pas trouvé d’information suffisante dans la FAQ pour répondre avec certitude. Veuillez contacter une agence Amen Bank ou le support pour obtenir une réponse précise.",
+                Language.FR: "Je n'ai pas trouvé d'information suffisante dans la FAQ pour répondre avec certitude. Veuillez contacter une agence Amen Bank ou le support pour obtenir une réponse précise.",
                 Language.AR: "لم أجد معلومات كافية في الأسئلة الشائعة للرد بثقة. يرجى التواصل مع فرع بنك آمن أو الدعم للحصول على إجابة دقيقة.",
                 Language.EN: "I could not find enough information in the FAQ to answer with confidence. Please contact an Amen Bank branch or support team for a precise answer.",
             }[language]
         
-        # Extract first sentence from context
-        first_sentence = context.split("\n")[0][:150]
-        
-        return prefix + first_sentence + "..."
+        # When LLM is not available, return a reformulated answer
+        # (category prefix and metadata have already been removed in _format_context)
+        answer = context.strip()
+        return self._reformulate_answer(answer, language)
+
+    def _reformulate_answer(self, answer: str, language: Language) -> str:
+        """
+        Apply a simple language-specific template to the FAQ answer to make it
+        sound like a concise, user-facing response.
+        """
+        if not answer:
+            templates = {
+                Language.FR: "Je n'ai pas trouvé d'information pertinente dans la FAQ.",
+                Language.AR: "لم أجد معلومات ذات صلة في الأسئلة المتكررة.",
+                Language.EN: "I couldn't find relevant information in the FAQ.",
+            }
+            return templates.get(language, templates[Language.EN])
+
+        # If an LLM is available, ask it to polish the answer into a friendly tone
+        if self.llm is not None and ChatPromptTemplate is not None and StrOutputParser is not None:
+            try:
+                polished = self._polish_with_llm(answer, language)
+                if polished and isinstance(polished, str):
+                    return polished
+            except Exception as e:
+                print(f"LLM polish failed: {e}. Falling back to template reformulation.")
+
+        # Fallback simple templates
+        if language == Language.FR:
+            # Ensure the answer is a complete sentence
+            if not answer.endswith('.') and len(answer) < 240:
+                answer = answer.rstrip() + '.'
+            return f"Selon notre FAQ : {answer}"
+        if language == Language.AR:
+            return f"وفقًا لأسئلتنا الشائعة: {answer}"
+        # Default to English
+        return f"According to our FAQ: {answer}"
+
+    def _polish_with_llm(self, answer: str, language: Language) -> str:
+        """
+        Use the Groq LLM to rewrite an FAQ answer in a concise, friendly tone.
+        Falls back to returning the original answer on any failure.
+        """
+        if ChatPromptTemplate is None or StrOutputParser is None or self.llm is None:
+            return answer
+
+        system_prompt = SYSTEM_PROMPTS.get(language, SYSTEM_PROMPTS[Language.FR])
+        # Craft a targeted user prompt for rewriting while preserving facts and controlling tone/length
+        user_prompt = (
+            "Réécris la réponse FAQ suivante en un style naturel, chaleureux et professionnel, sans dépasser 40 mots. "
+            "Ne rajoute aucune information, préserve strictement les faits, et répond uniquement par la formulation réécrite.\n\nRéponse à réécrire : {answer}"
+        ) if language == Language.FR else (
+            "Rewrite the following FAQ answer in a natural, friendly, and professional tone, using no more than 40 words. "
+            "Do not add any new information; preserve facts exactly and reply only with the rewritten answer.\n\nAnswer: {answer}"
+        )
+
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            ("user", user_prompt),
+        ])
+
+        chain = prompt | self.llm | StrOutputParser()
+        try:
+            response = chain.invoke({"answer": answer})
+            return response
+        except Exception as e:
+            print(f"Error invoking LLM polish chain: {e}")
+            return answer
     
     def _generate_llm_response(
         self,

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Menu, X, ChevronDown, Check } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -74,25 +75,32 @@ export default function Header() {
     >
       <nav
         className={`container header-nav ${isRTL ? 'flex-row-reverse' : ''}`}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
         aria-label="Main navigation"
       >
         {/* ── Logo ── */}
-        <Link
-          href={`/${currentLang}/`}
-          className={`header-logo ${isRTL ? 'flex-row-reverse' : ''}`}
-        >
-          <span className="text-2xl font-bold text-primary leading-none select-none">
-            A
-          </span>
-          <div className={`flex flex-col leading-tight ${isRTL ? 'items-end' : ''}`}>
-            <span className="text-base font-bold tracking-tight text-ink">
-              Amen Bank
-            </span>
-            <span className="text-[0.625rem] text-ink-muted tracking-wide uppercase">
-              {logoSubtitle}
-            </span>
-          </div>
-        </Link>
+        <div className="header-left" style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto' }}>
+          <Link
+            href={`/${currentLang}/`}
+            className={`header-logo ${isRTL ? 'flex-row-reverse' : ''}`}
+          >
+            <Image
+              src="/favicon.ico"
+              alt="Amen Bank"
+              width={32}
+              height={32}
+              className="select-none"
+            />
+            <div className={`flex flex-col leading-tight ${isRTL ? 'items-end' : ''}`}>
+              <span className="text-base font-bold tracking-tight text-ink">
+                Amen Bank
+              </span>
+              <span className="text-[0.625rem] text-ink-muted tracking-wide uppercase">
+                {logoSubtitle}
+              </span>
+            </div>
+          </Link>
+        </div>
 
         {/* ── Desktop Navigation ── */}
         <div
@@ -103,7 +111,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`header-nav-link ${
+              className={`header-nav-link whitespace-nowrap ${
                 isLinkActive(link.href) 
                   ? 'text-ink bg-surface-alt' 
                   : 'text-ink-secondary hover:text-ink hover:bg-surface-alt'
@@ -117,7 +125,7 @@ export default function Header() {
         </div>
 
         {/* ── Right Section ── */}
-        <div className={`header-right ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`header-right ${isRTL ? 'flex-row-reverse' : ''}`} style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto', marginLeft: 'auto' }}>
           {/* Language Selector */}
           <div className="relative">
             <button

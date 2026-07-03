@@ -211,19 +211,30 @@ class ChromaDBManager:
 
     def _generate_mock_embedding(self, text: str) -> List[float]:
         """
-        Generate mock embedding based on text hash
-
-        In production, use sentence-transformers:
-            from sentence_transformers import SentenceTransformer
-            model = SentenceTransformer("intfloat/multilingual-e5-base")
-            return model.encode(text).tolist()
+        Generate embedding using sentence-transformers multilingual model
 
         Args:
             text: Text to embed
 
         Returns:
-            384-dimensional mock embedding vector
+            Embedding vector (384 dimensions for multilingual-e5-base)
         """
+        # Try to use real semantic embeddings
+        if not hasattr(self, '_embedding_model'):
+            try:
+                from sentence_transformers import SentenceTransformer
+                self._embedding_model = SentenceTransformer("intfloat/multilingual-e5-base")
+                print("✓ Loaded multilingual-e5-base model for query embeddings")
+            except Exception as e:
+                print(f"⚠ Could not load embedding model ({e}), using mock embeddings")
+                self._embedding_model = None
+        
+        if self._embedding_model:
+            # multilingual-e5 requires "query:" prefix for query encoding
+            query_text = f"query: {text}"
+            return self._embedding_model.encode(query_text).tolist()
+        
+        # Fallback to mock embedding
         text_hash = int(hashlib.md5(text.encode()).hexdigest(), 16)
         return [
             float((text_hash + i) % 256) / 256.0 

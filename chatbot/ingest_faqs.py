@@ -180,9 +180,7 @@ class FAQIngestionManager:
 
     def generate_mock_embeddings(self, chunks_by_language: Dict[Language, List[Dict[str, Any]]]) -> Dict[Language, List[Dict[str, Any]]]:
         """
-        Generate mock embeddings for testing
-
-        In production, use sentence-transformers multilingual-e5-base model.
+        Generate embeddings using sentence-transformers multilingual model
 
         Args:
             chunks_by_language: Document chunks organized by language
@@ -190,19 +188,29 @@ class FAQIngestionManager:
         Returns:
             Chunks with embeddings added
         """
-        # For production, uncomment and use:
-        # model = SentenceTransformer("intfloat/multilingual-e5-base")
+        try:
+            from sentence_transformers import SentenceTransformer
+            model = SentenceTransformer("intfloat/multilingual-e5-base")
+            print(f"✓ Using multilingual-e5-base model for semantic embeddings")
+        except Exception as e:
+            print(f"⚠ Could not load semantic model ({e}), falling back to mock embeddings")
+            model = None
 
         for lang, chunks in chunks_by_language.items():
             for chunk in chunks:
-                # Mock embedding: hash-based deterministic vector
-                # In production: chunk["embedding"] = model.encode(chunk["text"])
-                text_hash = hash(chunk["text"])
-                # Generate 384-dimensional mock embedding
-                chunk["embedding"] = [
-                    float((text_hash + i) % 256) / 256.0
-                    for i in range(384)  # multilingual-e5-base output dimension
-                ]
+                if model:
+                    # Use real semantic embeddings
+                    # multilingual-e5 requires "passage:" prefix for document encoding
+                    passage_text = f"passage: {chunk['text']}"
+                    chunk["embedding"] = model.encode(passage_text).tolist()
+                else:
+                    # Fallback to mock embedding: hash-based deterministic vector
+                    text_hash = hash(chunk["text"])
+                    # Generate 384-dimensional mock embedding
+                    chunk["embedding"] = [
+                        float((text_hash + i) % 256) / 256.0
+                        for i in range(384)  # multilingual-e5-base output dimension
+                    ]
 
         print(f"✓ Generated embeddings for all chunks")
         return chunks_by_language

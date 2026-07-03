@@ -19,6 +19,9 @@ langchain-community==0.0.15
 pandas==2.1.3
 numpy==1.26.2
 
+# NLP
+spacy>=3.5.0
+
 # Utilities
 python-dotenv==1.0.0
 requests==2.31.0

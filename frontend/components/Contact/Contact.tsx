@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle, Clock, MessageCircle } from 'lucide-react';
 import { useLang } from '@/hooks/useLang';
+import { getAgencyMapUrl } from '../AgencyLocator/map';
 
 export default function Contact() {
   const { lang: currentLang, isRTL } = useLang();
@@ -200,11 +201,15 @@ export default function Contact() {
 
               <div className="mt-10">
                 <h3 className="text-h3 text-ink mb-6">{lang.location}</h3>
-                <div className="rounded-xl h-72 flex items-center justify-center" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
-                  <div className="text-center">
-                    <MapPin className="w-10 h-10 mx-auto mb-3" style={{ color: '#94a3b8' }} />
-                    <p className="text-lg font-medium" style={{ color: '#94a3b8' }}>Leaflet Map</p>
-                  </div>
+                <div className="rounded-xl h-72 overflow-hidden" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
+                  <iframe
+                    src={getAgencyMapUrl()}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    title="Amen Bank Agency Locator"
+                  />
                 </div>
               </div>
             </div>

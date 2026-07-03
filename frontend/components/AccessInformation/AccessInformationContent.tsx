@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, FileText, Mail, MailPlus, Send, BookOpen, AlertTriangle, Loader2 } from 'lucide-react';
+import { ExternalLink, FileText, Mail, MailPlus, Send, BookOpen, AlertTriangle, Loader2, MapPin, Phone } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 type Language = 'fr' | 'ar' | 'en';
@@ -265,6 +265,7 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       ],
       documentsTitle: 'Documents publiés',
       documentsIntro: 'Les documents ci-dessous sont mis à disposition de façon proactive.',
+      loadingState: 'Chargement des documents...',
       downloadLabel: 'Ouvrir le document',
       emptyState: 'Aucun document disponible pour le moment.',
       errorState: 'Impossible de charger les documents pour le moment.',
@@ -285,7 +286,9 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       allPeriods: 'Toutes les périodes',
       allYears: 'Toutes les années',
       allMonths: 'Tous les mois',
-      resultsSummary: '{{count}} document(s) affiché(s)',
+      resultsSummaryZero: 'Aucun document affiché',
+      resultsSummaryOne: '1 document affiché',
+      resultsSummaryMany: '{{count}} documents affichés',
     },
     en: {
       title: 'Access to Information',
@@ -306,6 +309,7 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       ],
       documentsTitle: 'Published documents',
       documentsIntro: 'The documents below are published proactively.',
+      loadingState: 'Loading documents...',
       downloadLabel: 'Open document',
       emptyState: 'No documents are available at the moment.',
       errorState: 'The documents could not be loaded at the moment.',
@@ -326,7 +330,9 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       allPeriods: 'All periods',
       allYears: 'All years',
       allMonths: 'All months',
-      resultsSummary: '{{count}} document(s) shown',
+      resultsSummaryZero: 'No documents shown',
+      resultsSummaryOne: '1 document shown',
+      resultsSummaryMany: '{{count}} documents shown',
     },
     ar: {
       title: 'الوصول إلى المعلومات',
@@ -347,6 +353,7 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       ],
       documentsTitle: 'الوثائق المنشورة',
       documentsIntro: 'يتم نشر الوثائق أدناه بشكل استباقي.',
+      loadingState: 'جارٍ تحميل الوثائق...',
       downloadLabel: 'فتح الوثيقة',
       emptyState: 'لا توجد وثائق متاحة حاليًا.',
       errorState: 'تعذر تحميل الوثائق مؤخرًا.',
@@ -367,77 +374,76 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
       allPeriods: 'كل الفترات',
       allYears: 'كل السنوات',
       allMonths: 'كل الأشهر',
-      resultsSummary: 'تم عرض {{count}} مستند',
+      resultsSummaryZero: 'لا توجد وثائق معروضة',
+      resultsSummaryOne: 'تم عرض مستند واحد',
+      resultsSummaryMany: 'تم عرض {{count}} مستند',
     },
   };
 
   const copy = content[lang];
 
-  return (
-    <section className="section-lg" style={{ background: '#0f172a' }} dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="container max-w-6xl">
-        <div className="section-header max-w-3xl text-left">
-          <span className="section-badge section-badge-light">{copy.legal}</span>
-          <h1 className="text-h1 mt-3 mb-4 text-white">{copy.title}</h1>
-          <p className="text-lg leading-relaxed" style={{ color: '#94a3b8' }}>{copy.intro}</p>
-        </div>
+  const getResultsSummary = () => {
+    const count = filteredDocuments.length;
+    if (count === 0) return copy.resultsSummaryZero;
+    if (count === 1) return copy.resultsSummaryOne;
+    return copy.resultsSummaryMany.replace('{{count}}', String(count));
+  };
 
-        <div className="mt-12 space-y-24">
+  return (
+    <>
+      {/* ── HERO ── */}
+      <section style={{ background: '#0f172a', padding: '96px 24px' }} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div style={{ maxWidth: '1024px', margin: '0 auto' }}>
+          <span className="page-hero-badge">{copy.legal}</span>
+          <h1 className="text-h1" style={{ marginTop: '32px', marginBottom: '24px', color: '#fff' }}>{copy.title}</h1>
+          <p style={{ fontSize: '18px', lineHeight: '1.6', maxWidth: '768px', color: '#94a3b8' }}>
+            {copy.intro}
+          </p>
+        </div>
+      </section>
+
+      {/* ── CONTENT ── */}
+      <section style={{ background: '#f8fafc', padding: '80px 24px' }} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div style={{ maxWidth: '1152px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '80px' }}>
+          
           {/* Hidden until later notice */}
           <div style={{ display: 'none' }}>
-            <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="card p-10">
+            <div style={{ display: 'grid', gap: '48px' }}>
+              <div style={{ background: '#fff', padding: '48px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
                 <h2 className="text-h3 text-ink">{copy.officerTitle}</h2>
-                <p className="mt-5 mb-8 text-small leading-relaxed" style={{ color: '#64748b' }}>{copy.officerDescription}</p>
-                <div className="rounded-2xl border border-border bg-slate-50 p-6">
-                  <p className="font-semibold" style={{ color: '#0f172a' }}>{copy.officerName}</p>
-                  <p className="mt-1 text-small" style={{ color: '#64748b' }}>{copy.officerRole}</p>
+                <p style={{ marginTop: '24px', marginBottom: '40px', fontSize: '14px', color: '#64748b' }}>{copy.officerDescription}</p>
+                <div style={{ borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '24px' }}>
+                  <p style={{ fontWeight: 600, color: '#0f172a' }}>{copy.officerName}</p>
+                  <p style={{ marginTop: '8px', fontSize: '14px', color: '#64748b' }}>{copy.officerRole}</p>
                 </div>
-                <div className="mt-8 space-y-4">
+                <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   {contactMethods.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <div key={item.key} className="flex items-start gap-3 rounded-2xl border border-border bg-white p-4">
-                        <div className="mt-0.5 rounded-full bg-primary-subtle p-2 text-primary">
-                          <Icon className="h-4 w-4" aria-hidden="true" />
+                      <div key={item.key} style={{ display: 'flex', gap: '20px', border: '1px solid #e2e8f0', background: '#fff', padding: '20px', borderRadius: '16px' }}>
+                        <div style={{ marginTop: '4px', background: 'rgba(0, 61, 165, 0.1)', padding: '10px', borderRadius: '999px', color: '#003DA5' }}>
+                          <Icon style={{ width: '20px', height: '20px' }} aria-hidden="true" />
                         </div>
                         <div>
-                          <p className="font-medium" style={{ color: '#0f172a' }}>
+                          <p style={{ fontWeight: 500, color: '#0f172a' }}>
                             {lang === 'fr' ? item.labelFr : lang === 'ar' ? item.labelAr : item.labelEn}
                           </p>
-                          <p className="text-sm" style={{ color: '#64748b' }}>{item.value}</p>
+                          <p style={{ marginTop: '4px', fontSize: '14px', color: '#64748b' }}>{item.value}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-
-              <div className="card p-10">
-                <h2 className="text-h3 text-ink">{copy.requestTitle}</h2>
-                <ol className="mt-6 space-y-4 text-small leading-relaxed">
-                  {copy.steps.map((step, index) => (
-                    <li key={step} className="flex gap-3">
-                      <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-sm font-semibold text-primary">
-                        {index + 1}
-                      </span>
-                      <span style={{ color: '#64748b' }}>{step}</span>
-                    </li>
-                  ))}
-                </ol>
-                <div className="mt-8 rounded-2xl border border-dashed border-border bg-slate-50 p-5 text-sm" style={{ color: '#64748b' }}>
-                  {copy.requestNote}
-                </div>
-              </div>
             </div>
           </div>
 
           {/* Documents Section */}
-          <div className="card p-10 lg:p-12">
+          <div style={{ background: '#fff', padding: '48px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <h2 className="text-h3 text-ink">{copy.documentsTitle}</h2>
-            <p className="mt-4 text-small leading-relaxed" style={{ color: '#64748b' }}>{copy.documentsIntro}</p>
+            <p style={{ marginTop: '20px', fontSize: '14px', color: '#64748b' }}>{copy.documentsIntro}</p>
 
-            <div className="mt-8 flex flex-wrap gap-3 pb-8 border-b border-border">
+            <div style={{ marginTop: '40px', display: 'flex', flexWrap: 'wrap', gap: '12px', paddingBottom: '32px', borderBottom: '1px solid #e2e8f0' }}>
               {[
                 { value: 'all', label: copy.allDocuments },
                 { value: 'indicators', label: copy.quarterlyIndicators },
@@ -451,23 +457,40 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
                     setActiveType(option.value as DocumentTypeFilter);
                     setSelectedDateValue('all');
                   }}
-                  className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                    activeType === option.value
-                      ? 'bg-ink text-white shadow-sm'
-                      : 'border-2 border-ink bg-white text-ink hover:bg-slate-50'
-                  }`}
+                  style={{
+                    padding: '10px 20px',
+                    borderRadius: '999px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: activeType === option.value ? '#003DA5' : '#f1f5f9',
+                    color: activeType === option.value ? '#fff' : '#475569',
+                    transition: 'background 0.2s'
+                  }}
                 >
                   {option.label}
                 </button>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <label className="text-sm font-medium" style={{ color: '#0f172a' }}>{copy.filterLabel}</label>
+            <div style={{ marginTop: '32px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 500, color: '#0f172a' }}>
+                {copy.filterLabel}
+              </label>
               <select
                 value={selectedDateValue}
                 onChange={(event) => setSelectedDateValue(event.target.value)}
-                className="rounded-full border border-border bg-white px-4 py-2 text-sm"
+                style={{
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '10px 16px',
+                  fontSize: '14px',
+                  color: '#334155',
+                  outline: 'none',
+                  width: '256px'
+                }}
               >
                 <option value="all">
                   {activeType === 'indicators' ? copy.allPeriods : activeType === 'financial' ? copy.allYears : copy.allMonths}
@@ -478,50 +501,54 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
               </select>
             </div>
 
-            <p className="mt-6 text-sm" style={{ color: '#64748b' }}>{copy.resultsSummary.replace('{{count}}', String(filteredDocuments.length))}</p>
+            {!isLoading && !errorMessage && (
+              <p style={{ marginTop: '24px', fontSize: '14px', fontWeight: 500, color: '#64748b' }}>
+                {getResultsSummary()}
+              </p>
+            )}
 
-            <div className="mt-12 space-y-8">
+            <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
               {isLoading ? (
-                <div className="flex items-center gap-3 rounded-2xl border border-border bg-slate-50 p-5" style={{ color: '#64748b' }} aria-live="polite">
-                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-                  <span>{copy.documentsIntro}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '32px', borderRadius: '16px', color: '#64748b' }} aria-live="polite">
+                  <Loader2 style={{ width: '20px', height: '20px', color: '#003DA5', animation: 'spin 1s linear infinite' }} aria-hidden="true" />
+                  <span style={{ fontSize: '14px', fontWeight: 500 }}>{copy.loadingState}</span>
                 </div>
               ) : errorMessage ? (
-                <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800" role="alert">
-                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+                <div style={{ display: 'flex', gap: '16px', border: '1px solid #fde68a', background: '#fffbeb', padding: '32px', borderRadius: '16px', color: '#92400e' }} role="alert">
+                  <AlertTriangle style={{ width: '20px', height: '20px', marginTop: '2px', flexShrink: 0 }} aria-hidden="true" />
                   <div>
-                    <p className="font-semibold">{copy.errorState}</p>
-                    <p className="mt-1 text-sm">{errorMessage}</p>
+                    <p style={{ fontWeight: 600, fontSize: '16px' }}>{copy.errorState}</p>
+                    <p style={{ marginTop: '8px', fontSize: '14px' }}>{errorMessage}</p>
                   </div>
                 </div>
               ) : Object.keys(groupedFilteredDocuments).length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border bg-slate-50 p-8 text-center" style={{ color: '#64748b' }}>
+                <div style={{ border: '1px dashed #e2e8f0', background: '#f8fafc', padding: '48px', borderRadius: '16px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
                   {copy.emptyState}
                 </div>
               ) : (
                 Object.entries(groupedFilteredDocuments).map(([type, items]) => (
                   <div key={type}>
-                    <div className="mb-5 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold" style={{ color: '#0f172a' }}>
+                    <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0f172a' }}>
                         {type === 'indicators' ? copy.quarterlyIndicators : type === 'financial' ? copy.financialStatements : copy.otherDocuments}
                       </h3>
-                      <span className="rounded-full bg-primary-subtle px-3 py-1 text-sm font-medium text-primary">
+                      <span style={{ borderRadius: '999px', background: 'rgba(0, 61, 165, 0.1)', padding: '4px 12px', fontSize: '14px', fontWeight: 500, color: '#003DA5' }}>
                         {items.length}
                       </span>
                     </div>
-                    <div className="space-y-4">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {items.map((document) => (
-                        <div key={document.id} className="flex flex-col gap-5 rounded-2xl border border-border bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-start gap-3">
-                            <div className="rounded-full bg-white p-2 text-primary shadow-sm">
-                              <FileText className="h-5 w-5" aria-hidden="true" />
+                        <div key={document.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '24px', borderRadius: '16px' }}>
+                          <div style={{ display: 'flex', gap: '16px' }}>
+                            <div style={{ background: '#fff', padding: '10px', borderRadius: '999px', color: '#003DA5', border: '1px solid #e2e8f0' }}>
+                              <FileText style={{ width: '20px', height: '20px' }} aria-hidden="true" />
                             </div>
                             <div>
-                              <p className="font-semibold" style={{ color: '#0f172a' }}>{getLocalizedTitle(document, lang)}</p>
-                              <div className="mt-3 flex flex-wrap gap-3 text-sm" style={{ color: '#64748b' }}>
-                                <span>{copy.categoryLabel}: {getLocalizedCategoryName(document.category, lang)}</span>
-                                <span>{copy.fileSizeLabel}: {formatBytes(document.file_size_bytes)}</span>
-                                <span>{copy.publishedLabel}: {formatDate(document.published_at, lang)}</span>
+                              <p style={{ fontWeight: 600, color: '#0f172a' }}>{getLocalizedTitle(document, lang)}</p>
+                              <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '24px', fontSize: '14px', color: '#64748b' }}>
+                                <span>{copy.categoryLabel}: <span style={{ fontWeight: 500, color: '#475569' }}>{getLocalizedCategoryName(document.category, lang)}</span></span>
+                                <span>{copy.fileSizeLabel}: <span style={{ fontWeight: 500, color: '#475569' }}>{formatBytes(document.file_size_bytes)}</span></span>
+                                <span>{copy.publishedLabel}: <span style={{ fontWeight: 500, color: '#475569' }}>{formatDate(document.published_at, lang)}</span></span>
                               </div>
                             </div>
                           </div>
@@ -529,11 +556,10 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
                             href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${encodeURIComponent(document.file_path)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-medium transition hover:bg-primary"
-                            style={{ color: '#ffffff', textDecoration: 'none' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', background: '#0f172a', padding: '10px 20px', fontSize: '14px', fontWeight: 500, color: '#fff', textDecoration: 'none', flexShrink: 0 }}
                             aria-label={`${copy.downloadLabel}: ${getLocalizedTitle(document, lang)}`}
                           >
-                            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                            <ExternalLink style={{ width: '16px', height: '16px' }} aria-hidden="true" />
                             {copy.downloadLabel}
                           </a>
                         </div>
@@ -545,55 +571,58 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
             </div>
           </div>
 
-          <div className="card p-10 lg:p-12">
-            <h2 className="text-h3 mb-4 text-ink">{copy.appealTitle}</h2>
-            <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>{copy.appealText}</p>
-            
-            {/* INAI Contact Card */}
-            <div className="mt-10 rounded-2xl border border-border bg-slate-50 p-8">
-              <h3 className="font-semibold" style={{ color: '#0f172a' }}>{copy.inaiContactTitle}</h3>
-              <div className="mt-8 space-y-5">
-                {/* Address */}
-                <div className="flex items-start gap-4">
-                  <div className="mt-0.5 rounded-full bg-primary-subtle p-2 text-primary">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+          {/* Voies de recours */}
+          <div style={{ background: '#fff', padding: '48px', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <h2 className="text-h3 text-ink" style={{ marginBottom: '20px' }}>{copy.appealTitle}</h2>
+            <p style={{ fontSize: '14px', color: '#64748b', maxWidth: '768px' }}>{copy.appealText}</p>
+
+            <div style={{ marginTop: '40px', borderRadius: '16px', border: '1px solid #e2e8f0', background: '#f8fafc', padding: '32px', position: 'sticky', top: '24px' }}>
+              <h3 style={{ fontWeight: 600, fontSize: '16px', color: '#0f172a' }}>{copy.inaiContactTitle}</h3>
+              <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <div style={{ width: '40px', height: '40px', minWidth: '40px', background: 'rgba(0, 61, 165, 0.1)', padding: '10px', borderRadius: '999px', color: '#003DA5', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <MapPin style={{ width: '20px', height: '20px' }} aria-hidden="true" />
                   </div>
-                  <p className="text-sm leading-relaxed" style={{ color: '#64748b' }}>{copy.inaiAddress}</p>
+                  <a 
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Rue Ahmed Gharbi, Tunis')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: '14px', color: '#003DA5', textDecoration: 'none' }}
+                    aria-label={`Get directions to ${copy.inaiAddress}`}
+                  >
+                    {copy.inaiAddress}
+                  </a>
                 </div>
 
-                {/* Phones */}
-                {copy.inaiPhones.map((phone, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="rounded-full bg-primary-subtle p-2 text-primary">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948.684l1.498 7.492a1 1 0 00.502.756l4.618 3.463a1 1 0 001.097-.07l3.583-3.583a1 1 0 00.211-1.197l-3.463-4.618a1 1 0 00-.756-.502l-7.492-1.498a1 1 0 00-.684-.948H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2h-3.28a1 1 0 00-.948.684l-1.498 7.492" />
-                      </svg>
-                    </div>
-                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-sm font-medium" style={{ color: '#003DA5' }}>
-                      {phone}
-                    </a>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <div style={{ width: '40px', height: '40px', minWidth: '40px', background: 'rgba(0, 61, 165, 0.1)', borderRadius: '999px', color: '#003DA5', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Phone style={{ width: '20px', height: '20px' }} aria-hidden="true" />
                   </div>
-                ))}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {copy.inaiPhones.map((phone, index) => (
+                      <a key={index} href={`tel:${phone.replace(/\s/g, '')}`} style={{ fontSize: '14px', color: '#003DA5', textDecoration: 'none' }}>
+                        {phone}
+                      </a>
+                    ))}
+                  </div>
+                </div>
 
-                {/* Email */}
-                <div className="flex items-center gap-4">
-                  <div className="rounded-full bg-primary-subtle p-2 text-primary">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <div style={{ width: '40px', height: '40px', minWidth: '40px', background: 'rgba(0, 61, 165, 0.1)', borderRadius: '999px', color: '#003DA5', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Mail style={{ width: '20px', height: '20px' }} aria-hidden="true" />
                   </div>
-                  <a href={`mailto:${copy.inaiEmail}`} className="text-sm font-medium" style={{ color: '#003DA5' }}>
+                  <a href={`mailto:${copy.inaiEmail}`} style={{ fontSize: '14px', color: '#003DA5', textDecoration: 'none' }}>
                     {copy.inaiEmail}
                   </a>
                 </div>
+
               </div>
             </div>
           </div>
+
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

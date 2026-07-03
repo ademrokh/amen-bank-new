@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Scale, Star, Rocket, HeartHandshake } from 'lucide-react';
 import Timeline from '@/components/Timeline';
 
@@ -242,13 +243,23 @@ export default async function NotreIdentitePage({
           </div>
 
           <div className="flex flex-wrap justify-center gap-6">
-            {['ISO 27001', 'ISO 20000', 'PCI DSS'].map((cert) => (
+            {[
+              { logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi1PrlV6apvxfQ1PUBOR4fcHkRJLht-CJGDg&s', title: 'ISO 27001' },
+              { logo: 'https://uaexpertcorporation.com/wp-content/uploads/2021/12/iso-20000-removebg-preview.png', title: 'ISO 20000' },
+              { logo: 'https://www.staffordnet.com/img/logos/logo-pci-dss-500.png', title: 'PCI DSS' },
+            ].map((cert) => (
               <div
-                key={cert}
-                className="card px-8 py-4 font-semibold text-ink border-2"
-                style={{ borderColor: '#e2e8f0', background: '#f8fafc' }}
+                key={cert.title}
+                className="card px-8 py-8 font-semibold text-ink border-2 flex items-center justify-center"
+                style={{ borderColor: '#e2e8f0', background: '#f8fafc', width: '120px', height: '120px', position: 'relative' }}
               >
-                {cert}
+                <Image 
+                  src={cert.logo} 
+                  alt={`${cert.title} logo`} 
+                  fill
+                  unoptimized
+                  style={{ objectFit: 'contain', padding: '1rem' }}
+                />
               </div>
             ))}
           </div>

@@ -242,6 +242,152 @@ def get_retrieval_context(query: str, language: Language, top_k: int = 3) -> Lis
         return []
 
 
+_SPACY_NLP_CACHE: Dict[str, Any] = {}
+
+
+def extract_keyword(text: str, language: Language) -> Optional[str]:
+    """
+    Improved keyword extractor using spaCy when available.
+
+    Strategy:
+    - Try to load a language-specific spaCy model (lazy cached).
+    - Extract entities, noun-chunks and candidate tokens (NOUN/PROPN/ADJ).
+    - Prefer multi-word noun chunks or named entities, fall back to single tokens.
+    - If spaCy is not available or model load fails, fall back to a simple regex-based extractor.
+    """
+    if not text:
+        return None
+
+    # Try spaCy-based extraction (lazy load models)
+    try:
+        import spacy  # type: ignore
+
+        model_map = {
+            'fr': 'fr_core_news_sm',
+            'en': 'en_core_web_sm',
+            'ar': 'xx_sent_ud_sm',
+        }
+
+        lang_code = language.value if isinstance(language, Language) else str(language)
+        model_name = model_map.get(lang_code, 'xx_sent_ud_sm')
+
+        nlp = None
+        if model_name in _SPACY_NLP_CACHE:
+            nlp = _SPACY_NLP_CACHE[model_name]
+        else:
+            try:
+                nlp = spacy.load(model_name)
+            except Exception:
+                # Try the universal small model as a last resort
+                try:
+                    nlp = spacy.load('xx_sent_ud_sm')
+                    model_name = 'xx_sent_ud_sm'
+                except Exception:
+                    nlp = None
+            if nlp is not None:
+                _SPACY_NLP_CACHE[model_name] = nlp
+
+
+            # Named entities (prefer longer entities)
+            for ent in getattr(doc, 'ents', []):
+                ent_text = ent.text.strip()
+                if len(ent_text) > 2:
+                    candidates.append(ent_text)
+
+            # Noun chunks (multi-word phrases)
+            for nc in getattr(doc, 'noun_chunks', []):
+                nc_text = nc.text.strip()
+                if len(nc_text) > 2:
+                    candidates.append(nc_text)
+
+            # POS-based tokens (NOUN/PROPN/ADJ)
+            for tok in doc:
+                if tok.pos_ in ('NOUN', 'PROPN', 'ADJ'):
+                    t = tok.text.strip()
+                    if len(t) > 2:
+                        candidates.append(t)
+
+            # De-duplicate while preserving order
+            seen = set()
+            candidates = [c for c in candidates if not (c.lower() in seen or seen.add(c.lower()))]
+
+            if candidates:
+                query_embedding = _get_text_embedding(text)
+                best_candidate = None
+                best_score = -1.0
+
+                if query_embedding is not None:
+                    for candidate in candidates:
+                        candidate_embedding = _get_text_embedding(candidate)
+                        if candidate_embedding is None:
+                            continue
+                        score = _cosine_similarity(query_embedding, candidate_embedding)
+                        if score > best_score:
+                            best_score = score
+                            best_candidate = candidate
+
+                if best_candidate is not None:
+                    return best_candidate.lower()
+
+                # Fallback: choose the longest candidate when embeddings are unavailable
+                candidates.sort(key=lambda s: -len(s))
+                return candidates[0].lower()
+    except Exception:
+        # spaCy not available or failed — fall back
+        pass
+
+    # Fallback: previous simple regex-based extraction
+    import re
+
+    token_list = re.findall(r"[\wÀ-ÿ']+", text.lower())
+    # Basic stopwords per language (small set)
+    stopwords = {
+        'fr': {
+            'est', 'le', 'la', 'les', 'de', 'des', 'du', 'un', 'une', 'et', 'à', 'a', 'au', 'aux',
+            'pour', 'que', 'qui', 'dans', 'sur'
+        },
+        'en': {'the', 'is', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'for', 'on', 'what', 'how', 'where'},
+        'ar': set(),
+    }
+
+    sw = stopwords.get(language.value, set())
+
+    for tok in token_list:
+        # skip short tokens and stopwords
+        if len(tok) <= 3:
+            continue
+        if tok in sw:
+            continue
+        # return first candidate
+        return tok
+
+    return None
+
+
+def _get_text_embedding(text: str) -> Optional[List[float]]:
+    """Generate an embedding for a piece of text using ChromaDB manager."""
+    if chromadb_manager is None or chromadb_manager.collection is None:
+        return None
+
+    try:
+        return chromadb_manager._generate_mock_embedding(text)
+    except Exception:
+        return None
+
+
+def _cosine_similarity(vec_a: List[float], vec_b: List[float]) -> float:
+    """Compute cosine similarity between two vectors."""
+    if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+        return 0.0
+
+    dot = sum(a * b for a, b in zip(vec_a, vec_b))
+    norm_a = sum(a * a for a in vec_a) ** 0.5
+    norm_b = sum(b * b for b in vec_b) ** 0.5
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
+
 # ============================================================
 # API ENDPOINTS
 # ============================================================
@@ -331,8 +477,27 @@ async def chat(request: Request, chat_request: ChatRequest):
         language = Language(chat_request.language) if isinstance(chat_request.language, str) else chat_request.language
         rag_language = RAGLanguage(language.value)
 
-        # Retrieve context from ChromaDB
-        context = get_retrieval_context(chat_request.message, language, top_k=3)
+        # Extract a keyword from the user's message; if none, decline immediately
+        keyword = extract_keyword(chat_request.message, language)
+
+        if not keyword:
+            # Language-specific decline templates
+            decline_templates = {
+                Language.FR: "Je n'ai pas identifié de mot-clé dans votre question. Veuillez contacter notre support client par téléphone au +216 71 833 517 ou par email à amenbank@amenbank.com.tn.",
+                Language.AR: "لم أتمكن من تحديد كلمة مفتاحية في سؤالك. يرجى التواصل مع خدمة العملاء عبر الهاتف +216 71 833 517 أو عبر البريد الإلكتروني amenbank@amenbank.com.tn.",
+                Language.EN: "I couldn't identify a keyword in your question. Please contact our support by phone at +216 71 833 517 or by email at amenbank@amenbank.com.tn.",
+            }
+            return ChatResponse(
+                status="success",
+                message=decline_templates.get(language, decline_templates[Language.EN]),
+                language=language.value,
+                sources=[],
+                confidence=0.0,
+                timestamp=datetime.now().isoformat(),
+            )
+
+        # Retrieve context from ChromaDB using the extracted keyword
+        context = get_retrieval_context(keyword, language, top_k=1)
 
         # Generate response using RAG chain
         if rag_chain is None:
@@ -346,8 +511,24 @@ async def chat(request: Request, chat_request: ChatRequest):
                     "text": c["text"],
                     "relevance": 1.0 - c["distance"] if c["distance"] else 0.8,
                 }
-                for c in context[:3]
+                for c in context[:1]
             ]
+
+            # If no relevant chunk found, decline with contact suggestion
+            if not rag_context:
+                decline_templates = {
+                    Language.FR: "Je n'ai pas trouvé d'information pertinente dans la FAQ. Veuillez contacter notre support client par téléphone au +216 71 833 517 ou par email à amenbank@amenbank.com.tn.",
+                    Language.AR: "لم أجد معلومات ذات صلة في الأسئلة المتكررة. يرجى التواصل مع خدمة العملاء عبر الهاتف +216 71 833 517 أو عبر البريد الإلكتروني amenbank@amenbank.com.tn.",
+                    Language.EN: "I couldn't find relevant information in the FAQ. Please contact our support by phone at +216 71 833 517 or by email at amenbank@amenbank.com.tn.",
+                }
+                return ChatResponse(
+                    status="success",
+                    message=decline_templates.get(language, decline_templates[Language.EN]),
+                    language=language.value,
+                    sources=[],
+                    confidence=0.0,
+                    timestamp=datetime.now().isoformat(),
+                )
 
             response_text = rag_chain.generate_response(
                 chat_request.message,
