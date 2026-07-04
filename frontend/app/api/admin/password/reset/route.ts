@@ -7,7 +7,10 @@ async function sendPasswordResetEmail(userId: string, plainPassword: string) {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !anonKey) {
-      console.warn('Cannot trigger email: missing Supabase config');
+      console.error('Missing env vars:', {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!anonKey,
+      });
       return;
     }
 
@@ -17,12 +20,17 @@ async function sendPasswordResetEmail(userId: string, plainPassword: string) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${anonKey}`,
       },
-      body: JSON.stringify({ user_id: userId, pre_generated_password: plainPassword }),
+      body: JSON.stringify({ 
+        user_id: userId, 
+        pre_generated_password: plainPassword 
+      }),
     });
 
     if (!res.ok) {
       const error = await res.text().catch(() => 'Unknown error');
-      console.warn(`Failed to send password reset email: ${res.status} ${error}`);
+      console.error(`Email function failed: ${res.status}`, error);
+    } else {
+      console.log('Password email sent successfully');
     }
   } catch (error) {
     console.error('Error triggering password reset email:', error);

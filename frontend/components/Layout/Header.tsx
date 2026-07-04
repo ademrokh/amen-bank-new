@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, Check } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLang } from '@/hooks/useLang';
@@ -15,6 +15,34 @@ export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+
+  // Securely check admin status via API because cookie is httpOnly
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAdmin = async () => {
+      try {
+        const res = await fetch('/api/admin/status');
+        if (!isMounted) return;
+        const data = await res.json();
+        setIsAdmin(data.isAdmin === true);
+      } catch {
+        if (isMounted) setIsAdmin(false);
+      }
+    };
+
+    checkAdmin();
+
+    const handleRouteChange = () => checkAdmin();
+    window.addEventListener('popstate', handleRouteChange);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [pathname]);
 
   const languages: { code: Language; label: string }[] = [
     { code: 'fr', label: 'Français' },
@@ -40,25 +68,29 @@ export default function Header() {
 
   const isAdminRoute = /^\/(fr|en|ar)\/admin(\/|$)/.test(pathname);
 
-  const adminNavLinks = [
-    { label: currentLang === 'fr' ? 'Vue utilisateur' : currentLang === 'ar' ? 'عرض المستخدم' : 'User View', href: `/${currentLang}/` },
-    { label: currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to Info', href: `/${currentLang}/acces-information` },
-    { label: currentLang === 'fr' ? 'Documenting' : currentLang === 'ar' ? 'توثيق' : 'Documenting', href: `/${currentLang}/admin/acces-information` },
-    { label: currentLang === 'fr' ? 'Presse' : currentLang === 'ar' ? 'الصحافة' : 'Press', href: `/${currentLang}/admin/press` },
+  // Dynamic routing for the admin pill
+  const adminTargetHref = pathname.includes('acces-information')
+    ? `/${currentLang}/admin/acces-information`
+    : pathname.includes('press')
+      ? `/${currentLang}/admin/press`
+      : `/${currentLang}/admin/acces-information`;
+
+  const navLinks = [
+    { label: currentLang === 'fr' ? 'Accueil' : currentLang === 'ar' ? 'الرئيسية' : 'Home', href: `/${currentLang}/` },
+    { label: currentLang === 'fr' ? 'Devenir client' : currentLang === 'ar' ? 'انضم إلينا' : 'Become a client', href: `/${currentLang}/devenir-client` },
+    { label: currentLang === 'fr' ? 'Particuliers' : currentLang === 'ar' ? 'للأفراد' : 'Retail', href: `/${currentLang}/particuliers` },
+    { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات' : 'Business', href: `/${currentLang}/entreprises` },
+    { label: currentLang === 'fr' ? 'Actualités' : currentLang === 'ar' ? 'الأخبار' : 'News', href: `/${currentLang}/actualites` },
+    { label: currentLang === 'fr' ? "Accès à l'information" : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information', href: `/${currentLang}/acces-information` },
+    { label: currentLang === 'fr' ? 'Notre Identité' : currentLang === 'ar' ? 'هويتنا' : 'About Us', href: `/${currentLang}/notre-identite` },
+    { label: currentLang === 'fr' ? 'Agences' : currentLang === 'ar' ? 'الفروع' : 'Branches', href: `/${currentLang}/agencies` },
   ];
 
-  const navLinks = isAdminRoute
-    ? adminNavLinks
-    : [
-        { label: currentLang === 'fr' ? 'Accueil' : currentLang === 'ar' ? 'الرئيسية' : 'Home', href: `/${currentLang}/` },
-        { label: currentLang === 'fr' ? 'Devenir client' : currentLang === 'ar' ? 'انضم إلينا' : 'Become a client', href: `/${currentLang}/devenir-client` },
-        { label: currentLang === 'fr' ? 'Particuliers' : currentLang === 'ar' ? 'للأفراد' : 'Retail', href: `/${currentLang}/particuliers` },
-        { label: currentLang === 'fr' ? 'Entreprises' : currentLang === 'ar' ? 'للشركات' : 'Business', href: `/${currentLang}/entreprises` },
-        { label: currentLang === 'fr' ? 'Actualités' : currentLang === 'ar' ? 'الأخبار' : 'News', href: `/${currentLang}/actualites` },
-        { label: currentLang === 'fr' ? 'Accès à l’information' : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information', href: `/${currentLang}/acces-information` },
-        { label: currentLang === 'fr' ? 'Notre Identité' : currentLang === 'ar' ? 'هويتنا' : 'About Us', href: `/${currentLang}/notre-identite` },
-        { label: currentLang === 'fr' ? 'Agences' : currentLang === 'ar' ? 'الفروع' : 'Branches', href: `/${currentLang}/agencies` },
-      ];
+  // Admin nav — minimal, just the admin section links
+  const adminNavLinks = [
+    { label: currentLang === 'fr' ? "Accès à l'information" : currentLang === 'ar' ? 'الوصول إلى المعلومات' : 'Access to information', href: `/${currentLang}/admin/acces-information` },
+    { label: currentLang === 'fr' ? 'Presse' : currentLang === 'ar' ? 'الصحافة' : 'Press', href: `/${currentLang}/admin/press` },
+  ];
 
   const ctaLabel =
     currentLang === 'fr' ? 'Ouvrir un compte' :
@@ -78,6 +110,8 @@ export default function Header() {
     return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
   };
 
+  const activeNavLinks = isAdminRoute ? adminNavLinks : navLinks;
+
   return (
     <header
       className="header"
@@ -90,7 +124,7 @@ export default function Header() {
         aria-label="Main navigation"
       >
         {/* ── Logo ── */}
-        <div className="header-left" style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto' }}>
+        <div className="header-left" style={{   display: 'flex', alignItems: 'center', flex: '0 0 auto' }}>
           <Link
             href={`/${currentLang}/`}
             className={`header-logo ${isRTL ? 'flex-row-reverse' : ''}`}
@@ -111,6 +145,23 @@ export default function Header() {
               </span>
             </div>
           </Link>
+
+          {/* Admin badge next to logo — only on admin routes */}
+          {isAdminRoute && (
+            <span style={{
+              marginLeft: '12px',
+              padding: '2px 10px',
+              borderRadius: '999px',
+              fontSize: '11px',
+              fontWeight: 600,
+              background: '#FEF3C7',
+              color: '#92400E',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}>
+              Admin
+            </span>
+          )}
         </div>
 
         {/* ── Desktop Navigation ── */}
@@ -118,13 +169,13 @@ export default function Header() {
           className={`header-nav-links ${isRTL ? 'flex-row-reverse' : ''}`}
           role="menubar"
         >
-          {navLinks.map((link) => (
+          {activeNavLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`header-nav-link whitespace-nowrap ${
-                isLinkActive(link.href) 
-                  ? 'text-ink bg-surface-alt' 
+                isLinkActive(link.href)
+                  ? 'text-ink bg-surface-alt'
                   : 'text-ink-secondary hover:text-ink hover:bg-surface-alt'
               }`}
               role="menuitem"
@@ -136,7 +187,11 @@ export default function Header() {
         </div>
 
         {/* ── Right Section ── */}
-        <div className={`header-right ${isRTL ? 'flex-row-reverse' : ''}`} style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto', marginLeft: 'auto' }}>
+        <div
+          className={`header-right ${isRTL ? 'flex-row-reverse' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', flex: '0 0 auto', marginLeft: 'auto' }}
+        >
+
           {/* Language Selector */}
           <div className="relative">
             <button
@@ -193,13 +248,50 @@ export default function Header() {
             )}
           </div>
 
-          {/* CTA Button — Desktop */}
-          <Link
-            href={`/${currentLang}/devenir-client`}
-            className="btn btn-dark hidden lg:inline-flex"
-          >
-            {ctaLabel}
-          </Link>
+          {/* CTA Button — Desktop, hidden on admin routes */}
+          {!isAdminRoute && (
+            <Link
+              href={`/${currentLang}/devenir-client`}
+              className="btn btn-dark hidden lg:inline-flex"
+            >
+              {ctaLabel}
+            </Link>
+          )}
+
+          {/* Admin / User View Context Switcher */}
+          {isAdmin && (
+            <Link
+              href={isAdminRoute ? `/${currentLang}/` : adminTargetHref}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: isAdminRoute ? '1px solid #003DA5' : 'none',
+                background: isAdminRoute ? '#ffffff' : '#003DA5',
+                color: isAdminRoute ? '#003DA5' : '#ffffff',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                marginLeft: isRTL ? '0' : '12px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => {
+                if (isAdminRoute) e.currentTarget.style.background = 'rgba(0, 61, 165, 0.1)';
+                else e.currentTarget.style.background = '#002d8a';
+              }}
+              onMouseLeave={e => {
+                if (isAdminRoute) e.currentTarget.style.background = '#ffffff';
+                else e.currentTarget.style.background = '#003DA5';
+              }}
+            >
+              {isAdminRoute
+                ? (currentLang === 'fr' ? 'Vue utilisateur' : currentLang === 'ar' ? 'عرض المستخدم' : 'User View')
+                : (currentLang === 'fr' ? 'Admin' : currentLang === 'ar' ? 'إدارة' : 'Admin')}
+            </Link>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button
@@ -223,7 +315,7 @@ export default function Header() {
           aria-label="Mobile navigation"
         >
           <div className="header-mobile-menu-content container">
-            {navLinks.map((link) => (
+            {activeNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

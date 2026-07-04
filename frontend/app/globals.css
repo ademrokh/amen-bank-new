@@ -988,7 +988,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 4rem;
+  height: 4.5rem;
 }
 
 .header-logo {
@@ -1028,13 +1028,13 @@ input:focus, textarea:focus, select:focus {
 }
 .header-logo-text-year { font-size: 0.6875rem; color: #94a3b8; letter-spacing: 0.02em; }
 
-.header-nav-links { display: none; align-items: center; gap: 0.25rem; }
+.header-nav-links { display: none; align-items: center; gap: 0.125rem; }
 @media (min-width: 1024px) { .header-nav-links { display: flex; } }
 
 .header-nav-link {
   position: relative;
-  padding: 0.5rem 0.875rem;
-  font-size: 0.875rem;
+  padding: 0.4375rem 0.625rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: #64748b;
   text-decoration: none;
@@ -1043,7 +1043,7 @@ input:focus, textarea:focus, select:focus {
 }
 .header-nav-link:hover { color: #0f172a; background: #f8fafc; }
 
-.header-right { display: flex; align-items: center; gap: 1rem; } /* Increased gap from 0.75rem to 1rem */
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
 
 .header-language-button {
   display: flex;

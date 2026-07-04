@@ -158,3 +158,9 @@ export async function assertAdmin(request: NextRequest) {
 export function buildPublicUrl(filePath: string): string {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${encodeURIComponent(filePath)}`;
 }
+
+export async function checkAdminStatus(request: Request): Promise<boolean> {
+  // Standard Request object doesn't have .cookies, so we parse the Cookie header directly
+  const cookieHeader = request.headers.get('cookie') ?? '';
+  return cookieHeader.includes('admin_session=true');
+}
