@@ -243,6 +243,17 @@ You will receive updates via email at [your email].
 
 ## 📧 Submit This Bug Report
 
+## Documentation Status and Missing Details
+This template is already structured for issue reporting, but it can be strengthened with a few practical additions:
+- A field for expected turnaround time and owner assignment would help triage.
+- The template should encourage including a link to the affected page and screen size.
+- A short section for reproduction on mobile and accessibility scenarios is still useful.
+
+### Recommended follow-up
+- Add a required field for the affected route and language.
+- Include a checkbox for whether the issue occurs on mobile or desktop.
+- Keep the form aligned with the UAT checklist and communication templates.
+
 **Email to**: uat-bugs@amen-bank.tn  
 **Subject line**: BUG REPORT: [Brief description]
 

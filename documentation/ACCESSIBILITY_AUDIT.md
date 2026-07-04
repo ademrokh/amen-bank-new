@@ -248,4 +248,16 @@ The frontend is production-ready. Next phase focuses on:
 **Build Time:** 8.2s  
 **All Routes:** Static prerendered  
 **Zero Errors:** Confirmed  
+
+## Documentation Status and Missing Details
+This audit is comprehensive, but a few follow-up notes would improve future maintenance:
+- A tracked list of remaining accessibility exceptions should be recorded if any are discovered during later testing.
+- Browser-specific issues for older mobile devices should be documented as they are found.
+- The audit should be re-run after any major UI refresh to ensure new components remain compliant.
+
+### Recommended follow-up
+- Add an accessibility regression checklist to the release process.
+- Link this file to the UAT checklist for manual validation steps.
+- Revisit the audit after any new component or form is introduced.
+
 **WCAG 2.1 AA:** Compliant

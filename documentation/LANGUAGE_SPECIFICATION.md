@@ -240,6 +240,17 @@ You are an intelligent banking assistant for Amen Bank Tunisia.
 
 ## Language Files Structure
 
+## Documentation Status and Missing Details
+This language guide is strong, but it still needs a few practical additions for long-term maintenance:
+- A reference for locale fallback behavior should be documented clearly.
+- The translation workflow for future content updates should be defined.
+- The document should mention how Arabic RTL testing will be validated in QA.
+
+### Recommended follow-up
+- Add a translation ownership and review process for new content.
+- Document the fallback chain for missing translation strings.
+- Link this file to the UAT checklist for multilingual validation steps.
+
 ```
 frontend/
 ├── public/
@@ -293,4 +304,4 @@ frontend/
 
 ---
 
-*Language Specification v1.0 — June 2025*
+*Language Specification v1.0 — June 2026*

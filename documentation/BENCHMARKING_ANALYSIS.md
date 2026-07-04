@@ -156,6 +156,17 @@
 
 ---
 
+## Documentation Status and Missing Details
+This benchmarking analysis offers strong UX inspiration, but it should be tied more directly to implementation priorities:
+- The most relevant design patterns should be mapped to specific components in the current frontend.
+- The document should note which patterns were adopted versus intentionally deferred.
+- Mobile-first patterns and accessibility expectations should be called out more explicitly.
+
+### Recommended follow-up
+- Add a section mapping each benchmark pattern to a concrete implementation target.
+- Note which patterns were applied in the current UI and which still need follow-up work.
+- Cross-reference this document with the responsive and accessibility guides.
+
 ## Design Pattern Synthesis
 
 ### Pattern 1: TRUST (Local Banks + Enterprise)

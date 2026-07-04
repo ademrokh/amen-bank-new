@@ -1,5 +1,17 @@
 # Routes Specification - Amen Bank Digital Solution
 
+## Documentation Status and Missing Details
+This route guide captures the intended site structure, but a few implementation details are still missing from the documentation:
+- The final route map should reflect the exact current implementation under the dynamic language segments.
+- Middleware and redirect behavior for locale detection need a formal write-up.
+- 404 and fallback behavior for unsupported locales should be documented.
+- Page-level route ownership for future feature work should be added.
+
+### Recommended follow-up
+- Align this document with the final deployed route structure after implementation is complete.
+- Add a route ownership matrix for each major page and section.
+- Document any redirects, rewrites, and locale fallbacks in one centralized section.
+
 ## URL Structure Overview
 
 ### Multilingual Routing Pattern

@@ -1,5 +1,17 @@
 # Amen Bank — AI Digital Solution: Project TODO
 
+## Documentation Status and Missing Details
+This todo list remains the main planning artifact, but it should be updated with current implementation realities and ownership notes:
+- The current document should be linked to the latest implementation milestones and test evidence.
+- Some completed items should be marked as verified rather than only planned.
+- Production readiness criteria and rollout steps are still missing from the final phase section.
+- Ownership for analytics, monitoring, and content maintenance should be made explicit.
+
+### Recommended follow-up
+- Add a short status table for each implementation phase with current completion and evidence.
+- Mark the most recent completed milestones as verified and linked to the relevant documentation files.
+- Add a launch checklist for deployment, rollback, and post-release monitoring.
+
 > **Stage:** Conception d'une Solution Digitale Intelligente pour Amen Bank grâce à l'IA  
 > **Duration:** 1 month | **Intern:** Adem Rokh | **Supervisor:** Mohamed Amine Baccouri
 

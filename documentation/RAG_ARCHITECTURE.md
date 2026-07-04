@@ -4,6 +4,18 @@
 **Status**: Production Ready  
 **Last Updated**: June 16, 2026
 
+## Documentation Status and Missing Details
+The current architecture overview is strong, but a few operational details are still missing for handoff and maintenance:
+- A concrete ingestion and reindexing workflow should be documented for future FAQ updates.
+- Performance benchmarks and evaluation metrics for retrieval quality still need a permanent section.
+- Failure handling for ChromaDB, embedding generation, and LLM outages should be spelled out.
+- A rollback and recovery procedure for knowledge-base changes is still recommended.
+
+### Recommended follow-up
+- Add a maintenance playbook for updating FAQs and re-running ingestion.
+- Capture expected latency and confidence thresholds for production monitoring.
+- Record the fallback behavior when the LLM or vector store is unavailable.
+
 ---
 
 ## Table of Contents
