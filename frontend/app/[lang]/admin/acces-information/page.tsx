@@ -290,6 +290,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
     return doc.title_fr;
   }
 
+  const tabOptions: Array<CategoryKey | 'all'> = ['all', ...(Object.keys(CATEGORY_CONFIG) as CategoryKey[])];
   const filteredDocuments = activeTab === 'all' ? documents : documents.filter(doc => doc.category.startsWith(activeTab));
 
   return (
@@ -432,7 +433,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
           <div>
             {/* AMEN BANK BLUE TABS */}
             <div className="mb-4 flex flex-wrap gap-3">
-              {(['all', ...Object.keys(CATEGORY_CONFIG) as CategoryKey[]]).map((key) => (
+              {tabOptions.map((key) => (
                 <button 
                   key={key} 
                   onClick={() => setActiveTab(key)} 

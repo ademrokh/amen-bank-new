@@ -1,8 +1,9 @@
-# Amen Bank Website- Europeanized and Smart AI Solution
+# Amen Bank Website - Europeanized and Smart AI Solution
 
 **Version**: 1.0  
-**Last Updated**: June 2026  
-**Status**: Production Ready (Post-UAT)
+**Last Updated**: July 2026  
+**Status**: Completed and ready for delivery
+
 
 <p align="center">
   <img src="https://pbs.twimg.com/profile_images/842261819330842624/PrmnR9ug_400x400.jpg" alt="Amen Bank" />
@@ -33,14 +34,14 @@
 
 ### Key Features
 
-- ✅ **Multilingual Support**: English, French, Arabic (with RTL support)
-- ✅ **AI-Powered Chatbot**: RAG-based system using Groq LLM
-- ✅ **7 Production Routes**: Homepage, Agencies, Contact, FAQ, + language variants
-- ✅ **Form Validation**: Contact submissions with ticket generation
-- ✅ **Accessibility**: WCAG 2.1 AA compliant
-- ✅ **Performance**: <3s load time, optimized for mobile
-- ✅ **Comprehensive Testing**: 135+ tests (unit, integration, E2E)
-- ✅ **RAG Pipeline**: ChromaDB vector search + LangChain integration
+- ✅ **Multilingual Support**: English, French, and Arabic pages with RTL-aware UI patterns
+- ✅ **AI-Powered Chatbot**: RAG-based assistant using Groq and vector search
+- ✅ **Multi-page Banking Experience**: Homepage, agencies, contact, FAQ, and language-specific routes
+- ✅ **Form Handling**: Contact submissions and admin document management workflows
+- ✅ **Accessibility-Focused UI**: Structured content and navigation for broader accessibility
+- ✅ **Responsive Frontend**: Mobile-friendly layouts built with Next.js and Tailwind
+- ✅ **Automated Testing**: Playwright E2E coverage and backend test suites are included
+- ✅ **RAG Pipeline**: ChromaDB vector search with LangChain integration
 
 ---
 
@@ -163,8 +164,9 @@ pip >= 23.0
 ```
 
 ### API Keys
-- **Groq API Key**: Free from https://console.groq.com
-  - Set as environment variable: `GROQ_API_KEY`
+- **Groq API Key**: Required for the chatbot to generate live AI responses. Get a free key from https://console.groq.com
+  - Set it as an environment variable: `GROQ_API_KEY`
+  - Without it, the backend will fall back to template responses instead of using Groq.
 
 ---
 
@@ -326,93 +328,25 @@ npx playwright show-report
 
 ```
 amen-bank-new/
-├── frontend/                          # Next.js frontend
-│   ├── app/                          # Next.js app directory
-│   │   ├── page.tsx                  # Homepage
-│   │   ├── layout.tsx                # Root layout
-│   │   ├── globals.css               # Global styles
-│   │   ├── agencies/page.tsx          # Agency Locator page
-│   │   ├── contact/page.tsx           # Contact form page
-│   │   └── faq/page.tsx               # FAQ page
-│   │
-│   ├── components/                    # Reusable React components
-│   │   ├── AgencyLocator/             # Agency locator component
-│   │   ├── Chatbot/                   # Chatbot widget
-│   │   ├── Contact/                   # Contact form
-│   │   ├── FAQ/                       # FAQ accordion
-│   │   ├── Homepage/                  # Hero + Products
-│   │   ├── Layout/                    # Header + Footer
-│   │   └── Map/                       # Map component
-│   │
-│   ├── lib/                           # Utilities
-│   ├── tests/e2e/                    # Playwright E2E tests (94+ tests)
-│   │   ├── homepage.spec.ts          # 11 tests
-│   │   ├── agencies.spec.ts          # 7 tests
-│   │   ├── contact.spec.ts           # 14 tests
-│   │   ├── faq.spec.ts               # 13 tests
-│   │   ├── navigation.spec.ts        # 15 tests
-│   │   ├── chatbot.spec.ts           # 17 tests
-│   │   ├── accessibility.spec.ts     # 17 tests
-│   │   └── README.md                 # Test documentation
-│   │
-│   ├── package.json                  # Frontend dependencies
-│   ├── playwright.config.ts          # Playwright configuration
-│   ├── tsconfig.json                 # TypeScript configuration
-│   └── README.md                     # Frontend README
+├── frontend/                          # Next.js frontend app
+│   ├── app/                          # Route-based pages and API routes
+│   ├── components/                   # Reusable UI blocks
+│   ├── lib/                          # Shared helpers and config
+│   ├── public/                       # Static assets
+│   ├── tests/e2e/                    # Playwright end-to-end tests
+│   ├── package.json                  # Frontend scripts and dependencies
+│   └── playwright.config.ts          # E2E test configuration
 │
-├── chatbot/                           # FastAPI backend
-│   ├── main.py                       # FastAPI application (440+ lines)
-│   │   ├── Language enum
-│   │   ├── Pydantic models
-│   │   ├── 5 endpoints
-│   │   ├── Middleware (CORS, rate limiting)
-│   │   └── Startup event
-│   │
-│   ├── rag_chain.py                  # LangChain RAG implementation (320+ lines)
-│   │   ├── AmenBankRAGChain class
-│   │   ├── SYSTEM_PROMPTS (3 languages)
-│   │   ├── create_rag_chain() factory
-│   │   └── Response generation
-│   │
-│   ├── services/
-│   │   ├── chromadb_manager.py       # ChromaDB integration (410+ lines)
-│   │   │   ├── ChromaDBManager class
-│   │   │   ├── ChromaDBSetup utility
-│   │   │   ├── Collection operations
-│   │   │   └── Query functionality
-│   │   └── __init__.py
-│   │
-│   ├── ingest_faqs.py                # FAQ ingestion pipeline
-│   │   └── Transforms 25 FAQs → 75 chunks (FR/AR/EN)
-│   │
-│   ├── test_rag.py                   # Unit tests (13 tests)
-│   │   ├── TestRAGChain
-│   │   ├── TestChromaDBManager
-│   │   └── TestLanguageValidation
-│   │
-│   ├── test_integration.py           # Integration tests (28 tests)
-│   │   ├── TestHealthEndpoint
-│   │   ├── TestChatEndpoint
-│   │   ├── TestContactEndpoint
-│   │   ├── TestFAQEndpoint
-│   │   ├── TestIngestEndpoint
-│   │   ├── TestRootEndpoint
-│   │   └── TestErrorHandling
-│   │
-│   ├── chroma_data/                  # Vector database storage
-│   │   └── chroma.sqlite3
-│   │
-│   ├── faq_ingestion_state.json      # Serialized FAQ chunks
-│   ├── contact_submissions.jsonl     # Contact form submissions log
+├── chatbot/                          # FastAPI backend and RAG service
+│   ├── main.py                       # App entrypoint and API routes
+│   ├── rag_chain.py                  # RAG orchestration logic
+│   ├── services/                     # ChromaDB and related services
+│   ├── ingest_faqs.py                # FAQ ingestion helper
 │   ├── requirements.txt              # Python dependencies
-│   └── .venv/                        # Virtual environment
+│   └── test_*.py                     # Backend test files
 │
-├── faq_knowledge_base.json           # Master FAQ data (25 FAQs)
-├── UAT_PLAN.md                       # User Acceptance Testing plan
-├── UAT_CHECKLIST.md                  # Quick UAT reference
-├── UAT_COMMUNICATION.md              # UAT email templates
-├── BUG_REPORT_TEMPLATE.md            # Bug reporting guide
-├── TASK_28_UAT_GUIDE.md              # UAT implementation guide
+├── documentation/                    # Project documentation and audit notes
+├── faq_knowledge_base.json           # Source FAQ knowledge base
 └── README.md                         # Project overview
 ```
 
@@ -747,10 +681,10 @@ pytest test_*.py -v
 ## Support & Documentation
 
 ### Key Documents
-- [UAT_PLAN.md](UAT_PLAN.md) - User Acceptance Testing strategy
-- [UAT_CHECKLIST.md](UAT_CHECKLIST.md) - Quick testing reference
-- [BUG_REPORT_TEMPLATE.md](BUG_REPORT_TEMPLATE.md) - How to report bugs
-- [TASK_28_UAT_GUIDE.md](TASK_28_UAT_GUIDE.md) - UAT execution guide
+- [documentation/USER_ACCEPTANCE_TESTS.md](documentation/USER_ACCEPTANCE_TESTS.md) - User acceptance testing notes
+- [documentation/BUG_REPORT_TEMPLATE.md](documentation/BUG_REPORT_TEMPLATE.md) - How to report bugs
+- [documentation/API_DOCUMENTATION.md](documentation/API_DOCUMENTATION.md) - API reference notes
+- [documentation/RAG_ARCHITECTURE.md](documentation/RAG_ARCHITECTURE.md) - RAG architecture overview
 
 ### Contact
 - **Technical Issues**: technical-support@amen-bank.tn
@@ -765,6 +699,6 @@ Proprietary - Amen Bank 2026
 
 ---
 
-**Last Updated**: June 2026  
+**Last Updated**: July 2026  
 **Maintained By**: Amen Bank Engineering Team  
-**Status**: ✅ Production Ready
+**Status**: ✅ Completed and ready for delivery
