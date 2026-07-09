@@ -48,299 +48,391 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const leftMargin = 12;
-    const rightMargin = 12;
+    const leftMargin = 14;
+    const rightMargin = 14;
     const maxWidth = pageWidth - leftMargin - rightMargin;
     let yPosition = 10;
 
-    // Colors
+    // ── Colors ──────────────────────────────────────────────
     const primaryGreen: [number, number, number] = [0, 107, 60];
     const darkGreen: [number, number, number] = [0, 80, 40];
     const accentBlue: [number, number, number] = [0, 61, 165];
     const textDark: [number, number, number] = [15, 23, 42];
-    const textMuted: [number, number, number] = [100, 120, 139];
+    const textMuted: [number, number, number] = [100, 116, 139];
     const lightGray: [number, number, number] = [248, 250, 252];
     const borderGray: [number, number, number] = [226, 232, 240];
-    const warningOrange: [number, number, number] = [255, 152, 0];
+    const warningAmber: [number, number, number] = [217, 119, 6];
+    const white: [number, number, number] = [255, 255, 255];
 
-    // Language content
+    // ── i18n ─────────────────────────────────────────────────
     const pdfContent = {
       fr: {
         title: 'FORMULAIRE DE DEMANDE CLIENT',
         tagline: 'Votre partenaire financier de confiance depuis 1980',
-        badge: 'FORMULAIRE OFFICIEL',
-        reference: 'Référence:',
-        date: 'Date:',
-        status: 'Statut: EN ATTENTE',
-        version: 'Version du formulaire: 2.1',
+        badge: 'DOCUMENT OFFICIEL',
+        reference: 'Référence :',
+        date: 'Date :',
+        status: 'Statut : EN ATTENTE DE TRAITEMENT',
+        version: 'Version 2.1',
         applicantInfo: 'INFORMATIONS DU DEMANDEUR',
         fullName: 'Nom complet',
         email: 'Adresse e-mail',
         phone: 'Numéro de téléphone',
         accountType: 'Type de compte',
-        additionalInfo: 'INFORMATIONS SUPPLÉMENTAIRES',
-        termsText: 'Ce formulaire est confidentiel et réservé à usage officiel. Vos données seront traitées conformément à notre politique de confidentialité et à la réglementation applicable.',
-        address: 'Amen Bank • 50, Avenue Mohamed V • Tunis 1002',
-        phone2: 'Téléphone: +216 71 833 517',
+        additionalInfo: 'MESSAGE / INFORMATIONS SUPPLÉMENTAIRES',
+        termsText:
+          "Ce document est strictement confidentiel et réservé à l'usage officiel d'Amen Bank. Vos données personnelles sont traitées conformément à notre politique de confidentialité et à la législation tunisienne en vigueur.",
+        address: '50, Avenue Mohamed V – Tunis 1002, Tunisie',
+        phone2: 'Tél : +216 71 833 517',
         web: 'www.amenbank.com.tn',
         notSpecified: 'Non spécifié',
+        signatureLabel: 'Signature du demandeur',
+        stampLabel: 'Cachet Amen Bank',
+        signatureLine: '____________________________',
       },
       en: {
         title: 'CLIENT APPLICATION FORM',
         tagline: 'Your Trusted Financial Partner Since 1980',
-        badge: 'OFFICIAL FORM',
+        badge: 'OFFICIAL DOCUMENT',
         reference: 'Reference:',
         date: 'Date:',
-        status: 'Status: PENDING',
-        version: 'Form Version: 2.1',
+        status: 'Status: PENDING PROCESSING',
+        version: 'Version 2.1',
         applicantInfo: 'APPLICANT INFORMATION',
         fullName: 'Full Name',
         email: 'Email Address',
         phone: 'Phone Number',
         accountType: 'Account Type',
-        additionalInfo: 'ADDITIONAL INFORMATION',
-        termsText: 'This form is confidential and for official use only. Your data will be processed in accordance with our Privacy Policy and applicable regulations.',
-        address: 'Amen Bank • 50, Avenue Mohamed V • Tunis 1002',
-        phone2: 'Phone: +216 71 833 517',
+        additionalInfo: 'MESSAGE / ADDITIONAL INFORMATION',
+        termsText:
+          'This document is strictly confidential and for official Amen Bank use only. Your personal data is processed in accordance with our Privacy Policy and applicable Tunisian legislation.',
+        address: '50, Avenue Mohamed V – Tunis 1002, Tunisia',
+        phone2: 'Tel: +216 71 833 517',
         web: 'www.amenbank.com.tn',
         notSpecified: 'Not specified',
+        signatureLabel: 'Applicant Signature',
+        stampLabel: 'Amen Bank Stamp',
+        signatureLine: '____________________________',
       },
       ar: {
         title: 'نموذج طلب العميل',
         tagline: 'شريكك المالي الموثوق منذ عام 1980',
-        badge: 'النموذج الرسمي',
+        badge: 'وثيقة رسمية',
         reference: 'المرجع:',
         date: 'التاريخ:',
-        status: 'الحالة: قيد الانتظار',
-        version: 'إصدار النموذج: 2.1',
+        status: 'الحالة: قيد المعالجة',
+        version: 'الإصدار 2.1',
         applicantInfo: 'معلومات المتقدم',
         fullName: 'الاسم الكامل',
-        email: 'عنوان البريد الإلكتروني',
+        email: 'البريد الإلكتروني',
         phone: 'رقم الهاتف',
         accountType: 'نوع الحساب',
-        additionalInfo: 'معلومات إضافية',
-        termsText: 'هذا النموذج سري وللاستخدام الرسمي فقط. سيتم معالجة بياناتك وفقاً لسياسة الخصوصية الخاصة بنا والأنظمة المعمول بها.',
-        address: 'بنك آمن • 50 شارع محمد الخامس • تونس 1002',
-        phone2: 'الهاتف: +216 71 833 517',
+        additionalInfo: 'الرسالة / معلومات إضافية',
+        termsText:
+          'هذه الوثيقة سرية للغاية ومخصصة للاستخدام الرسمي لبنك آمن فقط. تتم معالجة بياناتك الشخصية وفقاً لسياسة الخصوصية والتشريعات التونسية المعمول بها.',
+        address: '50 شارع محمد الخامس – تونس 1002، تونس',
+        phone2: 'هاتف: +216 71 833 517',
         web: 'www.amenbank.com.tn',
         notSpecified: 'غير محدد',
+        signatureLabel: 'توقيع المتقدم',
+        stampLabel: 'ختم بنك آمن',
+        signatureLine: '____________________________',
       },
     };
 
     const content = pdfContent[lang];
-    const isRTL = lang === 'ar';
+
+    // ── Fetch & embed logo ───────────────────────────────────
+    let logoBase64: string | null = null;
+    try {
+      const proxyUrl = `https://images.weserv.nl/?url=pbs.twimg.com/profile_images/842261819330842624/PrmnR9ug_400x400.jpg&output=jpg&w=200`;
+      const resp = await fetch(proxyUrl);
+      const blob = await resp.blob();
+      logoBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      // Logo unavailable — continue without it
+    }
 
     // ════════════════════════════════════════════════════════
-    // HEADER SECTION
+    // HEADER  (green bg, logo, name, title, tagline)
     // ════════════════════════════════════════════════════════
-    
+    const headerH = 52;
+
     // Green background
-    doc.setFillColor(primaryGreen[0], primaryGreen[1], primaryGreen[2]);
-    doc.rect(0, 0, pageWidth, 48, 'F');
+    doc.setFillColor(...primaryGreen);
+    doc.rect(0, 0, pageWidth, headerH, 'F');
 
-    // Bank name
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28);
+    // Logo top-left with white circle behind it
+    const logoSize = 30;
+    const logoPad = 11;
+    if (logoBase64) {
+      doc.setFillColor(...white);
+      doc.circle(leftMargin + logoSize / 2, logoPad + logoSize / 2, logoSize / 2 + 1, 'F');
+      doc.addImage(logoBase64, 'JPEG', leftMargin, logoPad, logoSize, logoSize);
+    }
+
+    // Text block to the right of logo
+    const textX = leftMargin + logoSize + 8;
+
+    doc.setTextColor(...white);
+    doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('AMEN BANK', leftMargin, 16);
+    doc.text('AMEN BANK', textX, 20);
 
-    // Form title
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(content.title, leftMargin, 26);
-
-    // Tagline
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(200, 220, 210);
-    doc.text(content.tagline, leftMargin, 31);
-
-    // Badge
-    doc.setFontSize(6.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    doc.text('✓ ' + content.badge, leftMargin, 36);
-
-    // Blue accent bar
-    doc.setFillColor(accentBlue[0], accentBlue[1], accentBlue[2]);
-    doc.rect(0, 48, pageWidth, 3.5, 'F');
-
-    yPosition = 56;
-
-    // ════════════════════════════════════════════════════════
-    // METADATA SECTION
-    // ════════════════════════════════════════════════════════
-
-    const appRef = `APP-${Date.now().toString().slice(-8)}`;
-    const today = new Date();
-    const dateStr = isRTL 
-      ? today.toLocaleDateString('ar-TN', { year: 'numeric', month: 'long', day: 'numeric' })
-      : today.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    // Left side: Reference and Date
-    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${content.reference} ${appRef}`, leftMargin, yPosition);
-    
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-    doc.text(`${content.date} ${dateStr}`, leftMargin, yPosition + 6);
-
-    // Right side: Status and Version
-    doc.setTextColor(accentBlue[0], accentBlue[1], accentBlue[2]);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(content.status, pageWidth - rightMargin - 50, yPosition);
-    
-    doc.setFontSize(8);
-    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-    doc.text(content.version, pageWidth - rightMargin - 50, yPosition + 6);
-
-    yPosition += 16;
-
-    // ════════════════════════════════════════════════════════
-    // APPLICANT INFORMATION SECTION
-    // ════════════════════════════════════════════════════════
-
-    // Section header
-    doc.setFillColor(darkGreen[0], darkGreen[1], darkGreen[2]);
-    doc.rect(leftMargin, yPosition - 2, maxWidth, 7, 'F');
-    
-    doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(content.applicantInfo, leftMargin + 2, yPosition + 2);
+    doc.text(content.title, textX, 29);
 
-    yPosition += 10;
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(190, 220, 205);
+    doc.text(content.tagline, textX, 36);
 
-    // Fields table
+    // Badge top-right
+    const badgeW = 44;
+    const badgeH = 7;
+    const badgeX = pageWidth - rightMargin - badgeW;
+    doc.setFillColor(...accentBlue);
+    doc.roundedRect(badgeX, 8, badgeW, badgeH, 1.5, 1.5, 'F');
+    doc.setTextColor(...white);
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`✓ ${content.badge}`, badgeX + badgeW / 2, 8 + badgeH / 2 + 1.2, { align: 'center' });
+
+    // Thin accent stripe under header
+    doc.setFillColor(...accentBlue);
+    doc.rect(0, headerH, pageWidth, 2.5, 'F');
+
+    yPosition = headerH + 10;
+
+    // ════════════════════════════════════════════════════════
+    // METADATA ROW
+    // ════════════════════════════════════════════════════════
+    const appRef = `APP-${Date.now().toString().slice(-8)}`;
+    const today = new Date();
+    const dateStr = today.toLocaleDateString(
+      lang === 'ar' ? 'ar-TN' : lang === 'fr' ? 'fr-FR' : 'en-US',
+      { year: 'numeric', month: 'long', day: 'numeric' }
+    );
+
+    // Left: reference + date
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...textDark);
+    doc.text(`${content.reference} ${appRef}`, leftMargin, yPosition);
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...textMuted);
+    doc.text(`${content.date} ${dateStr}`, leftMargin, yPosition + 5.5);
+
+    // Right: status + version
+    const statusX = pageWidth - rightMargin;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...accentBlue);
+    doc.text(content.status, statusX, yPosition, { align: 'right' });
+
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...textMuted);
+    doc.text(content.version, statusX, yPosition + 5.5, { align: 'right' });
+
+    // Thin separator
+    yPosition += 13;
+    doc.setDrawColor(...borderGray);
+    doc.setLineWidth(0.3);
+    doc.line(leftMargin, yPosition, pageWidth - rightMargin, yPosition);
+    yPosition += 6;
+
+    // ════════════════════════════════════════════════════════
+    // APPLICANT INFO SECTION
+    // ════════════════════════════════════════════════════════
+
+    // Section header bar
+    doc.setFillColor(...darkGreen);
+    doc.roundedRect(leftMargin, yPosition, maxWidth, 8, 1, 1, 'F');
+    doc.setTextColor(...white);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(content.applicantInfo, leftMargin + 3, yPosition + 5.5);
+    yPosition += 12;
+
+    // Field rows
     const fields = [
-      { label: content.fullName, value: formData.fullName || '—' },
-      { label: content.email, value: formData.email || '—' },
-      { label: content.phone, value: formData.phone || '—' },
+      { label: content.fullName,    value: formData.fullName    || '—' },
+      { label: content.email,       value: formData.email       || '—' },
+      { label: content.phone,       value: formData.phone       || '—' },
       { label: content.accountType, value: formData.accountType || content.notSpecified },
     ];
 
+    const rowH = 9;
+    const labelColW = 55;
+
     fields.forEach((field, idx) => {
-      const rowHeight = 8;
-      
-      // Alternating row background
+      // Zebra stripe
       if (idx % 2 === 0) {
-        doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-        doc.rect(leftMargin, yPosition - 1, maxWidth, rowHeight, 'F');
+        doc.setFillColor(...lightGray);
+        doc.rect(leftMargin, yPosition, maxWidth, rowH, 'F');
       }
+      // Outer border
+      doc.setDrawColor(...borderGray);
+      doc.setLineWidth(0.25);
+      doc.rect(leftMargin, yPosition, maxWidth, rowH, 'S');
 
-      // Row border
-      doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
-      doc.setLineWidth(0.3);
-      doc.rect(leftMargin, yPosition - 1, maxWidth, rowHeight, 'S');
+      // Vertical divider
+      doc.line(leftMargin + labelColW, yPosition, leftMargin + labelColW, yPosition + rowH);
 
-      // Label (colored)
-      doc.setTextColor(primaryGreen[0], primaryGreen[1], primaryGreen[2]);
+      // Label
+      doc.setTextColor(...primaryGreen);
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.text(`${field.label}:`, leftMargin + 2, yPosition + 2);
+      doc.text(field.label, leftMargin + 3, yPosition + 6);
 
       // Value
-      doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+      doc.setTextColor(...textDark);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.text(field.value, leftMargin + 50, yPosition + 2);
+      doc.text(field.value, leftMargin + labelColW + 4, yPosition + 6);
 
-      yPosition += rowHeight;
+      yPosition += rowH;
     });
 
-    yPosition += 4;
+    yPosition += 6;
 
     // ════════════════════════════════════════════════════════
-    // ADDITIONAL INFORMATION (if present)
+    // OPTIONAL MESSAGE SECTION
     // ════════════════════════════════════════════════════════
-
-    if (formData.message && formData.message.trim()) {
-      doc.setFillColor(accentBlue[0], accentBlue[1], accentBlue[2]);
-      doc.rect(leftMargin, yPosition - 2, maxWidth, 7, 'F');
-
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text(content.additionalInfo, leftMargin + 2, yPosition + 2);
-
-      yPosition += 10;
-
-      // Message box
-      doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
-      doc.setLineWidth(0.5);
-      doc.setFillColor(248, 255, 248);
-      
-      const messageLines = doc.splitTextToSize(formData.message, maxWidth - 4);
-      const messageHeight = Math.max(12, messageLines.length * 4.5 + 2);
-      
-      doc.rect(leftMargin, yPosition, maxWidth, messageHeight, 'FD');
-
-      doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+    if (formData.message?.trim()) {
+      doc.setFillColor(...accentBlue);
+      doc.roundedRect(leftMargin, yPosition, maxWidth, 8, 1, 1, 'F');
+      doc.setTextColor(...white);
       doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(messageLines, leftMargin + 2, yPosition + 3);
+      doc.setFont('helvetica', 'bold');
+      doc.text(content.additionalInfo, leftMargin + 3, yPosition + 5.5);
+      yPosition += 12;
 
-      yPosition += messageHeight + 3;
+      const msgLines = doc.splitTextToSize(formData.message, maxWidth - 10);
+      const msgBoxH = Math.max(14, msgLines.length * 4.8 + 4);
+
+      doc.setFillColor(240, 249, 245);
+      doc.setDrawColor(...primaryGreen);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(leftMargin, yPosition, maxWidth, msgBoxH, 1, 1, 'FD');
+
+      // Left accent bar
+      doc.setFillColor(...primaryGreen);
+      doc.rect(leftMargin, yPosition, 3, msgBoxH, 'F');
+
+      doc.setTextColor(...textDark);
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(msgLines, leftMargin + 6, yPosition + 5);
+
+      yPosition += msgBoxH + 6;
     }
 
-    yPosition += 3;
+    // ════════════════════════════════════════════════════════
+    // SIGNATURE AREA
+    // ════════════════════════════════════════════════════════
+    yPosition += 4;
+    const sigBoxH = 22;
+    const sigColW = (maxWidth - 8) / 2;
+
+    // Applicant signature box
+    doc.setDrawColor(...borderGray);
+    doc.setFillColor(...lightGray);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(leftMargin, yPosition, sigColW, sigBoxH, 1, 1, 'FD');
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...textMuted);
+    doc.text(content.signatureLabel, leftMargin + sigColW / 2, yPosition + 5, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setTextColor(200, 210, 220);
+    doc.text(content.signatureLine, leftMargin + sigColW / 2, yPosition + 16, { align: 'center' });
+
+    // Bank stamp box
+    const stampX = leftMargin + sigColW + 8;
+    doc.setFillColor(...lightGray);
+    doc.roundedRect(stampX, yPosition, sigColW, sigBoxH, 1, 1, 'FD');
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...textMuted);
+    doc.text(content.stampLabel, stampX + sigColW / 2, yPosition + 5, { align: 'center' });
+    // Dotted circle placeholder for stamp
+    doc.setDrawColor(200, 210, 220);
+    doc.setLineWidth(0.5);
+    doc.circle(stampX + sigColW / 2, yPosition + 14, 6, 'S');
+
+    yPosition += sigBoxH + 6;
 
     // ════════════════════════════════════════════════════════
     // CONFIDENTIALITY BANNER
     // ════════════════════════════════════════════════════════
+    const bannerLines = doc.splitTextToSize(content.termsText, maxWidth - 22);
+    const bannerH = bannerLines.length * 4.2 + 8;
 
-    doc.setFillColor(255, 243, 224);
-    doc.setDrawColor(warningOrange[0], warningOrange[1], warningOrange[2]);
-    doc.setLineWidth(0.8);
-    doc.rect(leftMargin, yPosition, maxWidth, 12, 'FD');
+    doc.setFillColor(255, 251, 235);
+    doc.setDrawColor(...warningAmber);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(leftMargin, yPosition, maxWidth, bannerH, 1.5, 1.5, 'FD');
 
-    doc.setTextColor(178, 75, 0);
+    // Amber left accent bar
+    doc.setFillColor(...warningAmber);
+    doc.rect(leftMargin, yPosition, 5, bannerH, 'F');
+
+    doc.setTextColor(146, 64, 14);
     doc.setFontSize(7.5);
     doc.setFont('helvetica', 'italic');
-    
-    const termsLines = doc.splitTextToSize(content.termsText, maxWidth - 4);
-    doc.text(termsLines, leftMargin + 2, yPosition + 2);
-
-    yPosition += 15;
+    doc.text(bannerLines, leftMargin + 8, yPosition + 5);
 
     // ════════════════════════════════════════════════════════
     // FOOTER
     // ════════════════════════════════════════════════════════
+    const footerY = pageHeight - 16;
 
-    const footerStartY = pageHeight - 18;
+    // Green footer bar
+    doc.setFillColor(...primaryGreen);
+    doc.rect(0, footerY - 3, pageWidth, 19, 'F');
 
-    // Divider line
-    doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
-    doc.setLineWidth(0.5);
-    doc.line(leftMargin, footerStartY - 1, pageWidth - rightMargin, footerStartY - 1);
+    // Small logo in footer
+    if (logoBase64) {
+      doc.addImage(logoBase64, 'JPEG', leftMargin, footerY - 1, 11, 11);
+    }
 
-    // Contact info
+    doc.setTextColor(...white);
     doc.setFontSize(8);
-    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text(content.address, leftMargin, footerStartY + 3);
-    doc.text(`${content.phone2} | ${content.web}`, leftMargin, footerStartY + 7);
+    doc.setFont('helvetica', 'bold');
+    doc.text('AMEN BANK', leftMargin + 14, footerY + 4);
 
-    // Bottom info line
     doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(190, 220, 205);
     doc.text(
-      `${lang === 'fr' ? 'Confidentiel' : lang === 'ar' ? 'سري' : 'Confidential'} • ${appRef} • ${new Date().toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}`,
-      leftMargin,
-      footerStartY + 11
+      `${content.address}  |  ${content.phone2}  |  ${content.web}`,
+      leftMargin + 14,
+      footerY + 9
     );
 
-    // ════════════════════════════════════════════════════════
-    // SAVE PDF
-    // ════════════════════════════════════════════════════════
+    // Right: ref + date
+    doc.setFontSize(7);
+    doc.setTextColor(190, 220, 205);
+    doc.text(
+      `${appRef} • ${new Date().toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}`,
+      pageWidth - rightMargin,
+      footerY + 4,
+      { align: 'right' }
+    );
 
-    const langSuffix = lang === 'fr' ? '_FR' : lang === 'ar' ? '_AR' : '_EN';
-    const fileName = `Amen_Bank_Application_${appRef}${langSuffix}.pdf`;
-    doc.save(fileName);
+    // ── Save ──────────────────────────────────────────────
+    const suffix = lang === 'fr' ? '_FR' : lang === 'ar' ? '_AR' : '_EN';
+    doc.save(`Amen_Bank_Application_${appRef}${suffix}.pdf`);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -349,10 +441,8 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     setFeedback({ type: null, message: '' });
 
     try {
-      // Generate PDF first (now async)
       await generatePDF();
 
-      // Then submit to API
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -385,8 +475,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     }
   };
 
-  const inputClasses = "w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base";
-  const labelClasses = "block text-sm font-semibold text-slate-900 mb-3";
+  const inputClasses =
+    'w-full px-4 py-3.5 border border-slate-200 rounded-lg text-slate-900 outline-none transition focus:border-green-600 focus:ring-2 focus:ring-green-100 text-base';
+  const labelClasses = 'block text-sm font-semibold text-slate-900 mb-3';
 
   return (
     <main className="section" style={{ background: '#f8fafc' }} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -396,9 +487,13 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
 
             {/* ── Left Column: Form ── */}
             <div>
-              <div 
-                className="section-header" 
-                style={{ textAlign: isRTL ? 'right' : 'left', marginBottom: '3rem', alignItems: isRTL ? 'flex-end' : 'flex-start' }}
+              <div
+                className="section-header"
+                style={{
+                  textAlign: isRTL ? 'right' : 'left',
+                  marginBottom: '3rem',
+                  alignItems: isRTL ? 'flex-end' : 'flex-start',
+                }}
               >
                 <span className="section-badge">Amen Bank</span>
                 <h1 className="text-h1 text-ink">{page.title}</h1>
@@ -412,13 +507,11 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
 
               <div className="card">
                 <h2 className="text-h3 text-ink mb-8">{page.formTitle}</h2>
-                <br></br>
+                <br />
                 <form onSubmit={handleSubmit}>
                   {page.fields.map((field) => (
                     <div key={field.name} className="mb-8">
-                      <label className={labelClasses}>
-                        {field.label}
-                      </label>
+                      <label className={labelClasses}>{field.label}</label>
                       <input
                         name={field.name}
                         value={formData[field.name as keyof typeof formData]}
@@ -431,9 +524,7 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                   ))}
 
                   <div className="mb-10">
-                    <label className={labelClasses}>
-                      {page.messageLabel}
-                    </label>
+                    <label className={labelClasses}>{page.messageLabel}</label>
                     <textarea
                       name="message"
                       rows={4}
@@ -446,10 +537,10 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
 
                   {/* Feedback alert */}
                   {feedback.type && (
-                    <div 
+                    <div
                       className={`flex items-start gap-3 p-4 rounded-lg border mb-8 ${
-                        feedback.type === 'success' 
-                          ? 'bg-green-50 border-green-200' 
+                        feedback.type === 'success'
+                          ? 'bg-green-50 border-green-200'
                           : 'bg-red-50 border-red-200'
                       }`}
                       style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
@@ -459,8 +550,8 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                       ) : (
                         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#dc2626' }} />
                       )}
-                      <p 
-                        className="text-sm font-medium" 
+                      <p
+                        className="text-sm font-medium"
                         style={{ color: feedback.type === 'success' ? '#166534' : '#991b1b' }}
                       >
                         {feedback.message}
@@ -468,7 +559,7 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                     </div>
                   )}
 
-                  {/* Buttons separated with explicit top margin, top padding, and a subtle border */}
+                  {/* Buttons */}
                   <div className="flex flex-wrap items-center gap-6 mt-2 pt-8 border-t border-slate-100">
                     <button
                       type="submit"
@@ -499,33 +590,42 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
             </div>
 
             {/* ── Right Column: Notes ── */}
-            <div 
-              className="lg:sticky lg:top-24" 
+            <div
+              className="lg:sticky lg:top-24"
               style={{ background: '#0f172a', padding: '2.5rem', borderRadius: '0.75rem' }}
             >
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', marginBottom: '1.5rem' }}>
+              <h2
+                style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff', marginBottom: '1.5rem' }}
+              >
                 {page.notesHeading}
               </h2>
               <ul className="space-y-4">
                 {page.notes.map((note) => (
-                  <li 
-                    key={note} 
+                  <li
+                    key={note}
                     className="flex items-start gap-3"
                     style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
                   >
-                    <span 
+                    <span
                       className="mt-1 shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs"
                       style={{ background: 'rgba(255,255,255,0.1)', color: '#ffffff' }}
                     >
                       ✓
                     </span>
-                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9375rem', lineHeight: '1.6' }}>
+                    <span
+                      style={{
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: '0.9375rem',
+                        lineHeight: '1.6',
+                      }}
+                    >
                       {note}
                     </span>
                   </li>
                 ))}
               </ul>
             </div>
+
           </div>
         </div>
       </div>
