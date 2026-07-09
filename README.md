@@ -687,9 +687,7 @@ pytest test_*.py -v
 - [documentation/RAG_ARCHITECTURE.md](documentation/RAG_ARCHITECTURE.md) - RAG architecture overview
 
 ### Contact
-- **Technical Issues**: technical-support@amen-bank.tn
-- **Project Lead**: project-lead@amen-bank.tn
-- **Emergencies**: [Emergency hotline]
+- **Technical Issues, Project Lead, Emergencies**: ademrokh3@gmail.com
 
 ---
 
