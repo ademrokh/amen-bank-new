@@ -52,11 +52,13 @@
 |-----------|-----------|---------|
 | Framework | Next.js | 16.2.9 |
 | Runtime | React | 19.2.4 |
+| Database | Supabase | x |
 | Language | TypeScript | 5.x |
 | Styling | Tailwind CSS | 4.x |
 | Build | Turbopack | Built-in |
 | Testing | Playwright | 1.40.0 |
 | Icons | Lucide React | 1.18.0 |
+
 
 **Deployment**: Vercel (recommended) or Node.js server
 
