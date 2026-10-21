@@ -51,8 +51,12 @@
 | Component | Technology | Version |
 |-----------|-----------|---------|
 | Framework | Next.js | 16.2.9 |
+<<<<<<< Updated upstream
 | Runtime | React | 19.2.4 |
 | Database | Supabase | x |
+=======
+| Runtime | React |  1.26.08 |
+>>>>>>> Stashed changes
 | Language | TypeScript | 5.x |
 | Styling | Tailwind CSS | 4.x |
 | Build | Turbopack | Built-in |

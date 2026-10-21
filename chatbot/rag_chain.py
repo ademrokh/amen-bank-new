@@ -216,11 +216,11 @@ class AmenBankRAGChain:
             # Ensure the answer is a complete sentence
             if not answer.endswith('.') and len(answer) < 240:
                 answer = answer.rstrip() + '.'
-            return f"Selon notre FAQ : {answer}"
+            return answer
         if language == Language.AR:
-            return f"وفقًا لأسئلتنا الشائعة: {answer}"
+            return answer
         # Default to English
-        return f"According to our FAQ: {answer}"
+        return answer
 
     def _polish_with_llm(self, answer: str, language: Language) -> str:
         """

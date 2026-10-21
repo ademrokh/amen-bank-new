@@ -156,7 +156,8 @@ export async function assertAdmin(request: NextRequest) {
 }
 
 export function buildPublicUrl(filePath: string): string {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${encodeURIComponent(filePath)}`;
+  const encodedPath = filePath.split('/').map(encodeURIComponent).join('/');
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${encodedPath}`;
 }
 
 export async function checkAdminStatus(request: Request): Promise<boolean> {

@@ -68,6 +68,20 @@ class TestChatEndpoint:
         }
         response = client.post("/chat", json=request_data)
         data = response.json()
+        assert "message" in data
+
+    def test_chat_rejects_unrelated_question(self, client):
+        """Questions outside banking should be declined before FAQ retrieval."""
+        response = client.post("/chat", json={
+            "message": "How are you doing?",
+            "language": "en",
+        })
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["message"] == "You can only ask me things related to our bank; otherwise I can't be of help."
+        assert data["sources"] == []
+        assert data["confidence"] == 0.0
         
         assert "status" in data
         assert "message" in data

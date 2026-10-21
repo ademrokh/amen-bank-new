@@ -245,6 +245,42 @@ def get_retrieval_context(query: str, language: Language, top_k: int = 3) -> Lis
 _SPACY_NLP_CACHE: Dict[str, Any] = {}
 
 
+BANK_KEYWORDS = {
+    Language.FR: {
+        "amen", "bank", "banque", "compte", "carte", "cartes", "credit", "crédit",
+        "pret", "prêt", "epargne", "épargne", "virement", "paiement", "cheque",
+        "chèque", "agence", "succursale", "client", "assurance", "sicav", "financement",
+        "depot", "dépôt", "iban", "rib", "distributeur", "guichet", "taux", "frais",
+        "securite", "sécurité", "amen first",
+    },
+    Language.EN: {
+        "amen", "bank", "account", "card", "cards", "credit", "loan", "mortgage",
+        "savings", "transfer", "payment", "check", "cheque", "branch", "customer",
+        "insurance", "sicav", "financing", "deposit", "iban", "routing", "atm", "cash",
+        "rate", "fees", "security", "amen first",
+    },
+    Language.AR: {
+        "آمن", "بنك", "حساب", "بطاقة", "بطاقات", "قرض", "ائتمان", "ادخار", "تحويل",
+        "دفع", "فرع", "عميل", "تأمين", "وديعة", "صراف", "رسوم", "أمان", "امن", "amen", "bank",
+    },
+}
+
+
+def is_bank_related(text: str, language: Language) -> bool:
+    """Allow only questions containing a known banking topic keyword."""
+    normalized = text.casefold()
+    return any(keyword in normalized for keyword in BANK_KEYWORDS[language])
+
+
+def get_out_of_scope_message(language: Language) -> str:
+    """Return the refusal used before retrieval for unrelated questions."""
+    return {
+        Language.FR: "Vous pouvez uniquement me poser des questions liées à notre banque ; sinon, je ne peux pas vous aider.",
+        Language.AR: "يمكنك فقط أن تسألني عن الأمور المتعلقة ببنكنا، وإلا فلن أتمكن من مساعدتك.",
+        Language.EN: "You can only ask me things related to our bank; otherwise I can't be of help.",
+    }[language]
+
+
 def extract_keyword(text: str, language: Language) -> Optional[str]:
     """
     Improved keyword extractor using spaCy when available.
@@ -477,7 +513,17 @@ async def chat(request: Request, chat_request: ChatRequest):
         language = Language(chat_request.language) if isinstance(chat_request.language, str) else chat_request.language
         rag_language = RAGLanguage(language.value)
 
-        # Extract a keyword from the user's message; if none, decline immediately
+        if not is_bank_related(chat_request.message, language):
+            return ChatResponse(
+                status="success",
+                message=get_out_of_scope_message(language),
+                language=language.value,
+                sources=[],
+                confidence=0.0,
+                timestamp=datetime.now().isoformat(),
+            )
+
+        # Extract a keyword to keep retrieval focused on the user's banking topic.
         keyword = extract_keyword(chat_request.message, language)
 
         if not keyword:
@@ -496,8 +542,8 @@ async def chat(request: Request, chat_request: ChatRequest):
                 timestamp=datetime.now().isoformat(),
             )
 
-        # Retrieve context from ChromaDB using the extracted keyword
-        context = get_retrieval_context(keyword, language, top_k=1)
+        # Retrieve with the full question so the answer is selected by its meaning.
+        context = get_retrieval_context(chat_request.message, language, top_k=1)
 
         # Generate response using RAG chain
         if rag_chain is None:

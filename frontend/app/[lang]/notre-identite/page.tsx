@@ -192,7 +192,7 @@ export default async function NotreIdentitePage({
           ════════════════════════════════════════════ */}
       <section className="section-lg" style={{ background: '#ffffff' }}>
         <div className="container">
-          <div className="section-header max-w-3xl mx-auto mb-10">
+          <div className="section-header max-w-3xl mx-auto mb-10 text-center">
             <span className="section-badge">{d.valuesHeading}</span>
             <h2 className="text-h2 mt-3 text-ink">{d.valuesHeading}</h2>
           </div>

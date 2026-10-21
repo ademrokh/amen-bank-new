@@ -83,6 +83,15 @@ class TestRAGChain:
         )
         assert len(response) > 0
         assert isinstance(response, str)
+        assert not response.startswith("According to our FAQ")
+
+    def test_reformulate_answer_has_no_faq_prefix(self):
+        """Answers should be direct instead of introducing the FAQ source."""
+        chain = create_rag_chain(Language.FR)
+
+        response = chain._reformulate_answer("Les cartes sont disponibles.", Language.FR)
+
+        assert response == "Les cartes sont disponibles."
     
     def test_get_response_metadata_no_context(self):
         """Test response metadata with no context"""

@@ -553,7 +553,7 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
                             </div>
                           </div>
                           <a
-                            href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${encodeURIComponent(document.file_path)}`}
+                            href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/access-info-documents/${document.file_path.split('/').map(encodeURIComponent).join('/')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px', background: '#0f172a', padding: '10px 20px', fontSize: '14px', fontWeight: 500, color: '#fff', textDecoration: 'none', flexShrink: 0 }}

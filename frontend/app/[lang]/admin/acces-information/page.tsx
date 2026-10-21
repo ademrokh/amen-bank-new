@@ -16,6 +16,12 @@ interface AdminDocument {
   is_published: boolean;
 }
 
+interface UploadedFileInfo {
+  file_path: string;
+  file_size_bytes: number;
+  mime_type: string;
+}
+
 interface AdminAccessInformationPageProps {
   params: Promise<{ lang: Language }>;
 }
@@ -36,6 +42,9 @@ const ui: Record<Language, Record<string, string>> = {
     type: 'Type',
     customLabel: 'Label personnalisé',
     file: 'Fichier PDF',
+    sendToStorage: 'Envoyer vers le stockage',
+    sendingToStorage: 'Envoi en cours...',
+    sentToStorage: '✓ Envoyé au stockage',
     uploadBtn: 'Télécharger',
     uploadingBtn: 'Téléchargement...',
     all: 'Tous',
@@ -52,13 +61,17 @@ const ui: Record<Language, Record<string, string>> = {
     msgUploaded: 'Document téléchargé avec succès.',
     msgUpdated: 'Statut mis à jour.',
     msgDeleted: 'Supprimé.',
+    msgSentToStorage: 'Fichier envoyé au stockage.',
     errSelectFile: 'Veuillez sélectionner un fichier PDF.',
+    errNotSent: 'Veuillez d\'abord envoyer le fichier vers le stockage.',
     errUpdate: 'Échec de la mise à jour.',
     errDelete: 'Échec de la suppression.',
     confirmDel: 'Supprimer ce document ?',
     loading: 'Chargement...',
     yearPh: '2024',
     labelPh: 'ex: Résultats annuels 2024',
+    analyzing: 'Analyse du document...',
+    aiSuggested: '✨ Titre et catégorie suggérés par IA — à vérifier avant l\'envoi',
   },
   en: {
     badge: 'Admin',
@@ -74,6 +87,9 @@ const ui: Record<Language, Record<string, string>> = {
     type: 'Type',
     customLabel: 'Custom Label',
     file: 'PDF File',
+    sendToStorage: 'Send to Storage',
+    sendingToStorage: 'Uploading...',
+    sentToStorage: '✓ Sent to Storage',
     uploadBtn: 'Upload',
     uploadingBtn: 'Uploading...',
     all: 'All',
@@ -90,13 +106,17 @@ const ui: Record<Language, Record<string, string>> = {
     msgUploaded: 'Document uploaded successfully.',
     msgUpdated: 'Status updated.',
     msgDeleted: 'Deleted.',
+    msgSentToStorage: 'File sent to storage.',
     errSelectFile: 'Please select a PDF file.',
+    errNotSent: 'Please send the file to storage first.',
     errUpdate: 'Failed to update.',
     errDelete: 'Failed to delete.',
     confirmDel: 'Delete this document?',
     loading: 'Loading...',
     yearPh: '2024',
     labelPh: 'e.g. Annual results 2024',
+    analyzing: 'Analyzing document...',
+    aiSuggested: '✨ AI-suggested title & category — review before uploading',
   },
   ar: {
     badge: 'إدارة',
@@ -112,6 +132,9 @@ const ui: Record<Language, Record<string, string>> = {
     type: 'النوع',
     customLabel: 'تصنيف مخصص',
     file: 'ملف PDF',
+    sendToStorage: 'إرسال إلى التخزين',
+    sendingToStorage: 'جاري الإرسال...',
+    sentToStorage: '✓ تم الإرسال إلى التخزين',
     uploadBtn: 'رفع',
     uploadingBtn: 'جاري الرفع...',
     all: 'الكل',
@@ -128,13 +151,17 @@ const ui: Record<Language, Record<string, string>> = {
     msgUploaded: 'تم رفع المستند بنجاح.',
     msgUpdated: 'تم تحديث الحالة.',
     msgDeleted: 'تم الحذف.',
+    msgSentToStorage: 'تم إرسال الملف إلى التخزين.',
     errSelectFile: 'يرجى اختيار ملف PDF.',
+    errNotSent: 'يرجى إرسال الملف إلى التخزين أولاً.',
     errUpdate: 'فشل التحديث.',
     errDelete: 'فشل الحذف.',
     confirmDel: 'حذف هذا المستند؟',
     loading: 'جاري التحميل...',
     yearPh: '2024',
     labelPh: 'مثال: النتائج السنوية 2024',
+    analyzing: 'جاري تحليل المستند...',
+    aiSuggested: '✨ العنوان والفئة مقترحان بالذكاء الاصطناعي — يرجى المراجعة قبل الرفع',
   },
 };
 
@@ -176,7 +203,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+
   const [titleFr, setTitleFr] = useState('');
   const [titleEn, setTitleEn] = useState('');
   const [titleAr, setTitleAr] = useState('');
@@ -189,6 +216,14 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
   const [filterLang, setFilterLang] = useState('fr');
   const [filterType, setFilterType] = useState('consolides');
   const [filterLabel, setFilterLabel] = useState('');
+
+  // AI suggestion state
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiSuggested, setAiSuggested] = useState(false);
+
+  // Storage upload state
+  const [isUploadingToStorage, setIsUploadingToStorage] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
 
   const router = useRouter();
   const currentConfig = CATEGORY_CONFIG[category];
@@ -221,32 +256,93 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
     setFilterYear(''); setFilterSem('1'); setFilterLang('fr'); setFilterType('consolides'); setFilterLabel('');
   }
 
+  async function handleFileSelect(selected: File | null) {
+    setFile(selected);
+    setAiSuggested(false);
+    setUploadedFile(null);
+    if (!selected) return;
+
+    setIsAnalyzing(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', selected);
+      const res = await fetch('/api/admin/documents/analyze', { method: 'POST', body: fd });
+      if (res.ok) {
+        const suggestion = await res.json();
+        if (!titleFr) setTitleFr(suggestion.title_fr ?? '');
+        if (!titleEn) setTitleEn(suggestion.title_en ?? '');
+        if (!titleAr) setTitleAr(suggestion.title_ar ?? '');
+        if (suggestion.category && suggestion.category in CATEGORY_CONFIG) {
+          handleCategoryChange(suggestion.category as CategoryKey);
+        }
+        setAiSuggested(true);
+      }
+    } catch {
+      // silent fail — admin just fills manually, no need to block the form
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
+  async function handleSendToStorage() {
+    if (!file) return;
+    setIsUploadingToStorage(true);
+    setErrorMessage(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('category', category);
+      const res = await fetch('/api/admin/documents/upload', { method: 'POST', body: fd });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error);
+      setUploadedFile({
+        file_path: payload.file_path,
+        file_size_bytes: payload.file_size_bytes,
+        mime_type: payload.mime_type,
+      });
+      setSuccessMessage(t.msgSentToStorage);
+    } catch (err) {
+      setErrorMessage((err as Error).message);
+    } finally {
+      setIsUploadingToStorage(false);
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!file) return setErrorMessage(t.errSelectFile);
+    if (!uploadedFile) return setErrorMessage(t.errNotSent);
     setIsSubmitting(true); setErrorMessage(null); setSuccessMessage(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('title_fr', titleFr);
-    formData.append('title_en', titleEn);
-    formData.append('title_ar', titleAr);
-    formData.append('category', category);
+    const body: Record<string, string | number> = {
+      title_fr: titleFr,
+      title_en: titleEn,
+      title_ar: titleAr,
+      category,
+      file_path: uploadedFile.file_path,
+      file_size_bytes: uploadedFile.file_size_bytes,
+      mime_type: uploadedFile.mime_type,
+    };
 
-    if (currentConfig.filters.includes('year') && filterYear) formData.append('filter_year', filterYear);
-    if (currentConfig.filters.includes('sem')) formData.append('filter_sem', filterSem);
-    if (currentConfig.filters.includes('lang')) formData.append('filter_lang', filterLang);
-    if (currentConfig.filters.includes('type')) formData.append('filter_type', filterType);
-    if (currentConfig.filters.includes('label') && filterLabel) formData.append('filter_label', filterLabel);
+    if (currentConfig.filters.includes('year') && filterYear) body.filter_year = filterYear;
+    if (currentConfig.filters.includes('sem')) body.filter_sem = filterSem;
+    if (currentConfig.filters.includes('lang')) body.filter_lang = filterLang;
+    if (currentConfig.filters.includes('type')) body.filter_type = filterType;
+    if (currentConfig.filters.includes('label') && filterLabel) body.filter_label = filterLabel;
 
     try {
-      const res = await fetch('/api/admin/documents', { method: 'POST', body: formData });
+      const res = await fetch('/api/admin/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload.error);
       setSuccessMessage(t.msgUploaded);
       setTitleFr(''); setTitleEn(''); setTitleAr(''); setFile(null);
+      setAiSuggested(false); setUploadedFile(null);
       (document.getElementById('document-file') as HTMLInputElement).value = '';
-      
+
       const listRes = await fetch('/api/admin/documents');
       if (listRes.ok) {
         const listPayload = await listRes.json();
@@ -263,7 +359,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
     try {
       const res = await fetch('/api/admin/documents', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, is_published: !val }) });
       if (!res.ok) throw new Error();
-      setSuccessMessage(t.msgUpdated); 
+      setSuccessMessage(t.msgUpdated);
       setDocuments(prev => prev.map(d => d.id === id ? { ...d, is_published: !val } : d));
     } catch { setErrorMessage(t.errUpdate); }
   }
@@ -273,7 +369,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
     try {
       const res = await fetch('/api/admin/documents', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
       if (!res.ok) throw new Error();
-      setSuccessMessage(t.msgDeleted); 
+      setSuccessMessage(t.msgDeleted);
       setDocuments(prev => prev.filter(d => d.id !== id));
     } catch { setErrorMessage(t.errDelete); }
   }
@@ -306,13 +402,13 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
       {/* Main Content */}
       <section className="section">
         <div className="container max-w-6xl space-y-8">
-          
+
           {/* UPLOAD FORM */}
           <div className="rounded-xl bg-white p-6" style={{ boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.04)' }}>
             <h2 className="text-h3" style={{ color: '#0f172a' }}>{t.uploadTitle}</h2>
-            
+
             <form className="mt-6 grid gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
-              
+
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium" style={{ color: '#334155' }}>{t.category}</label>
                 <select value={category} onChange={e => handleCategoryChange(e.target.value as CategoryKey)} className={inputClasses} style={{ borderColor: '#e2e8f0', color: '#0f172a' }}>
@@ -380,25 +476,56 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
                 >
                   <svg className="mb-3 h-10 w-10" style={{ color: '#94a3b8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                   <span className="text-sm font-medium" style={{ color: '#334155' }}>{file ? file.name : 'Click to select PDF file'}</span>
-                  <span className="mt-1 text-xs" style={{ color: '#64748b' }}>Max 10MB</span>
-                  <input id="document-file" type="file" accept="application/pdf" onChange={e => setFile(e.target.files?.[0] ?? null)} required className="hidden" />
+                  {isAnalyzing && (
+                    <span className="mt-1 text-xs" style={{ color: '#003DA5' }}>{t.analyzing}</span>
+                  )}
+                  {aiSuggested && !isAnalyzing && (
+                    <span className="mt-1 text-xs" style={{ color: '#006B3C' }}>{t.aiSuggested}</span>
+                  )}
+                  {!isAnalyzing && !aiSuggested && (
+                    <span className="mt-1 text-xs" style={{ color: '#64748b' }}>Max 10MB</span>
+                  )}
+                  <input id="document-file" type="file" accept="application/pdf" onChange={e => handleFileSelect(e.target.files?.[0] ?? null)} required className="hidden" />
                 </label>
+
+                {file && (
+                  <button
+                    type="button"
+                    onClick={handleSendToStorage}
+                    disabled={isUploadingToStorage || !!uploadedFile}
+                    className="mt-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '8px 18px',
+                      borderRadius: '999px',
+                      border: '1px solid #003DA5',
+                      background: uploadedFile ? 'rgba(0, 107, 60, 0.1)' : 'transparent',
+                      color: uploadedFile ? '#006B3C' : '#003DA5',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => { if (!uploadedFile) e.currentTarget.style.background = 'rgba(0, 61, 165, 0.1)'; }}
+                    onMouseLeave={e => { if (!uploadedFile) e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {isUploadingToStorage ? t.sendingToStorage : uploadedFile ? t.sentToStorage : t.sendToStorage}
+                  </button>
+                )}
               </div>
 
               <div className="md:col-span-2 flex items-center gap-4 border-t pt-6" style={{ borderColor: '#f1f5f9' }}>
                 {/* AMEN BANK GREEN PRIMARY BUTTON */}
-                <button 
-                  type="submit" 
-                  disabled={isSubmitting} 
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !uploadedFile}
                   className="text-sm font-medium text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
-                    padding: '10px 24px', 
-                    borderRadius: '999px', 
-                    background: '#006B3C', 
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '10px 24px',
+                    borderRadius: '999px',
+                    background: '#006B3C',
                     border: 'none',
-                    cursor: 'pointer' 
+                    cursor: 'pointer'
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = '#004d2b'}
                   onMouseLeave={e => e.currentTarget.style.background = '#006B3C'}
@@ -412,7 +539,7 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
                 </button>
               </div>
             </form>
-            
+
             <div className="mt-6 space-y-3">
               {errorMessage && (
                 <div className="flex items-center gap-3 rounded-lg border p-4 text-sm" style={{ background: '#fef2f2', borderColor: '#fecaca', color: '#991b1b' }}>
@@ -434,9 +561,9 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
             {/* AMEN BANK BLUE TABS */}
             <div className="mb-4 flex flex-wrap gap-3">
               {tabOptions.map((key) => (
-                <button 
-                  key={key} 
-                  onClick={() => setActiveTab(key)} 
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
                   style={{
                     padding: '10px 20px',
                     borderRadius: '999px',
@@ -487,18 +614,18 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                           <td className="whitespace-nowrap px-4 py-3 font-medium" style={{ color: '#0f172a' }}>{getDocTitle(doc)}</td>
-                          
+
                           {/* AMEN BANK BLUE CATEGORY BADGE */}
                           <td className="whitespace-nowrap px-4 py-3">
                             <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium" style={{ background: 'rgba(0, 61, 165, 0.1)', color: '#003DA5' }}>
                               {categoryLabels[parsed.base]?.[lang] || parsed.base}
                             </span>
                           </td>
-                          
+
                           <td className="whitespace-nowrap px-4 py-3 text-xs" style={{ color: '#64748b' }}>
                             {getFilterBadge(doc.category)}
                           </td>
-                          
+
                           <td className="whitespace-nowrap px-4 py-3">
                             <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold" style={{
                               background: doc.is_published ? 'rgba(0, 107, 60, 0.1)' : '#fffbeb',
@@ -507,12 +634,12 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
                               {doc.is_published ? t.published : t.draft}
                             </span>
                           </td>
-                          
+
                           <td className="whitespace-nowrap px-4 py-3 text-right">
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
                               {/* AMEN BANK BLUE OUTLINE BUTTON */}
-                              <button 
-                                onClick={() => handleToggle(doc.id, doc.is_published)} 
+                              <button
+                                onClick={() => handleToggle(doc.id, doc.is_published)}
                                 style={{
                                   display: 'inline-flex',
                                   alignItems: 'center',
@@ -531,10 +658,10 @@ export default function AdminAccessInformationPage({ params }: AdminAccessInform
                               >
                                 {doc.is_published ? t.unpublish : t.publish}
                               </button>
-                              
+
                               {/* DANGER DELETE BUTTON */}
-                              <button 
-                                onClick={() => handleDelete(doc.id)} 
+                              <button
+                                onClick={() => handleDelete(doc.id)}
                                 style={{
                                   display: 'inline-flex',
                                   alignItems: 'center',
