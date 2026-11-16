@@ -57,6 +57,7 @@ export default function Contact() {
       email: 'Email',
       phone: 'Téléphone',
       address: 'Adresse',
+      addressValue: '50, avenue Mohamed V, 1002 Tunis, Tunisie',
       hours: "Horaires d'ouverture",
       formTitle: 'Formulaire de Contact',
       formDesc: 'Remplissez le formulaire ci-dessous et nous vous répondrons dans les 24 heures',
@@ -67,6 +68,7 @@ export default function Contact() {
       success: 'Message envoyé avec succès !',
       successMsg: 'Merci pour votre message. Nous vous répondrons dans les 24 heures.',
       location: 'Localisation',
+      mapTitle: 'Carte des agences Amen Bank',
       workingHours: 'Lun-Ven : 8:00-17:00 | Sam : 9:00-12:00',
       subjects: ['Général', 'Support Client', 'Demande de Crédit', 'Plainte', 'Autre'],
       faqTitle: 'Besoin d\'aide immédiate ?',
@@ -80,6 +82,7 @@ export default function Contact() {
       email: 'البريد الإلكتروني',
       phone: 'الهاتف',
       address: 'العنوان',
+      addressValue: '50، شارع محمد الخامس، 1002 تونس، تونس',
       hours: 'ساعات العمل',
       formTitle: 'نموذج الاتصال',
       formDesc: 'املأ النموذج أدناه وسنرد عليك في غضون 24 ساعة',
@@ -90,6 +93,7 @@ export default function Contact() {
       success: 'تم إرسال الرسالة بنجاح!',
       successMsg: 'شكراً لرسالتك. سنرد عليك في غضون 24 ساعة.',
       location: 'الموقع',
+      mapTitle: 'خريطة فروع Amen Bank',
       workingHours: 'الاثنين-الجمعة: 8:00-17:00 | السبت: 9:00-12:00',
       subjects: ['عام', 'دعم العملاء', 'طلب قرض', 'شكوى', 'أخرى'],
       faqTitle: 'بحاجة إلى مساعدة فورية؟',
@@ -103,6 +107,7 @@ export default function Contact() {
       email: 'Email',
       phone: 'Phone',
       address: 'Address',
+      addressValue: '50 Avenue Mohamed V, 1002 Tunis, Tunisia',
       hours: 'Working Hours',
       formTitle: 'Contact Form',
       formDesc: "Fill out the form below and we'll get back to you within 24 hours",
@@ -113,6 +118,7 @@ export default function Contact() {
       success: 'Message sent successfully!',
       successMsg: "Thank you for your message. We'll get back to you within 24 hours.",
       location: 'Location',
+      mapTitle: 'Amen Bank branch map',
       workingHours: 'Mon-Fri: 8:00-17:00 | Sat: 9:00-12:00',
       subjects: ['General', 'Customer Support', 'Loan Request', 'Complaint', 'Other'],
       faqTitle: 'Need immediate help?',
@@ -180,7 +186,7 @@ export default function Contact() {
                     <div>
                       <h3 className="text-h4 text-ink mb-2">{lang.address}</h3>
                       <p className="text-small leading-relaxed" style={{ color: '#64748b' }}>
-                        Avenue Mohamed V, 1002 Tunis, Tunisia
+                        {lang.addressValue}
                       </p>
                     </div>
                   </div>
@@ -208,7 +214,7 @@ export default function Contact() {
                     height="100%"
                     style={{ border: 0 }}
                     loading="lazy"
-                    title="Amen Bank Agency Locator"
+                    title={lang.mapTitle}
                   />
                 </div>
               </div>

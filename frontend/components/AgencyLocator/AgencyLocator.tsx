@@ -11,13 +11,21 @@ export default function AgencyLocator() {
   const { lang: currentLang, isRTL } = useLang();
   const [selectedCity, setSelectedCity] = useState('all');
 
-  const ui = {
+  const ui: Record<Language, {
+    sectionTitle: string;
+    sectionDescription: string;
+    selectLabel: string;
+    allOption: string;
+    infoBox: string;
+    mapTitle: string;
+  }> = {
     fr: {
       sectionTitle: "Réseau d'Agences",
       sectionDescription: "Trouvez l'agence Amen Bank la plus proche de vous",
       selectLabel: 'Sélectionner un gouvernorat',
       allOption: 'Toute la Tunisie',
       infoBox: "Localisation exacte fournie par Google Maps. Sélectionnez une région pour zoomer sur ses agences.",
+      mapTitle: 'Carte des agences Amen Bank',
     },
     ar: {
       sectionTitle: 'شبكة الفروع',
@@ -25,6 +33,7 @@ export default function AgencyLocator() {
       selectLabel: 'اختر ولاية',
       allOption: 'كامل تونس',
       infoBox: 'موقع دقيق مقدمة من خرائط جوجل. حدد منطقة للتكبير على فروعها.',
+      mapTitle: 'خريطة فروع Amen Bank',
     },
     en: {
       sectionTitle: 'Branch Network',
@@ -32,6 +41,7 @@ export default function AgencyLocator() {
       selectLabel: 'Select a Governorate',
       allOption: 'All of Tunisia',
       infoBox: 'Exact location provided by Google Maps. Select a region to zoom in on its branches.',
+      mapTitle: 'Amen Bank branch map',
     },
   }[currentLang];
 
@@ -73,7 +83,7 @@ export default function AgencyLocator() {
             height="100%"
             style={{ border: 0 }}
             loading="lazy"
-            title="Amen Bank Agency Locator"
+            title={ui.mapTitle}
           ></iframe>
         </div>
 

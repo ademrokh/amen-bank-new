@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Scale, Star, Rocket, HeartHandshake } from 'lucide-react';
 import Timeline from '@/components/Timeline';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -9,11 +10,10 @@ export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Notre Identité - Amen Bank',
-  description:
-    "À propos d'Amen Bank - Histoire, mission, valeurs et équipe",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('identity', lang);
+}
 
 const VALUE_ICONS = [Scale, Star, Rocket, HeartHandshake];
 
@@ -149,7 +149,7 @@ export default async function NotreIdentitePage({
           <span className="section-badge section-badge-light">{d.label}</span>
           <h1 className="text-h1 mt-3 mb-4 text-white">{d.title}</h1>
           <p className="text-lg leading-relaxed" style={{ color: '#94a3b8' }}>
-            Amen Bank · Since 1980
+            {lang === 'fr' ? 'Amen Bank · Depuis 1980' : lang === 'ar' ? 'Amen Bank · منذ 1980' : 'Amen Bank · Since 1980'}
           </p>
         </div>
 

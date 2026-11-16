@@ -167,6 +167,40 @@ export default function Hero() {
   };
 
   const content = heroContent[currentLang];
+  const supportingCopy: Record<Language, {
+    informationSecurity: string;
+    itServiceManagement: string;
+    paymentCardSecurity: string;
+    awardWinning: string;
+    googlePlayAlt: string;
+    appStoreAlt: string;
+  }> = {
+    fr: {
+      informationSecurity: 'Sécurité de l’information',
+      itServiceManagement: 'Gestion des services informatiques',
+      paymentCardSecurity: 'Sécurité des paiements par carte',
+      awardWinning: 'Primé',
+      googlePlayAlt: 'Télécharger sur Google Play',
+      appStoreAlt: 'Télécharger sur l’App Store',
+    },
+    ar: {
+      informationSecurity: 'أمن المعلومات',
+      itServiceManagement: 'إدارة خدمات تقنية المعلومات',
+      paymentCardSecurity: 'أمان بطاقات الدفع',
+      awardWinning: 'حائز على جائزة',
+      googlePlayAlt: 'التنزيل من Google Play',
+      appStoreAlt: 'التنزيل من App Store',
+    },
+    en: {
+      informationSecurity: 'Information Security',
+      itServiceManagement: 'IT Service Management',
+      paymentCardSecurity: 'Payment Card Security',
+      awardWinning: 'Award Winning',
+      googlePlayAlt: 'Get it on Google Play',
+      appStoreAlt: 'Download on the App Store',
+    },
+  };
+  const labels = supportingCopy[currentLang];
   const errorMsg =
     currentLang === 'ar' ? '⚠ البيانات غير متاحة'
     : currentLang === 'en' ? '⚠ Data unavailable'
@@ -271,17 +305,17 @@ export default function Hero() {
                     { 
                       logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi1PrlV6apvxfQ1PUBOR4fcHkRJLht-CJGDg&s', 
                       title: 'ISO 27001', 
-                      sub: 'Information Security' 
+                      sub: labels.informationSecurity
                     },
                     { 
                       logo: 'https://uaexpertcorporation.com/wp-content/uploads/2021/12/iso-20000-removebg-preview.png', 
                       title: 'ISO 20000', 
-                      sub: 'IT Service Management' 
+                      sub: labels.itServiceManagement
                     },
                     { 
                       logo: 'https://www.staffordnet.com/img/logos/logo-pci-dss-500.png', 
                       title: 'PCI DSS', 
-                      sub: 'Payment Card Security' 
+                      sub: labels.paymentCardSecurity
                     },
                   ].map((cert) => (
                     <div key={cert.title} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
@@ -319,7 +353,7 @@ export default function Hero() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <Trophy size={16} style={{ color: '#E8A000' }} />
                   <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#E8A000', margin: 0 }}>
-                    Award Winning
+                    {labels.awardWinning}
                   </p>
                 </div>
                 <p style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.3, margin: 0 }}>
@@ -619,7 +653,7 @@ export default function Hero() {
               >
                 <Image 
                   src="https://en.logodownload.org/wp-content/uploads/2019/06/get-it-on-google-play-badge-1.png" 
-                  alt="Get it on Google Play" 
+                  alt={labels.googlePlayAlt}
                   width={135}
                   height={48}
                   unoptimized
@@ -634,7 +668,7 @@ export default function Hero() {
               >
                 <Image 
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/3840px-Download_on_the_App_Store_Badge.svg.png" 
-                  alt="Download on the App Store" 
+                  alt={labels.appStoreAlt}
                   width={135}
                   height={48}
                   unoptimized

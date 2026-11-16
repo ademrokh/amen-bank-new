@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Briefcase, Rocket, Wrench, Handshake } from 'lucide-react';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -7,11 +8,10 @@ export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Entreprises - Amen Bank',
-  description:
-    'Solutions bancaires pour les entreprises - Financements, comptes professionnels',
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('business', lang);
+}
 
 /* Stripe mapping: product index → design-system stripe class */
 const PRODUCT_STRIPES = [

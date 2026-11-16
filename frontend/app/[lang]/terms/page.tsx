@@ -1,13 +1,15 @@
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
+
 type Language = 'fr' | 'ar' | 'en';
 
 export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Conditions Générales - Amen Bank',
-  description: "Conditions générales d'utilisation des services Amen Bank.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('terms', lang);
+}
 
 export default async function TermsPage({ params }: { params: Promise<{ lang: Language }> }) {
   const { lang } = await params;
@@ -15,6 +17,7 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
 
   const content = {
     fr: {
+      sectionLabel: 'Informations',
       title: 'Conditions Générales d\'Utilisation',
       lastUpdated: 'Dernière mise à jour : 1er janvier 2025',
       intro: 'Les présentes conditions générales régissent l\'utilisation des services et de la plateforme Amen Bank. En utilisant nos services, vous acceptez ces conditions dans leur intégralité.',
@@ -58,6 +61,7 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
       ],
     },
     en: {
+      sectionLabel: 'Information',
       title: 'General Terms of Use',
       lastUpdated: 'Last updated: January 1, 2025',
       intro: 'These general terms govern the use of Amen Bank\'s services, accessible via our website, Amen First Bank app, our branches, and any other authorized channel. By using our services, you accept these terms in full.',
@@ -101,6 +105,7 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
       ],
     },
     ar: {
+      sectionLabel: 'المعلومات',
       title: 'الشروط العامة للاستخدام',
       lastUpdated: 'آخر تحديث: 1 يناير 2025',
       intro: 'تنظم هذه الشروط العامة استخدام جميع الخدمات المقدمة من بنك آمن، عبر موقعنا الإلكتروني تطبيق بنك فيرست، فروعنا وأي قناة أخرى مصرح بها. باستخدام خدماتنا، فإنك تقبل هذه الشروط بالكامل.',
@@ -162,7 +167,7 @@ export default async function TermsPage({ params }: { params: Promise<{ lang: La
       <section className="section" style={{ background: '#f8fafc' }}>
         <div className="container max-w-4xl">
           <div className="section-header">
-            <span className="section-badge">Informations</span>
+            <span className="section-badge">{d.sectionLabel}</span>
             <h2 className="text-h2 text-ink">{d.title}</h2>
           </div>
 

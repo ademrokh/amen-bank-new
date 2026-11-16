@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowRight, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import jsPDF from 'jspdf';
+import amenBankLogo from '../amenbank_logo.png';
 
 type Language = 'fr' | 'en' | 'ar';
 
@@ -13,6 +14,15 @@ type PageContent = {
   intro: string;
   formTitle: string;
   fields: Array<{ label: string; placeholder: string; name: string }>;
+  customerTypeLabel: string;
+  customerTypePlaceholder: string;
+  customerTypes: Array<{ value: string; label: string }>;
+  accountTypeLabel: string;
+  accountTypePlaceholder: string;
+  accountTypes: Array<{ value: string; label: string }>;
+  productTypeLabel: string;
+  productTypePlaceholder: string;
+  productTypes: Array<{ value: string; label: string }>;
   notesHeading: string;
   notes: string[];
   submit: string;
@@ -30,7 +40,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     fullName: '',
     email: '',
     phone: '',
+    customerType: '',
     accountType: '',
+    productType: '',
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,10 +50,38 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     type: null,
     message: '',
   });
+  const selectedCustomerType = page.customerTypes.find((option) => option.value === formData.customerType)?.label;
+  const selectedAccountType = page.accountTypes.find((option) => option.value === formData.accountType)?.label;
+  const selectedProductType = page.productTypes.find((option) => option.value === formData.productType)?.label;
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'customerType' && value !== 'young' && value !== 'individual' ? { productType: '' } : {}),
+    }));
+  };
+
+  const getAmenBankLogoDataUrl = async (): Promise<string | null> => {
+    return new Promise<string>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Canvas context unavailable'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      image.onerror = () => reject(new Error('Amen Bank logo could not be decoded'));
+      image.src = amenBankLogo.src;
+    });
   };
 
   const generatePDF = async () => {
@@ -78,7 +118,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
         fullName: 'Nom complet',
         email: 'Adresse e-mail',
         phone: 'Numéro de téléphone',
+        customerType: 'Catégorie de clientèle',
         accountType: 'Type de compte',
+        productType: 'Produit',
         additionalInfo: 'MESSAGE / INFORMATIONS SUPPLÉMENTAIRES',
         termsText:
           "Ce document est strictement confidentiel et réservé à l'usage officiel d'Amen Bank. Vos données personnelles sont traitées conformément à notre politique de confidentialité et à la législation tunisienne en vigueur.",
@@ -102,7 +144,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
         fullName: 'Full Name',
         email: 'Email Address',
         phone: 'Phone Number',
+        customerType: 'Customer category',
         accountType: 'Account Type',
+        productType: 'Product',
         additionalInfo: 'MESSAGE / ADDITIONAL INFORMATION',
         termsText:
           'This document is strictly confidential and for official Amen Bank use only. Your personal data is processed in accordance with our Privacy Policy and applicable Tunisian legislation.',
@@ -126,7 +170,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
         fullName: 'الاسم الكامل',
         email: 'البريد الإلكتروني',
         phone: 'رقم الهاتف',
+        customerType: 'فئة العميل',
         accountType: 'نوع الحساب',
+        productType: 'المنتج',
         additionalInfo: 'الرسالة / معلومات إضافية',
         termsText:
           'هذه الوثيقة سرية للغاية ومخصصة للاستخدام الرسمي لبنك آمن فقط. تتم معالجة بياناتك الشخصية وفقاً لسياسة الخصوصية والتشريعات التونسية المعمول بها.',
@@ -143,17 +189,9 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     const content = pdfContent[lang];
 
     // ── Fetch & embed logo ───────────────────────────────────
-    let logoBase64: string | null = null;
+    let logoDataUrl: string | null = null;
     try {
-      const proxyUrl = `https://images.weserv.nl/?url=pbs.twimg.com/profile_images/842261819330842624/PrmnR9ug_400x400.jpg&output=jpg&w=200`;
-      const resp = await fetch(proxyUrl);
-      const blob = await resp.blob();
-      logoBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+      logoDataUrl = await getAmenBankLogoDataUrl();
     } catch {
       // Logo unavailable — continue without it
     }
@@ -170,10 +208,10 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     // Logo top-left with white circle behind it
     const logoSize = 30;
     const logoPad = 11;
-    if (logoBase64) {
+    if (logoDataUrl) {
       doc.setFillColor(...white);
       doc.circle(leftMargin + logoSize / 2, logoPad + logoSize / 2, logoSize / 2 + 1, 'F');
-      doc.addImage(logoBase64, 'JPEG', leftMargin, logoPad, logoSize, logoSize);
+      doc.addImage(logoDataUrl, 'PNG', leftMargin, logoPad, logoSize, logoSize);
     }
 
     // Text block to the right of logo
@@ -202,7 +240,7 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     doc.setTextColor(...white);
     doc.setFontSize(6.5);
     doc.setFont('helvetica', 'bold');
-    doc.text(`✓ ${content.badge}`, badgeX + badgeW / 2, 8 + badgeH / 2 + 1.2, { align: 'center' });
+    doc.text(content.badge, badgeX + badgeW / 2, 8 + badgeH / 2 + 1.2, { align: 'center' });
 
     // Thin accent stripe under header
     doc.setFillColor(...accentBlue);
@@ -268,8 +306,10 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
       { label: content.fullName,    value: formData.fullName    || '—' },
       { label: content.email,       value: formData.email       || '—' },
       { label: content.phone,       value: formData.phone       || '—' },
-      { label: content.accountType, value: formData.accountType || content.notSpecified },
+      { label: content.customerType, value: selectedCustomerType || content.notSpecified },
+      { label: content.accountType, value: selectedAccountType || content.notSpecified },
     ];
+    if (selectedProductType) fields.push({ label: content.productType, value: selectedProductType });
 
     const rowH = 9;
     const labelColW = 55;
@@ -402,8 +442,8 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
     doc.rect(0, footerY - 3, pageWidth, 19, 'F');
 
     // Small logo in footer
-    if (logoBase64) {
-      doc.addImage(logoBase64, 'JPEG', leftMargin, footerY - 1, 11, 11);
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'PNG', leftMargin, footerY - 1, 11, 11);
     }
 
     doc.setTextColor(...white);
@@ -451,20 +491,25 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
           email: formData.email,
           phone: formData.phone,
           subject: 'Devenir client',
-          message: `${formData.accountType}\n\n${formData.message}`,
+          message: [
+            `${page.customerTypeLabel}: ${selectedCustomerType || ''}`,
+            `${page.accountTypeLabel}: ${selectedAccountType || ''}`,
+            selectedProductType ? `${page.productTypeLabel}: ${selectedProductType}` : '',
+            formData.message,
+          ].filter(Boolean).join('\n\n'),
           language: lang,
           formType: 'devenir-client',
         }),
       });
 
-      const result = await response.json().catch(() => ({ success: false, message: 'Unable to submit' }));
+      const result = await response.json().catch(() => ({ success: false }));
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || page.error);
+        throw new Error(page.error);
       }
 
       setFeedback({ type: 'success', message: page.success });
-      setFormData({ fullName: '', email: '', phone: '', accountType: '', message: '' });
+      setFormData({ fullName: '', email: '', phone: '', customerType: '', accountType: '', productType: '', message: '' });
     } catch (error) {
       setFeedback({
         type: 'error',
@@ -522,6 +567,59 @@ export default function DevenirClientForm({ lang, page }: { lang: Language; page
                       />
                     </div>
                   ))}
+
+                  <div className="mb-8">
+                    <label className={labelClasses} htmlFor="customerType">{page.customerTypeLabel}</label>
+                    <select
+                      id="customerType"
+                      name="customerType"
+                      value={formData.customerType}
+                      onChange={handleChange}
+                      className={inputClasses}
+                      required
+                    >
+                      <option value="">{page.customerTypePlaceholder}</option>
+                      {page.customerTypes.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-8">
+                    <label className={labelClasses} htmlFor="accountType">{page.accountTypeLabel}</label>
+                    <select
+                      id="accountType"
+                      name="accountType"
+                      value={formData.accountType}
+                      onChange={handleChange}
+                      className={inputClasses}
+                      required
+                    >
+                      <option value="">{page.accountTypePlaceholder}</option>
+                      {page.accountTypes.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(formData.customerType === 'young' || formData.customerType === 'individual') && (
+                    <div className="mb-8">
+                      <label className={labelClasses} htmlFor="productType">{page.productTypeLabel}</label>
+                      <select
+                        id="productType"
+                        name="productType"
+                        value={formData.productType}
+                        onChange={handleChange}
+                        className={inputClasses}
+                        required
+                      >
+                        <option value="">{page.productTypePlaceholder}</option>
+                        {page.productTypes.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div className="mb-10">
                     <label className={labelClasses}>{page.messageLabel}</label>

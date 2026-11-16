@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Shield, Lock, Eye, Server, CheckCircle, ArrowRight } from 'lucide-react';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -7,10 +8,10 @@ export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Sécurité - Amen Bank',
-  description: 'Découvrez comment Amen Bank protège vos données et transactions bancaires.',
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('security', lang);
+}
 
 export default async function SecurityPage({ params }: { params: Promise<{ lang: Language }> }) {
   const { lang } = await params;

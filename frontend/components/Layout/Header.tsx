@@ -16,6 +16,10 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    document.documentElement.lang = currentLang;
+  }, [currentLang]);
+
   // Securely check admin status via API because cookie is httpOnly
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -197,7 +201,13 @@ export default function Header() {
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
               className="header-language-button"
-              aria-label={`Select language, current: ${currentLang}`}
+              aria-label={
+                currentLang === 'fr'
+                  ? `Sélectionner la langue, langue actuelle : ${currentLang}`
+                  : currentLang === 'ar'
+                    ? `اختر اللغة، اللغة الحالية: ${currentLang}`
+                    : `Select language, current: ${currentLang}`
+              }
               aria-expanded={isLangDropdownOpen}
               aria-haspopup="menu"
             >

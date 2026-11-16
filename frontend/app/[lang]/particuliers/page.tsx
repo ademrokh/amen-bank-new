@@ -417,7 +417,7 @@ export default function ParticuliersPage() {
               >
                 <Image
                   src="https://en.logodownload.org/wp-content/uploads/2019/06/get-it-on-google-play-badge-1.png"
-                  alt="Get it on Google Play"
+                  alt={lang === 'fr' ? 'Télécharger sur Google Play' : lang === 'ar' ? 'التنزيل من Google Play' : 'Get it on Google Play'}
                   width={135}
                   height={48}
                   unoptimized
@@ -432,7 +432,7 @@ export default function ParticuliersPage() {
               >
                 <Image
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/3840px-Download_on_the_App_Store_Badge.svg.png"
-                  alt="Download on the App Store"
+                  alt={lang === 'fr' ? 'Télécharger sur l’App Store' : lang === 'ar' ? 'التنزيل من App Store' : 'Download on the App Store'}
                   width={135}
                   height={48}
                   unoptimized

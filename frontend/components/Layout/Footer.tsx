@@ -12,6 +12,7 @@ export default function Footer() {
   const footerContent = {
     fr: {
       products: 'Produits & Services',
+      logoAlt: 'Logo Amen Bank',
       retail: 'Particuliers',
       business: 'Entreprises',
       digital: 'Amen First Bank',
@@ -38,6 +39,7 @@ export default function Footer() {
     },
     ar: {
       products: 'المنتجات والخدمات',
+      logoAlt: 'شعار Amen Bank',
       retail: 'للأفراد',
       business: 'للشركات',
       digital: 'بنك آمن فيرست',
@@ -64,6 +66,7 @@ export default function Footer() {
     },
     en: {
       products: 'Products & Services',
+      logoAlt: 'Amen Bank logo',
       retail: 'Retail',
       business: 'Business',
       digital: 'Amen First Bank',
@@ -127,7 +130,7 @@ export default function Footer() {
               <div className="flex items-center gap-3 mb-6">
                 <img 
                   src="/favicon.ico" 
-                  alt="Amen Bank Logo" 
+                  alt={content.logoAlt}
                   className="w-8 h-8 object-contain" 
                 />
                 <div>

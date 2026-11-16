@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Leaf, Globe, HandHeart, Recycle, ArrowRight } from 'lucide-react';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -7,10 +8,10 @@ export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Développement Durable - Amen Bank',
-  description: 'Amen Bank s\'engage pour un développement durable et responsable.',
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('sustainability', lang);
+}
 
 export default async function SustainabilityPage({ params }: { params: Promise<{ lang: Language }> }) {
   const { lang } = await params;

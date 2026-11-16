@@ -6,6 +6,81 @@ import { Lock, RefreshCw, LogIn, Eye, EyeOff, CheckCircle, AlertCircle } from 'l
 
 // The only admin user — username is fixed, never shown to the user
 const ADMIN_USERNAME = 'adminamenbank';
+type Language = 'fr' | 'en' | 'ar';
+
+const copy: Record<Language, {
+  portalTitle: string;
+  restrictedAccess: string;
+  passwordLabel: string;
+  passwordPlaceholder: string;
+  showPassword: string;
+  hidePassword: string;
+  signIn: string;
+  signingIn: string;
+  forgotPassword: string;
+  sendNewPassword: string;
+  sending: string;
+  resetSuccess: string;
+  resetFailure: string;
+  invalidPassword: string;
+  networkError: string;
+  expiryNote: string;
+}> = {
+  fr: {
+    portalTitle: 'Portail administrateur',
+    restrictedAccess: 'Amen Bank — accès réservé',
+    passwordLabel: 'Mot de passe à usage unique',
+    passwordPlaceholder: 'Saisissez votre mot de passe temporaire',
+    showPassword: 'Afficher le mot de passe',
+    hidePassword: 'Masquer le mot de passe',
+    signIn: 'Se connecter',
+    signingIn: 'Connexion…',
+    forgotPassword: 'Mot de passe oublié ?',
+    sendNewPassword: 'M’envoyer un nouveau mot de passe',
+    sending: 'Envoi…',
+    resetSuccess: 'Un nouveau mot de passe temporaire a été envoyé à l’adresse e-mail de l’administrateur.',
+    resetFailure: 'Impossible d’envoyer le mot de passe. Veuillez réessayer.',
+    invalidPassword: 'Mot de passe invalide. Demandez-en un nouveau ci-dessous.',
+    networkError: 'Erreur réseau : impossible de joindre le serveur.',
+    expiryNote: 'Les mots de passe sont à usage unique et expirent après connexion.',
+  },
+  en: {
+    portalTitle: 'Admin Portal',
+    restrictedAccess: 'Amen Bank — restricted access',
+    passwordLabel: 'One-time password',
+    passwordPlaceholder: 'Enter your temporary password',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    signIn: 'Sign in',
+    signingIn: 'Signing in…',
+    forgotPassword: 'Forgot your password?',
+    sendNewPassword: 'Send me a new password',
+    sending: 'Sending…',
+    resetSuccess: 'A new temporary password has been sent to the admin email address.',
+    resetFailure: 'Could not send the reset email. Please try again.',
+    invalidPassword: 'Invalid password. Request a new one below.',
+    networkError: 'Network error: could not reach the server.',
+    expiryNote: 'Passwords are single-use and expire after login.',
+  },
+  ar: {
+    portalTitle: 'بوابة الإدارة',
+    restrictedAccess: 'Amen Bank — دخول مخصص للإدارة',
+    passwordLabel: 'كلمة مرور لمرة واحدة',
+    passwordPlaceholder: 'أدخل كلمة المرور المؤقتة',
+    showPassword: 'إظهار كلمة المرور',
+    hidePassword: 'إخفاء كلمة المرور',
+    signIn: 'تسجيل الدخول',
+    signingIn: 'جارٍ تسجيل الدخول…',
+    forgotPassword: 'هل نسيت كلمة المرور؟',
+    sendNewPassword: 'أرسل لي كلمة مرور جديدة',
+    sending: 'جارٍ الإرسال…',
+    resetSuccess: 'تم إرسال كلمة مرور مؤقتة جديدة إلى البريد الإلكتروني للإدارة.',
+    resetFailure: 'تعذر إرسال رسالة إعادة التعيين. يُرجى المحاولة مرة أخرى.',
+    invalidPassword: 'كلمة المرور غير صحيحة. اطلب كلمة جديدة أدناه.',
+    networkError: 'خطأ في الشبكة: تعذر الاتصال بالخادم.',
+    expiryNote: 'كلمات المرور صالحة لاستخدام واحد وتنتهي بعد تسجيل الدخول.',
+  },
+};
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
@@ -17,7 +92,8 @@ export default function AdminLoginPage() {
 
   const router = useRouter();
   const params = useParams();
-  const locale = (params as { lang?: string })?.lang ?? 'fr';
+  const locale = ((params as { lang?: Language })?.lang ?? 'fr') as Language;
+  const t = copy[locale];
 
   async function handleResetPassword() {
     setIsResetting(true);
@@ -31,23 +107,21 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ username: ADMIN_USERNAME }),
       });
 
-      const data = await res.json().catch(() => ({}));
-
       if (res.ok) {
         setResetStatus({
           type: 'success',
-          message: 'A new temporary password has been sent to the admin email address.',
+          message: t.resetSuccess,
         });
       } else {
         setResetStatus({
           type: 'error',
-          message: data.error || 'Failed to send reset email. Check Supabase edge function logs.',
+          message: t.resetFailure,
         });
       }
     } catch {
       setResetStatus({
         type: 'error',
-        message: 'Network error — could not reach the server.',
+        message: t.networkError,
       });
     } finally {
       setIsResetting(false);
@@ -69,16 +143,14 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ username: ADMIN_USERNAME, password }),
       });
 
-      const data = await res.json().catch(() => ({}));
-
       if (res.ok) {
         router.push(`/${locale}/admin/acces-information`);
       } else {
-        setLoginError(data.error || 'Invalid password. Request a new one below.');
+        setLoginError(t.invalidPassword);
         setPassword('');
       }
     } catch {
-      setLoginError('Network error — could not reach the server.');
+      setLoginError(t.networkError);
     } finally {
       setIsSubmitting(false);
     }
@@ -108,10 +180,10 @@ export default function AdminLoginPage() {
             <Lock size={22} color="#ffffff" />
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.375rem' }}>
-            Admin Portal
+            {t.portalTitle}
           </h1>
           <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
-            Amen Bank — restricted access
+            {t.restrictedAccess}
           </p>
         </div>
 
@@ -133,7 +205,7 @@ export default function AdminLoginPage() {
                 htmlFor="password"
                 style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', marginBottom: '0.5rem' }}
               >
-                One-time password
+                {t.passwordLabel}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -143,7 +215,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  placeholder="Enter your temporary password"
+                  placeholder={t.passwordPlaceholder}
                   style={{
                     width: '100%',
                     padding: '0.75rem 3rem 0.75rem 1rem',
@@ -175,7 +247,7 @@ export default function AdminLoginPage() {
                     padding: 0,
                   }}
                   tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? t.hidePassword : t.showPassword}
                 >
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
@@ -212,12 +284,12 @@ export default function AdminLoginPage() {
               {isSubmitting ? (
                 <>
                   <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                  Signing in…
+                  {t.signingIn}
                 </>
               ) : (
                 <>
                   <LogIn size={16} />
-                  Sign in
+                  {t.signIn}
                 </>
               )}
             </button>
@@ -234,7 +306,7 @@ export default function AdminLoginPage() {
           >
             <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
             <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
-              no password?
+              {t.forgotPassword}
             </span>
             <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
           </div>
@@ -273,12 +345,12 @@ export default function AdminLoginPage() {
             {isResetting ? (
               <>
                 <RefreshCw size={15} style={{ animation: 'spin 1s linear infinite' }} />
-                Sending…
+                {t.sending}
               </>
             ) : (
               <>
                 <RefreshCw size={15} />
-                Send me a new password
+                {t.sendNewPassword}
               </>
             )}
           </button>
@@ -316,7 +388,7 @@ export default function AdminLoginPage() {
 
         {/* Footer note */}
         <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', marginTop: '1.5rem' }}>
-          Passwords are single-use and expire after login.
+          {t.expiryNote}
         </p>
       </div>
 

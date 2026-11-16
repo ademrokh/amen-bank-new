@@ -1,5 +1,6 @@
 import ActualitesList, { Article } from '@/components/ActualitesList';
 import { createClient } from '@supabase/supabase-js';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 type Language = 'fr' | 'ar' | 'en';
 
@@ -53,10 +54,10 @@ async function fetchPublishedPressArticles(lang: Language) {
   }));
 }
 
-export const metadata = {
-  title: 'Actualités - Amen Bank',
-  description: "Dernières actualités et communiqués de presse d'Amen Bank",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('news', lang);
+}
 
 export default async function ActualitesPage({
   params,

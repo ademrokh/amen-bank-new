@@ -1,13 +1,14 @@
 import { AmenFirstBank } from '@/components/AmenFirstBank';
+import { getLocalizedMetadata, type SiteLanguage } from '@/lib/locale-metadata';
 
 export function generateStaticParams() {
   return [{ lang: 'fr' }, { lang: 'en' }, { lang: 'ar' }];
 }
 
-export const metadata = {
-  title: 'Amen First Bank - Amen Bank',
-  description: "Ouvrez votre compte bancaire en ligne en quelques clics avec Amen First Bank.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ lang: SiteLanguage }> }) {
+  const { lang } = await params;
+  return getLocalizedMetadata('amenFirstBank', lang);
+}
 
 export default function AmenFirstBankPage() {
   return <AmenFirstBank />;

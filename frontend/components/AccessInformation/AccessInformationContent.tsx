@@ -6,6 +6,12 @@ import { createClient } from '@supabase/supabase-js';
 
 type Language = 'fr' | 'ar' | 'en';
 
+const loadErrorFallback: Record<Language, string> = {
+  fr: 'Veuillez vérifier votre connexion et réessayer.',
+  en: 'Check your connection and try again.',
+  ar: 'يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
+};
+
 interface AccessInfoDocument {
   id: string;
   title_fr: string;
@@ -168,9 +174,8 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
         setDocuments((data ?? []) as AccessInfoDocument[]);
       } catch (error) {
         if (!isMounted) return;
-        const message = error instanceof Error ? error.message : 'Unable to load the documents.';
         console.error('Failed to load access information documents', error);
-        setErrorMessage(message);
+        setErrorMessage(loadErrorFallback[lang]);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -183,7 +188,7 @@ export default function AccessInformationContent({ lang }: AccessInformationCont
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [lang]);
 
   const dateOptions = useMemo(() => {
     const typeDocuments = activeType === 'all'
