@@ -5,8 +5,10 @@ FastAPI server with RAG pipeline, multilingual support (FR/AR/EN)
 
 import os
 import json
+import re
+import unicodedata
 from enum import Enum
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Literal, Optional
 from datetime import datetime
 from pathlib import Path
 
@@ -45,12 +47,18 @@ class Language(str, Enum):
 # PYDANTIC MODELS (Request/Response schemas)
 # ============================================================
 
+class ChatHistoryMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=1000)
+
+
 class ChatRequest(BaseModel):
     """Chat endpoint request"""
     message: str = Field(..., min_length=1, max_length=1000)
     language: Language = Language.FR
     user_id: Optional[str] = None
     conversation_id: Optional[str] = None
+    history: List[ChatHistoryMessage] = Field(default_factory=list, max_length=8)
 
 
 class ChatResponse(BaseModel):
@@ -251,25 +259,106 @@ BANK_KEYWORDS = {
         "pret", "prêt", "epargne", "épargne", "virement", "paiement", "cheque",
         "chèque", "agence", "succursale", "client", "assurance", "sicav", "financement",
         "depot", "dépôt", "iban", "rib", "distributeur", "guichet", "taux", "frais",
-        "securite", "sécurité", "amen first",
+        "securite", "sécurité", "amen first", "crc",
     },
     Language.EN: {
         "amen", "bank", "account", "card", "cards", "credit", "loan", "mortgage",
         "savings", "transfer", "payment", "check", "cheque", "branch", "customer",
         "insurance", "sicav", "financing", "deposit", "iban", "routing", "atm", "cash",
-        "rate", "fees", "security", "amen first",
+        "rate", "fees", "security", "amen first", "crc", "customer service",
+        "customer relations center", "customer relations centre",
     },
     Language.AR: {
         "آمن", "بنك", "حساب", "بطاقة", "بطاقات", "قرض", "ائتمان", "ادخار", "تحويل",
         "دفع", "فرع", "عميل", "تأمين", "وديعة", "صراف", "رسوم", "أمان", "امن", "amen", "bank",
+        "crc", "كومبت", "كومبتات", "كونت", "كونتو", "كريدي", "فلوس", "نسحب", "سحب",
     },
 }
 
+_ALL_BANK_KEYWORDS = frozenset().union(*BANK_KEYWORDS.values())
+_FOLLOW_UP_PREFIXES = {
+    Language.EN: (
+        "and that", "and it", "and those", "and them", "and the same",
+        "and what about ", "and how about ", "also ", "what about ", "how about ",
+        "then ", "that ", "it ", "those ", "them ", "same ",
+    ),
+    Language.FR: (
+        "et ça", "et cela", "et celui ", "et celle ", "et les mêmes",
+        "qu'en est-il", "aussi ", "celui ", "celle ", "ça ", "cela ",
+    ),
+    Language.AR: ("وماذا عن ", "ماذا عن ", "وبالنسبة ", "وذلك ", "وهذا ", "وهذه ", "نفس "),
+}
+
+
+def _normalize_text(text: str) -> str:
+    decomposed = unicodedata.normalize("NFKD", text.casefold())
+    return "".join(char for char in decomposed if not unicodedata.combining(char))
+
+
+def _tokenize_text(text: str) -> List[str]:
+    return re.findall(r"[^\W\d_]+|[0-9]+", _normalize_text(text), flags=re.UNICODE)
+
 
 def is_bank_related(text: str, language: Language) -> bool:
-    """Allow only questions containing a known banking topic keyword."""
-    normalized = text.casefold()
-    return any(keyword in normalized for keyword in BANK_KEYWORDS[language])
+    """Match banking terms across supported languages without substring false positives."""
+    tokens = _tokenize_text(text)
+    for keyword in _ALL_BANK_KEYWORDS:
+        keyword_tokens = _tokenize_text(keyword)
+        if keyword_tokens and any(
+            tokens[index:index + len(keyword_tokens)] == keyword_tokens
+            for index in range(len(tokens) - len(keyword_tokens) + 1)
+        ):
+            return True
+    return False
+
+
+def is_contextual_follow_up(text: str, language: Language) -> bool:
+    normalized = _normalize_text(text).strip()
+    return any(normalized.startswith(prefix) for prefix in _FOLLOW_UP_PREFIXES[language])
+
+
+def build_contextual_question(
+    message: str,
+    history: List[ChatHistoryMessage],
+    language: Language,
+) -> str:
+    prior_banking_question = any(
+        turn.role == "user" and is_bank_related(turn.content, language)
+        for turn in history
+    )
+    if not history or not (
+        is_bank_related(message, language)
+        or (prior_banking_question and is_contextual_follow_up(message, language))
+    ):
+        return message
+
+    conversation = "\n".join(
+        f"{'Customer' if turn.role == 'user' else 'Assistant'}: {turn.content}"
+        for turn in history[-8:]
+    )
+    return f"Previous conversation:\n{conversation}\nCurrent question: {message}"
+
+
+def build_retrieval_query(message: str, contextual_question: str, language: Language) -> str:
+    tokens = set(_tokenize_text(message))
+    if "crc" in tokens:
+        return {
+            Language.FR: "Comment puis-je contacter Amen Bank?",
+            Language.AR: "كيف يمكنني التواصل مع بنك آمن؟",
+            Language.EN: "How can I contact Amen Bank?",
+        }[language]
+
+    if language == Language.AR:
+        if tokens.intersection({"كومبت", "كومبتات", "كونت", "كونتو"}):
+            return "كيف أفتح حسابًا؟"
+        if tokens.intersection({"فلوس", "نسحب", "سحب"}):
+            return "ما هي مساحات الخدمة الذاتية؟"
+        if "كريدي" in tokens:
+            return "ما أنواع القروض المتاحة؟"
+        if {"amen", "first"}.issubset(tokens):
+            return "ما هو بنك آمن فيرست؟"
+
+    return contextual_question
 
 
 def get_out_of_scope_message(language: Language) -> str:
@@ -513,7 +602,14 @@ async def chat(request: Request, chat_request: ChatRequest):
         language = Language(chat_request.language) if isinstance(chat_request.language, str) else chat_request.language
         rag_language = RAGLanguage(language.value)
 
-        if not is_bank_related(chat_request.message, language):
+        has_prior_banking_question = any(
+            turn.role == "user" and is_bank_related(turn.content, language)
+            for turn in chat_request.history
+        )
+        if not is_bank_related(chat_request.message, language) and not (
+            has_prior_banking_question
+            and is_contextual_follow_up(chat_request.message, language)
+        ):
             return ChatResponse(
                 status="success",
                 message=get_out_of_scope_message(language),
@@ -523,27 +619,18 @@ async def chat(request: Request, chat_request: ChatRequest):
                 timestamp=datetime.now().isoformat(),
             )
 
-        # Extract a keyword to keep retrieval focused on the user's banking topic.
-        keyword = extract_keyword(chat_request.message, language)
+        contextual_question = build_contextual_question(
+            chat_request.message,
+            chat_request.history,
+            language,
+        )
 
-        if not keyword:
-            # Language-specific decline templates
-            decline_templates = {
-                Language.FR: "Je n'ai pas identifié de mot-clé dans votre question. Veuillez contacter notre support client par téléphone au +216 71 833 517 ou par email à amenbank@amenbank.com.tn.",
-                Language.AR: "لم أتمكن من تحديد كلمة مفتاحية في سؤالك. يرجى التواصل مع خدمة العملاء عبر الهاتف +216 71 833 517 أو عبر البريد الإلكتروني amenbank@amenbank.com.tn.",
-                Language.EN: "I couldn't identify a keyword in your question. Please contact our support by phone at +216 71 833 517 or by email at amenbank@amenbank.com.tn.",
-            }
-            return ChatResponse(
-                status="success",
-                message=decline_templates.get(language, decline_templates[Language.EN]),
-                language=language.value,
-                sources=[],
-                confidence=0.0,
-                timestamp=datetime.now().isoformat(),
-            )
-
-        # Retrieve with the full question so the answer is selected by its meaning.
-        context = get_retrieval_context(chat_request.message, language, top_k=1)
+        retrieval_query = build_retrieval_query(
+            chat_request.message,
+            contextual_question,
+            language,
+        )
+        context = get_retrieval_context(retrieval_query, language, top_k=1)
 
         # Generate response using RAG chain
         if rag_chain is None:
@@ -577,7 +664,7 @@ async def chat(request: Request, chat_request: ChatRequest):
                 )
 
             response_text = rag_chain.generate_response(
-                chat_request.message,
+                contextual_question,
                 rag_context,
                 language=rag_language,
             )

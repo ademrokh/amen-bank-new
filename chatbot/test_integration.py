@@ -4,6 +4,7 @@ Integration tests for FastAPI endpoints
 
 import pytest
 import json
+from unittest.mock import Mock
 from fastapi.testclient import TestClient
 from main import app, Language
 
@@ -50,6 +51,98 @@ class TestHealthEndpoint:
 
 class TestChatEndpoint:
     """Tests for /chat endpoint"""
+
+    @pytest.mark.parametrize(
+        ("message", "language", "expected_query"),
+        [
+            ("Contact the CRC", "en", "How can I contact Amen Bank?"),
+            ("crc", "ar", "كيف يمكنني التواصل مع بنك آمن؟"),
+            ("account", "ar", "account"),
+            ("آش هو Amen First Bank؟", "ar", "ما هو بنك آمن فيرست؟"),
+            ("كيفاش نفتح كومبت؟", "ar", "كيف أفتح حسابًا؟"),
+            ("كيفاش نسحب فلوس؟", "ar", "ما هي مساحات الخدمة الذاتية؟"),
+            ("كريدي سيارة وإلا سكن؟", "ar", "ما أنواع القروض المتاحة؟"),
+            ("كيفاش نكلم CRC؟", "ar", "كيف يمكنني التواصل مع بنك آمن؟"),
+        ],
+    )
+    def test_chat_accepts_banking_terms_across_languages(
+        self, client, monkeypatch, message, language, expected_query
+    ):
+        retrieved_queries = []
+
+        def retrieve(query, language, top_k=3):
+            retrieved_queries.append(query)
+            return [{"text": "Amen Bank contact information", "distance": 0.1}]
+
+        rag = Mock()
+        rag.generate_response.return_value = "Amen Bank contact information."
+        rag.get_response_metadata.return_value = {
+            "confidence": 0.9,
+            "sources": [{"text": "Amen Bank contact information", "relevance": 0.9}],
+        }
+        monkeypatch.setattr("main.get_retrieval_context", retrieve)
+        monkeypatch.setattr("main.rag_chain", rag)
+
+        response = client.post(
+            "/chat",
+            json={"message": message, "language": language},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "Amen Bank contact information."
+        assert retrieved_queries == [expected_query]
+
+    def test_chat_uses_history_for_contextual_follow_up(self, client, monkeypatch):
+        retrieved_queries = []
+
+        def retrieve(query, language, top_k=3):
+            retrieved_queries.append(query)
+            return [{"text": "Amen Bank account information", "distance": 0.1}]
+
+        rag = Mock()
+        rag.generate_response.return_value = "Visit an Amen Bank branch."
+        rag.get_response_metadata.return_value = {
+            "confidence": 0.9,
+            "sources": [{"text": "Amen Bank account information", "relevance": 0.9}],
+        }
+        monkeypatch.setattr("main.get_retrieval_context", retrieve)
+        monkeypatch.setattr("main.rag_chain", rag)
+
+        response = client.post(
+            "/chat",
+            json={
+                "message": "And that?",
+                "language": "en",
+                "history": [
+                    {"role": "user", "content": "How do I open an account?"},
+                    {"role": "assistant", "content": "Visit an Amen Bank branch."},
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "Visit an Amen Bank branch."
+        assert "How do I open an account?" in retrieved_queries[0]
+        assert "And that?" in retrieved_queries[0]
+        assert "How do I open an account?" in rag.generate_response.call_args.args[0]
+
+    def test_chat_does_not_use_banking_history_for_unrelated_questions(self, client):
+        response = client.post(
+            "/chat",
+            json={
+                "message": "And how are you doing?",
+                "language": "en",
+                "history": [
+                    {"role": "user", "content": "How do I open an account?"},
+                    {"role": "assistant", "content": "Visit an Amen Bank branch."},
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["message"] == (
+            "You can only ask me things related to our bank; otherwise I can't be of help."
+        )
     
     def test_chat_basic_request_200(self, client):
         """Test chat endpoint returns 200 for valid request"""
@@ -82,13 +175,23 @@ class TestChatEndpoint:
         assert data["message"] == "You can only ask me things related to our bank; otherwise I can't be of help."
         assert data["sources"] == []
         assert data["confidence"] == 0.0
-        
         assert "status" in data
         assert "message" in data
         assert "language" in data
         assert "sources" in data
         assert "confidence" in data
         assert "timestamp" in data
+
+    def test_chat_does_not_match_banking_keywords_inside_other_words(self, client):
+        response = client.post(
+            "/chat",
+            json={"message": "Tell me about bankruptcy law", "language": "en"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["message"] == (
+            "You can only ask me things related to our bank; otherwise I can't be of help."
+        )
     
     def test_chat_response_status_success(self, client):
         """Test chat returns success status"""

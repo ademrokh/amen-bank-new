@@ -22,6 +22,11 @@ interface Message {
   timestamp: Date;
 }
 
+interface ChatHistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface ChatSource {
   text?: string;
   relevance?: number;
@@ -87,7 +92,8 @@ const quickReplies: Record<Language, string[]> = {
 async function fetchBotResponse(
   message: string,
   lang: Language,
-  conversationId: string
+  conversationId: string,
+  history: ChatHistoryMessage[]
 ): Promise<ChatApiResponse> {
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: 'POST',
@@ -96,6 +102,7 @@ async function fetchBotResponse(
       message,
       language: lang,
       conversation_id: conversationId,
+      history,
     }),
   });
 
@@ -205,7 +212,19 @@ export default function ChatbotWidget() {
       setIsLoading(true);
 
       try {
-        const data = await fetchBotResponse(trimmed, currentLang, conversationIdRef.current);
+        const history = messages
+          .filter((message) => message.id !== '1')
+          .slice(-8)
+          .map(({ role, content }) => ({
+            role: role === 'bot' ? 'assistant' as const : 'user' as const,
+            content,
+          }));
+        const data = await fetchBotResponse(
+          trimmed,
+          currentLang,
+          conversationIdRef.current,
+          history
+        );
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'bot',
@@ -221,7 +240,7 @@ export default function ChatbotWidget() {
         setIsLoading(false);
       }
     },
-    [isLoading, currentLang, ui.error]
+    [isLoading, currentLang, ui.error, messages]
   );
 
   const handleSendMessage = useCallback(() => {

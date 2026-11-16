@@ -53,7 +53,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: `New temporary password has been generated.`,
-      password: result.password,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to reset password';
